@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help – Editor CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">E1</div>
+      <span class="header-username">Editor 1</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>
+        Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </a>
+      <a href="events.html" class="nav-item">
+        <span class="material-icons">assignment</span>
+        Events
+      </a>
+      <a href="blog-posts.html" class="nav-item">
+        <span class="material-icons">article</span>
+        Blog Posts
+      </a>
+      <a href="calendar.html" class="nav-item">
+        <span class="material-icons">calendar_month</span>
+        Calendar
+      </a>
+      <a href="media.html" class="nav-item">
+        <span class="material-icons">perm_media</span>
+        Media
+      </a>
+      <a href="announcement.html" class="nav-item">
+        <span class="material-icons">campaign</span>
+        Announcement
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item active">
+        <span class="material-icons">help_outline</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <main class="main">
+    <h1 class="page-title">Help</h1>
+
+    <!-- Search help -->
+    <div style="background:#f3f4f6;border-radius:12px;padding:24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+      <p style="font-family:'Inter',sans-serif;font-size:16px;color:#374151;margin-bottom:12px;font-weight:500;">
+        How can we help you?
+      </p>
+      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px 14px;">
+        <span class="material-icons" style="color:var(--text-muted);">search</span>
+        <input type="text" placeholder="Search help topics…"
+          style="border:none;outline:none;font-family:'Inter',sans-serif;font-size:14px;width:100%;color:#111827;" />
+      </div>
+    </div>
+
+    <!-- Help topics -->
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">article</span>
+        Creating & Managing Blog Posts
+      </h3>
+      <p>
+        Go to <strong>Blog Posts</strong> in the sidebar to view all posts. Click <em>New Post</em> to create one.
+        Fill in the title, content, category and status, then click <em>Publish</em> or <em>Save as Draft</em>.
+        You can edit or delete any post from the list using the action buttons.
+      </p>
+    </div>
+
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">event</span>
+        Adding & Managing Events
+      </h3>
+      <p>
+        Navigate to <strong>Events</strong> to see all scheduled events. Use <em>Add Event</em> to create a new one.
+        Provide a title, date, time, location, description and cover image. Events can be saved as drafts before publishing.
+      </p>
+    </div>
+
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">calendar_month</span>
+        Using the Calendar
+      </h3>
+      <p>
+        The <strong>Calendar</strong> page shows a full year view with working and non-working day counts.
+        Use the arrows to navigate between years. Click <em>Add Event</em> in the top-right corner to schedule a new event.
+        Weekends are highlighted in red.
+      </p>
+    </div>
+
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">perm_media</span>
+        Uploading Media
+      </h3>
+      <p>
+        Go to <strong>Media</strong> and click the upload area or drag &amp; drop files to upload images, videos or PDFs.
+        Uploaded files appear in the Media Library below. Hover over any item to reveal the delete button.
+      </p>
+    </div>
+
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">campaign</span>
+        Publishing Announcements
+      </h3>
+      <p>
+        Use the <strong>Announcement</strong> page to post important notices to the website.
+        Click <em>New Announcement</em>, fill in the title and message, set the status to <em>Active</em> and save.
+        Drafts are not visible to visitors until set to Active.
+      </p>
+    </div>
+
+    <div class="help-card">
+      <h3>
+        <span class="material-icons">contact_support</span>
+        Contact Support
+      </h3>
+      <p>
+        If you encounter any issues, please contact the site administrator at
+        <a href="mailto:admin@example.com" style="color:var(--blue);">admin@example.com</a>.
+        Include a brief description of the problem and any error messages you see.
+      </p>
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homepage Content – Admin CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">AD</div>
+      <span class="header-username">Admin</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>Dashboard
+      </a>
+      <a href="page-management.html" class="nav-item">
+        <span class="material-icons">account_tree</span>Page Management
+      </a>
+      <a href="bylaws.html" class="nav-item">
+        <span class="material-icons">gavel</span>Bylaws
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-icons">description</span>Reports
+      </a>
+      <a href="iban-data.html" class="nav-item">
+        <span class="material-icons">account_balance</span>IBAN Data
+      </a>
+      <a href="contact-details.html" class="nav-item">
+        <span class="material-icons">contact_phone</span>Contact Details
+      </a>
+      <a href="homepage-content.html" class="nav-item active">
+        <span class="material-icons">web</span>Homepage Content
+      </a>
+      <a href="board-members.html" class="nav-item">
+        <span class="material-icons">groups</span>Board Members
+      </a>
+      <a href="supporters.html" class="nav-item">
+        <span class="material-icons">volunteer_activism</span>Supporters
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>Help
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title">HOMEPAGE CONTENT</h1>
+
+    <!-- Slider Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Homepage Slider</h2>
+        <button class="btn btn-green">
+          <span class="material-icons" style="font-size:18px;">add</span>
+          Add New Slide
+        </button>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-thumb">Slide 1</div>
+        <div class="slider-content">
+          <div class="slider-title">MG Awareness Month</div>
+          <div class="slider-subtitle">Join us in raising awareness for Myasthenia Gravis — May 2024</div>
+        </div>
+        <div class="reorder-btns">
+          <button class="reorder-btn" title="Move up">▲</button>
+          <button class="reorder-btn" title="Move down">▼</button>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-thumb">Slide 2</div>
+        <div class="slider-content">
+          <div class="slider-title">Annual Fundraising Campaign</div>
+          <div class="slider-subtitle">Support our patients and their families with your donations</div>
+        </div>
+        <div class="reorder-btns">
+          <button class="reorder-btn" title="Move up">▲</button>
+          <button class="reorder-btn" title="Move down">▼</button>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-thumb">Slide 3</div>
+        <div class="slider-content">
+          <div class="slider-title">New Treatment Research</div>
+          <div class="slider-subtitle">Discover the latest advances in MG treatment and research</div>
+        </div>
+        <div class="reorder-btns">
+          <button class="reorder-btn" title="Move up">▲</button>
+          <button class="reorder-btn" title="Move down">▼</button>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slogans Section -->
+    <div class="section-card mb-0">
+      <div class="section-header">
+        <h2 class="section-title">Homepage Slogans</h2>
+        <button class="btn btn-green">
+          <span class="material-icons" style="font-size:18px;">add</span>
+          Add Slogan
+        </button>
+      </div>
+
+      <div class="slogan-row">
+        <div class="slogan-text">"Birlikte Güçlüyüz / Together We Are Strong"</div>
+        <div class="slogan-status" style="color:#27ae60;">
+          <span class="status-dot dot-green"></span> Active
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+
+      <div class="slogan-row">
+        <div class="slogan-text">"MG ile Yaşam Mümkün / Life with MG is Possible"</div>
+        <div class="slogan-status" style="color:#27ae60;">
+          <span class="status-dot dot-green"></span> Active
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+
+      <div class="slogan-row">
+        <div class="slogan-text">"Umut ve Dayanışma / Hope and Solidarity"</div>
+        <div class="slogan-status" style="color:#9ca3af;">
+          <span class="status-dot dot-gray"></span> Inactive
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-green btn-sm">Edit</button>
+          <button class="btn btn-red btn-sm">Delete</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+</body>
+</html>

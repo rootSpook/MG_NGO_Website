@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBAN Data – Admin CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">AD</div>
+      <span class="header-username">Admin</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>Dashboard
+      </a>
+      <a href="page-management.html" class="nav-item">
+        <span class="material-icons">account_tree</span>Page Management
+      </a>
+      <a href="bylaws.html" class="nav-item">
+        <span class="material-icons">gavel</span>Bylaws
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-icons">description</span>Reports
+      </a>
+      <a href="iban-data.html" class="nav-item active">
+        <span class="material-icons">account_balance</span>IBAN Data
+      </a>
+      <a href="contact-details.html" class="nav-item">
+        <span class="material-icons">contact_phone</span>Contact Details
+      </a>
+      <a href="homepage-content.html" class="nav-item">
+        <span class="material-icons">web</span>Homepage Content
+      </a>
+      <a href="board-members.html" class="nav-item">
+        <span class="material-icons">groups</span>Board Members
+      </a>
+      <a href="supporters.html" class="nav-item">
+        <span class="material-icons">volunteer_activism</span>Supporters
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>Help
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title">IBAN DATA</h1>
+
+    <div class="form-section">
+      <h2 class="section-title" style="margin-bottom:6px;">Bank Account Information</h2>
+      <p style="font-size:14px;color:#6b7280;margin-bottom:24px;">
+        Update the donation account details below. Changes will be reflected on the website immediately.
+      </p>
+
+      <!-- IBAN Number (prominent) -->
+      <div class="form-group" style="margin-bottom:24px;">
+        <label>IBAN Number</label>
+        <input type="text" class="iban-input" value="TR00 0000 0000 0000 0000 0000 00" />
+      </div>
+
+      <!-- Row 2 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" value="Türkiye İş Bankası" />
+        </div>
+        <div class="form-group">
+          <label>Account Holder Name</label>
+          <input type="text" value="Myasthenia Gravis Yaşam Derneği" />
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Branch Name</label>
+          <input type="text" value="Kadıköy Branch" />
+        </div>
+        <div class="form-group">
+          <label>BIC / SWIFT Code</label>
+          <input type="text" value="ISBKTRISXXX" />
+        </div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Currency</label>
+          <select>
+            <option selected>Turkish Lira (TRY)</option>
+            <option>Euro (EUR)</option>
+            <option>US Dollar (USD)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Account Type</label>
+          <select>
+            <option selected>Savings Account</option>
+            <option>Current Account</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Info note -->
+      <div class="info-note">
+        <span class="material-icons">info</span>
+        Please double-check all account details before saving. Incorrect IBAN information may cause donation processing issues for supporters.
+      </div>
+
+      <div class="form-actions" style="margin-top:24px;">
+        <button class="btn btn-outline">Discard Changes</button>
+        <button class="btn btn-green">
+          <span class="material-icons" style="font-size:18px;">save</span>
+          Save Changes
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+</body>
+</html>

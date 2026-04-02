@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events – Editor CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">E1</div>
+      <span class="header-username">Editor 1</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>
+        Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </a>
+      <a href="events.html" class="nav-item active">
+        <span class="material-icons">assignment</span>
+        Events
+      </a>
+      <a href="blog-posts.html" class="nav-item">
+        <span class="material-icons">article</span>
+        Blog Posts
+      </a>
+      <a href="calendar.html" class="nav-item">
+        <span class="material-icons">calendar_month</span>
+        Calendar
+      </a>
+      <a href="media.html" class="nav-item">
+        <span class="material-icons">perm_media</span>
+        Media
+      </a>
+      <a href="announcement.html" class="nav-item">
+        <span class="material-icons">campaign</span>
+        Announcement
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <main class="main">
+    <div class="flex-between" style="margin-bottom:20px;">
+      <h1 class="page-title" style="margin-bottom:0;">Events</h1>
+      <a href="events-add.html" class="btn btn-green">
+        <span class="material-icons" style="font-size:18px;">add</span>
+        Add Event
+      </a>
+    </div>
+
+    <div class="section-card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MG Awareness Walk 2024</td>
+              <td>March 15, 2024</td>
+              <td>İstanbul</td>
+              <td><span class="status-badge badge-published">Active</span></td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-green" style="padding:4px 12px;font-size:13px;">Edit</button>
+                  <button class="btn btn-outline" style="padding:4px 12px;font-size:13px;">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Annual Fundraiser Gala</td>
+              <td>April 22, 2024</td>
+              <td>Ankara</td>
+              <td><span class="status-badge badge-published">Active</span></td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-green" style="padding:4px 12px;font-size:13px;">Edit</button>
+                  <button class="btn btn-outline" style="padding:4px 12px;font-size:13px;">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Patient Support Workshop</td>
+              <td>May 10, 2024</td>
+              <td>İzmir</td>
+              <td><span class="status-badge badge-draft">Draft</span></td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-green" style="padding:4px 12px;font-size:13px;">Edit</button>
+                  <button class="btn btn-outline" style="padding:4px 12px;font-size:13px;">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>MG Research Conference</td>
+              <td>June 5, 2024</td>
+              <td>Online</td>
+              <td><span class="status-badge badge-draft">Draft</span></td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-green" style="padding:4px 12px;font-size:13px;">Edit</button>
+                  <button class="btn btn-outline" style="padding:4px 12px;font-size:13px;">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

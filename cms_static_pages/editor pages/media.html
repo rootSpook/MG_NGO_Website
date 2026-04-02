@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media – Editor CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .media-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .media-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 7px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      flex: 1;
+      max-width: 280px;
+    }
+    .media-search input {
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #111827;
+      width: 100%;
+      background: transparent;
+    }
+    .media-item-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+    }
+    .media-item:hover .media-item-actions { display: flex; }
+    .media-item-btn {
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+    }
+    .media-item-btn .material-icons { font-size: 16px; }
+    .media-placeholder {
+      width: 100%;
+      height: 140px;
+      background: #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .media-placeholder .material-icons { font-size: 48px; color: #9ca3af; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">E1</div>
+      <span class="header-username">Editor 1</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>
+        Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </a>
+      <a href="events.html" class="nav-item">
+        <span class="material-icons">assignment</span>
+        Events
+      </a>
+      <a href="blog-posts.html" class="nav-item">
+        <span class="material-icons">article</span>
+        Blog Posts
+      </a>
+      <a href="calendar.html" class="nav-item">
+        <span class="material-icons">calendar_month</span>
+        Calendar
+      </a>
+      <a href="media.html" class="nav-item active">
+        <span class="material-icons">perm_media</span>
+        Media
+      </a>
+      <a href="announcement.html" class="nav-item">
+        <span class="material-icons">campaign</span>
+        Announcement
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <main class="main">
+    <h1 class="page-title">Add Media</h1>
+
+    <!-- Upload area -->
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+      <span class="material-icons">cloud_upload</span>
+      <span style="font-size:16px;font-weight:500;color:#374151;">Upload File</span>
+      <span>Click to browse or drag &amp; drop files here</span>
+      <span style="font-size:12px;">Supports: JPG, PNG, GIF, MP4, PDF (max 50MB)</span>
+    </div>
+    <input type="file" id="file-input" multiple accept="image/*,video/*,.pdf" style="display:none;" />
+
+    <!-- Media library -->
+    <div style="margin-top:28px;">
+      <div class="flex-between" style="margin-bottom:12px;">
+        <h2 class="section-title" style="font-size:20px;">Media Library</h2>
+        <div class="media-search">
+          <span class="material-icons" style="font-size:18px;">search</span>
+          <input type="text" placeholder="Search files…" />
+        </div>
+      </div>
+
+      <div class="media-grid">
+        <!-- Sample media items -->
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">image</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">donation-banner.jpg</div>
+        </div>
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">image</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">awareness-event.png</div>
+        </div>
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">picture_as_pdf</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">annual-report-2023.pdf</div>
+        </div>
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">image</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">mg-logo.png</div>
+        </div>
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">videocam</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">fundraiser-recap.mp4</div>
+        </div>
+        <div class="media-item">
+          <div class="media-placeholder">
+            <span class="material-icons">image</span>
+          </div>
+          <div class="media-item-actions">
+            <button class="media-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+          </div>
+          <div class="media-item-title">team-photo.jpg</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

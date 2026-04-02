@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Event – Editor CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">E1</div>
+      <span class="header-username">Editor 1</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>
+        Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </a>
+      <a href="events.html" class="nav-item active">
+        <span class="material-icons">assignment</span>
+        Events
+      </a>
+      <a href="blog-posts.html" class="nav-item">
+        <span class="material-icons">article</span>
+        Blog Posts
+      </a>
+      <a href="calendar.html" class="nav-item">
+        <span class="material-icons">calendar_month</span>
+        Calendar
+      </a>
+      <a href="media.html" class="nav-item">
+        <span class="material-icons">perm_media</span>
+        Media
+      </a>
+      <a href="announcement.html" class="nav-item">
+        <span class="material-icons">campaign</span>
+        Announcement
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <main class="main">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <a href="events.html" class="btn btn-outline" style="padding:6px 12px;">
+        <span class="material-icons" style="font-size:18px;">arrow_back</span>
+      </a>
+      <h1 class="page-title" style="margin-bottom:0;">Add Events</h1>
+    </div>
+
+    <div class="form-section">
+      <form>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Title</label>
+            <input type="text" placeholder="Enter event title" />
+          </div>
+          <div class="form-group">
+            <label>Event Date</label>
+            <input type="date" />
+          </div>
+        </div>
+
+        <div class="form-row triple">
+          <div class="form-group">
+            <label>Start Time</label>
+            <input type="time" />
+          </div>
+          <div class="form-group">
+            <label>End Time</label>
+            <input type="time" />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" placeholder="City or Online" />
+          </div>
+        </div>
+
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="Write a short description of the event…"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select>
+              <option value="">Select a category</option>
+              <option>Awareness</option>
+              <option>Fundraiser</option>
+              <option>Workshop</option>
+              <option>Conference</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Cover Image</label>
+            <div class="upload-area" style="padding:20px;">
+              <span class="material-icons">upload_file</span>
+              <span>Click to upload or drag &amp; drop an image</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="events.html" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-green">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

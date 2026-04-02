@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar – Editor CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-avatar">E1</div>
+      <span class="header-username">Editor 1</span>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="material-icons">search</span>
+        Quick search
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" title="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <nav class="nav-card">
+      <a href="dashboard.html" class="nav-item">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </a>
+      <a href="events.html" class="nav-item">
+        <span class="material-icons">assignment</span>
+        Events
+      </a>
+      <a href="blog-posts.html" class="nav-item">
+        <span class="material-icons">article</span>
+        Blog Posts
+      </a>
+      <a href="calendar.html" class="nav-item active">
+        <span class="material-icons">calendar_month</span>
+        Calendar
+      </a>
+      <a href="media.html" class="nav-item">
+        <span class="material-icons">perm_media</span>
+        Media
+      </a>
+      <a href="announcement.html" class="nav-item">
+        <span class="material-icons">campaign</span>
+        Announcement
+      </a>
+      <div class="nav-divider"></div>
+      <a href="help.html" class="nav-item">
+        <span class="material-icons">help_outline</span>
+        Help
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <main class="main">
+    <div class="flex-between" style="margin-bottom:16px;">
+      <h1 class="page-title" style="margin-bottom:0;">Calendar</h1>
+      <a href="events-add.html" class="btn btn-green" style="font-size:16px;padding:10px 24px;">Add Event</a>
+    </div>
+
+    <!-- Controls row -->
+    <div class="calendar-top">
+      <div class="calendar-controls">
+        <div>
+          <div class="branch-label">Branch</div>
+          <div class="branch-select-wrap">
+            <select id="branch-select">
+              <option>Paris</option>
+              <option>Istanbul</option>
+              <option>Ankara</option>
+            </select>
+            <span class="material-icons">arrow_drop_down</span>
+          </div>
+        </div>
+        <div>
+          <div class="branch-label">Select the date</div>
+          <div class="year-nav">
+            <button class="year-nav-btn" onclick="changeYear(-1)">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <span id="year-display">2024</span>
+            <button class="year-nav-btn" onclick="changeYear(1)">
+              <span class="material-icons">chevron_right</span>
+            </button>
+            <span class="material-icons" style="color:var(--blue);cursor:pointer;font-size:22px;">calendar_today</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-count-box">
+        <div class="day-count">
+          <div class="count" id="working-total">247</div>
+          <div class="count-label">working<br>days</div>
+        </div>
+        <div class="day-count-divider"></div>
+        <div class="day-count">
+          <div class="count red" id="nonworking-total">118</div>
+          <div class="count-label">non-working<br>days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12-month grid -->
+    <div class="months-grid" id="months-grid"></div>
+  </main>
+
+</div>
+
+<script>
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const DAY_HEADERS = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+  let currentYear = new Date().getFullYear();
+
+  function isWeekend(dayOfWeek) { return dayOfWeek === 0 || dayOfWeek === 6; }
+
+  function buildMonth(year, monthIndex) {
+    const firstDay = new Date(year, monthIndex, 1);
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    let startDow = firstDay.getDay(); // 0=Sun
+    // Convert to Mon-first (0=Mon)
+    startDow = (startDow === 0) ? 6 : startDow - 1;
+
+    const today = new Date();
+    let working = 0, nonworking = 0;
+
+    const card = document.createElement('div');
+    card.className = 'month-card';
+
+    const name = document.createElement('div');
+    name.className = 'month-name';
+    name.textContent = MONTH_NAMES[monthIndex];
+    card.appendChild(name);
+
+    const grid = document.createElement('div');
+    grid.className = 'month-grid';
+
+    // Day headers
+    DAY_HEADERS.forEach(d => {
+      const h = document.createElement('div');
+      h.className = 'day-header';
+      h.textContent = d;
+      grid.appendChild(h);
+    });
+
+    // Empty cells before first day
+    for (let i = 0; i < startDow; i++) {
+      const e = document.createElement('div');
+      e.className = 'day-cell empty';
+      e.textContent = '.';
+      grid.appendChild(e);
+    }
+
+    // Day cells
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, monthIndex, d);
+      const dow = date.getDay(); // 0=Sun,6=Sat
+      const cell = document.createElement('div');
+      cell.className = 'day-cell';
+      cell.textContent = d;
+
+      if (isWeekend(dow)) {
+        cell.classList.add('weekend');
+        nonworking++;
+      } else {
+        working++;
+      }
+
+      if (date.toDateString() === today.toDateString()) {
+        cell.classList.add('today');
+      }
+
+      grid.appendChild(cell);
+    }
+
+    card.appendChild(grid);
+
+    const stats = document.createElement('div');
+    stats.className = 'month-stats';
+    stats.innerHTML = `
+      <div class="working"><span>Working days:</span><span>${working}</span></div>
+      <div class="nonworking"><span>Non-working days:</span><span>${nonworking}</span></div>
+    `;
+    card.appendChild(stats);
+
+    return { card, working, nonworking };
+  }
+
+  function renderCalendar(year) {
+    const grid = document.getElementById('months-grid');
+    grid.innerHTML = '';
+    let totalWorking = 0, totalNonworking = 0;
+
+    for (let m = 0; m < 12; m++) {
+      const { card, working, nonworking } = buildMonth(year, m);
+      grid.appendChild(card);
+      totalWorking += working;
+      totalNonworking += nonworking;
+    }
+
+    document.getElementById('working-total').textContent = totalWorking;
+    document.getElementById('nonworking-total').textContent = totalNonworking;
+    document.getElementById('year-display').textContent = year;
+  }
+
+  function changeYear(delta) {
+    currentYear += delta;
+    renderCalendar(currentYear);
+  }
+
+  renderCalendar(currentYear);
+</script>
+</body>
+</html>
