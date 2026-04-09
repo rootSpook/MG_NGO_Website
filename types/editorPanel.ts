@@ -1,0 +1,72 @@
+export type EditorNavKey =
+  | "dashboard"
+  | "events"
+  | "blog-posts"
+  | "calendar"
+  | "media"
+  | "announcements"
+  | "help"
+  | "my-details"
+  | "performance-review";
+
+export type BlogStatus = "published" | "draft" | "archived";
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  category: string;
+  publishedAt: string;
+  status: BlogStatus;
+  author: string;
+  summary: string;
+}
+
+export type EventStatus = "planned" | "active" | "done" | "cancelled";
+
+export interface EventItem {
+  id: string;
+  title: string;
+  date: string;
+  endDate?: string;
+  location: string;
+  city: string;
+  venue: string;
+  type: string;
+  capacity: number;
+  isOnline: boolean;
+  status: EventStatus;
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export type MediaVisibility = "public" | "private";
+
+export interface MediaItem {
+  id: string;
+  pageKey: string;
+  title: string;
+  description: string;
+  tags: string[];
+  visibility: MediaVisibility;
+  featured: boolean;
+  imageUrl: string;
+  createdAt: string;
+}
+
+export type AnnouncementStatus = "published" | "draft";
+export type AnnouncementAudience = "all" | "members" | "volunteers" | "patients";
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  content: string;
+  audience: AnnouncementAudience;
+  publishedAt: string;
+  status: AnnouncementStatus;
+  pinned: boolean;
+}
