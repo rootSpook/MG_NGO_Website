@@ -1,7 +1,12 @@
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { MediaPageData } from "@/lib/publicContent"
 
-export function MediaHero() {
+interface MediaHeroProps {
+  data: MediaPageData["hero"]
+}
+
+export function MediaHero({ data }: MediaHeroProps) {
   return (
     <section className="relative bg-gradient-to-r from-slate-700 to-slate-600 py-16 md:py-24">
       {/* Background Pattern */}
@@ -15,18 +20,17 @@ export function MediaHero() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-white/70 mb-6">
           <Link href="/" className="hover:text-white transition-colors">
-            Home
+            Ana Sayfa
           </Link>
           <ChevronRight size={16} />
-          <span className="text-white">Media</span>
+          <span className="text-white">{data.breadcrumbCurrent}</span>
         </nav>
 
         <h1 className="text-3xl md:text-5xl font-bold text-teal-400 mb-4">
-          Media & News
+          {data.title}
         </h1>
         <p className="text-white/90 text-lg md:text-xl max-w-2xl leading-relaxed">
-          Stay updated with the latest news, events, and media coverage from the Myasthenia Gravis 
-          community. Explore our gallery, press materials, and announcements.
+          {data.description}
         </p>
       </div>
     </section>

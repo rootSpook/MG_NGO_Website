@@ -3,8 +3,11 @@ import { Footer } from "@/components/layout/footer"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText, Newspaper, Heart } from "lucide-react"
+import { getHomePageData } from "@/lib/publicPagesContent"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const homeContent = await getHomePageData()
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
@@ -19,16 +22,14 @@ export default function HomePage() {
           
           <div className="relative max-w-6xl mx-auto px-6 text-center">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Myasthenia Gravis<br />Farkındalık Ayı
+              {homeContent.hero.title}
             </h1>
             <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
-              Myasthenia Gravis ile yaşayan milyonlarca insan için farkındalık oluşturma zamanı. 
-              Bu özel ay boyunca, hastalığa dair doğru bilgiyi yaymayı, güç vermeyi ve 
-              topluluk olarak dayanışmayı artırmayı hedefliyoruz.
+              {homeContent.hero.description}
             </p>
             <Button asChild size="lg" className="bg-white text-teal-700 hover:bg-gray-100">
-              <Link href="/about">
-                Daha Fazla Bilgi
+              <Link href={homeContent.hero.ctaHref}>
+                {homeContent.hero.ctaLabel}
                 <ArrowRight size={20} className="ml-2" />
               </Link>
             </Button>
@@ -41,15 +42,13 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-2xl md:text-4xl font-bold text-teal-600 mb-6">
-                  Myasthenia Gravis Yaşam Derneği Nedir?
+                  {homeContent.about.title}
                 </h2>
                 <p className="text-gray-600 leading-relaxed mb-6">
-                  Myastenia Gravis (MG) hastaları ve yakınlarına yönelik farkındalık oluşturmak, 
-                  doğru bilgi sağlamak ve destekleyici bir topluluk oluşturmak amacıyla kurulmuş 
-                  bir sivil toplum kuruluşuyuz.
+                  {homeContent.about.description}
                 </p>
                 <Button asChild className="bg-teal-600 hover:bg-teal-700 text-white">
-                  <Link href="/about">Daha Fazla Bilgi</Link>
+                  <Link href={homeContent.about.ctaHref}>{homeContent.about.ctaLabel}</Link>
                 </Button>
               </div>
               <div className="flex justify-center">
@@ -79,50 +78,50 @@ export default function HomePage() {
         <section className="py-16 bg-gray-50">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-bold text-teal-600 text-center mb-12">
-              Explore Our Resources
+              Kaynaklarımızı Keşfedin
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {/* Reports Card */}
-              <Link href="/reports" className="group">
+              <Link href={homeContent.quickLinks[0].href} className="group">
                 <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
                   <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-4 group-hover:bg-teal-200 transition-colors">
                     <FileText className="w-7 h-7 text-teal-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">
-                    Reports & Publications
+                    {homeContent.quickLinks[0].title}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Access our research reports, medical guidelines, and downloadable resources.
+                    {homeContent.quickLinks[0].description}
                   </p>
                 </div>
               </Link>
 
               {/* Media Card */}
-              <Link href="/media" className="group">
+              <Link href={homeContent.quickLinks[1].href} className="group">
                 <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
                   <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-4 group-hover:bg-teal-200 transition-colors">
                     <Newspaper className="w-7 h-7 text-teal-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">
-                    Media & News
+                    {homeContent.quickLinks[1].title}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Stay updated with the latest news, events, and community stories.
+                    {homeContent.quickLinks[1].description}
                   </p>
                 </div>
               </Link>
 
               {/* Donate Card */}
-              <Link href="/donate" className="group">
+              <Link href={homeContent.quickLinks[2].href} className="group">
                 <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
                   <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-4 group-hover:bg-teal-200 transition-colors">
                     <Heart className="w-7 h-7 text-teal-600" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">
-                    Support Our Cause
+                    {homeContent.quickLinks[2].title}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Your donation helps us continue our mission to support the MG community.
+                    {homeContent.quickLinks[2].description}
                   </p>
                 </div>
               </Link>

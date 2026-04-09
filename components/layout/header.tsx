@@ -6,12 +6,12 @@ import { Menu, X } from "lucide-react"
 import { useState } from "react"
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About Us" },
-  { href: "/blogs", label: "Blogs" },
-  { href: "/reports", label: "Reports" },
-  { href: "/media", label: "Media" },
-  { href: "/contacts", label: "Contacts" },
+  { href: "/", label: "Ana Sayfa" },
+  { href: "/about", label: "Hakkımızda" },
+  { href: "/blogs", label: "Bloglar" },
+  { href: "/reports", label: "Raporlar" },
+  { href: "/media", label: "Medya" },
+  { href: "/contacts", label: "İletişim" },
 ]
 
 export function Header() {
@@ -98,7 +98,7 @@ export function Header() {
                 asChild
                 className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded"
               >
-                <Link href="/donate">Donate Now</Link>
+                <Link href="/donate">Bağış Yap</Link>
               </Button>
             </div>
 
@@ -129,7 +129,7 @@ export function Header() {
                 asChild
                 className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded w-fit"
               >
-                <Link href="/donate">Donate Now</Link>
+                <Link href="/donate">Bağış Yap</Link>
               </Button>
             </div>
           )}

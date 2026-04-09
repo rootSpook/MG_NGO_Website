@@ -119,7 +119,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-zinc-700 pt-6 text-center">
           <p className="text-sm text-zinc-400">
-            © Copyright 2025 Myastenia Gravis Yaşam Derneği.
+            © 2025 Myastenia Gravis Yaşam Derneği. Tüm hakları saklıdır.
           </p>
         </div>
       </div>

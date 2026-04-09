@@ -5,73 +5,25 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Download, FileText, Calendar, Search } from "lucide-react"
+import { ReportListItem } from "@/lib/publicContent"
 
-const categories = [
-  "All",
-  "Annual Reports",
-  "Research",
-  "Medical Guidelines",
-  "Community",
-]
+interface ReportsGridProps {
+  title: string
+  categories: string[]
+  reports: ReportListItem[]
+  searchPlaceholder: string
+  emptyStateText: string
+  loadMoreLabel: string
+}
 
-const reports = [
-  {
-    id: 1,
-    title: "Understanding Myasthenia Gravis: A Patient Guide",
-    summary: "A comprehensive guide for patients and families about living with MG, including treatment options and daily management strategies.",
-    date: "December 2024",
-    category: "Medical Guidelines",
-    pages: 32,
-    format: "PDF",
-  },
-  {
-    id: 2,
-    title: "2024 Research Partnerships Summary",
-    summary: "Overview of our collaborative research initiatives with leading neurological institutions across Turkey.",
-    date: "November 2024",
-    category: "Research",
-    pages: 24,
-    format: "PDF",
-  },
-  {
-    id: 3,
-    title: "Community Impact Report Q3 2024",
-    summary: "Quarterly report on community events, support group activities, and patient outreach programs.",
-    date: "October 2024",
-    category: "Community",
-    pages: 18,
-    format: "PDF",
-  },
-  {
-    id: 4,
-    title: "MG Awareness Month Campaign Results",
-    summary: "Analysis of our June awareness campaign including reach, engagement, and key outcomes.",
-    date: "August 2024",
-    category: "Community",
-    pages: 16,
-    format: "PDF",
-  },
-  {
-    id: 5,
-    title: "Treatment Advances in Myasthenia Gravis 2024",
-    summary: "Latest developments in MG treatment options including new therapies and clinical trial results.",
-    date: "July 2024",
-    category: "Research",
-    pages: 28,
-    format: "PDF",
-  },
-  {
-    id: 6,
-    title: "Annual Report 2023",
-    summary: "Complete annual report covering all organizational activities, financial summary, and strategic goals.",
-    date: "January 2024",
-    category: "Annual Reports",
-    pages: 52,
-    format: "PDF",
-  },
-]
-
-export function ReportsGrid() {
+export function ReportsGrid({
+  title,
+  categories,
+  reports,
+  searchPlaceholder,
+  emptyStateText,
+  loadMoreLabel,
+}: ReportsGridProps) {
   const [activeCategory, setActiveCategory] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -86,7 +38,7 @@ export function ReportsGrid() {
     <section className="py-12 md:py-16">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
-          All Reports
+          {title}
         </h2>
 
         {/* Search and Filters */}
@@ -96,7 +48,7 @@ export function ReportsGrid() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <Input
               type="text"
-              placeholder="Search reports..."
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 border-gray-300 focus:border-teal-500 focus:ring-teal-500"
@@ -153,7 +105,7 @@ export function ReportsGrid() {
                     {report.date}
                   </span>
                   <span>•</span>
-                  <span>{report.pages} pages</span>
+                  <span>{report.pages} sayfa</span>
                 </div>
 
                 <Button
@@ -161,7 +113,7 @@ export function ReportsGrid() {
                   className="w-full bg-teal-600 hover:bg-teal-700 text-white"
                 >
                   <Download size={16} className="mr-2" />
-                  Download {report.format}
+                  İndir {report.format}
                 </Button>
               </div>
             </div>
@@ -172,7 +124,7 @@ export function ReportsGrid() {
         {filteredReports.length === 0 && (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No reports found matching your criteria.</p>
+            <p className="text-gray-500">{emptyStateText}</p>
           </div>
         )}
 
@@ -180,7 +132,7 @@ export function ReportsGrid() {
         {filteredReports.length > 0 && (
           <div className="text-center mt-10">
             <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
-              Load More Reports
+              {loadMoreLabel}
             </Button>
           </div>
         )}
