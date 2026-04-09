@@ -1,0 +1,240 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Firestore Security Rules
+// Project: ngo-mg-website-47a1a
+//
+// Role-based access model
+// ────────────────────────
+// Public   – unauthenticated visitors; read-only access to published content
+//            and the right to submit contact forms / event registrations.
+// Editor   – authenticated staff with role == "editor" in staff/{uid};
+//            manages frequently updated content (blog, events, announcements,
+//            media). Cannot touch structural or financial data.
+// Admin    – authenticated staff with role == "admin" in staff/{uid};
+//            full CRUD on all collections. The only role that can write
+//            settings, manage staff documents, delete assets, and read
+//            financial/donation data.
+//
+// Security is enforced HERE — not by hiding UI elements. Every write that
+// is not explicitly allowed is denied by default.
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ─────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function staffDoc() {
+      return get(/databases/$(database)/documents/staff/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && staffDoc().role == "admin";
+    }
+
+    function isEditor() {
+      return isAuthenticated() && staffDoc().role == "editor";
+    }
+
+    function isAdminOrEditor() {
+      return isAdmin() || isEditor();
+    }
+
+    // ── settings ─────────────────────────────────────────────────────────────
+    // Public read on site settings; only admin may write.
+
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── staff ─────────────────────────────────────────────────────────────────
+    // No public access. Authenticated staff may read their own document.
+    // Only admin may read all documents or write any.
+
+    match /staff/{uid} {
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == uid);
+      allow write: if isAdmin();
+    }
+
+    // ── contentItems ──────────────────────────────────────────────────────────
+    // Public: read only published, non-deleted items.
+    // Editor: read all; create and update (must stamp own uid on createdBy/updatedBy).
+    // Admin:  full CRUD.
+
+    match /contentItems/{contentItemId} {
+      allow read: if
+        (resource.data.status == "published" && resource.data.deletedAt == null) ||
+        isAdminOrEditor();
+
+      allow create: if isAdmin() ||
+        (isEditor() &&
+          request.resource.data.createdBy == request.auth.uid &&
+          request.resource.data.updatedBy == request.auth.uid);
+
+      allow update: if isAdmin() ||
+        (isEditor() &&
+          request.resource.data.updatedBy == request.auth.uid);
+
+      allow delete: if isAdmin();
+
+      // ── contentItems / revisions ───────────────────────────────────────────
+      // Append-only audit trail. No update or delete for anyone.
+
+      match /revisions/{revisionId} {
+        allow read:   if isAdminOrEditor();
+        allow create: if isAdminOrEditor();
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    // ── categories ────────────────────────────────────────────────────────────
+    // Public read. Admin and editor can create/update. No hard delete.
+
+    match /categories/{categoryId} {
+      allow read:   if true;
+      allow create,
+            update: if isAdminOrEditor();
+      allow delete: if false;
+    }
+
+    // ── tags ──────────────────────────────────────────────────────────────────
+    // Same as categories.
+
+    match /tags/{tagId} {
+      allow read:   if true;
+      allow create,
+            update: if isAdminOrEditor();
+      allow delete: if false;
+    }
+
+    // ── mediaAssets ───────────────────────────────────────────────────────────
+    // Public: read only visible, non-deleted assets.
+    // Admin and editor: create and update.
+    // Only admin may delete.
+
+    match /mediaAssets/{assetId} {
+      allow read: if
+        (resource.data.visibility == "public" && resource.data.deletedAt == null) ||
+        isAdminOrEditor();
+
+      allow create,
+            update: if isAdminOrEditor();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── contactMessages ───────────────────────────────────────────────────────
+    // Public: create only — strictly validated fields, workflow fields blocked.
+    // Admin:  full read/write.
+    // Editor: read and update workflow fields only.
+
+    match /contactMessages/{messageId} {
+      allow create: if
+        // Public submission — only allow the declared public fields
+        request.resource.data.keys().hasOnly([
+          "senderName", "senderEmail", "senderPhone",
+          "subject", "messageBody"
+        ]);
+
+      allow read: if isAdminOrEditor();
+
+      allow update: if isAdmin() ||
+        // Editor may only touch workflow fields
+        (isEditor() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["status", "handledAt", "handledBy", "internalNotes"]));
+
+      allow delete: if isAdmin();
+    }
+
+    // ── campaigns ─────────────────────────────────────────────────────────────
+    // Public: read active campaigns.
+    // Admin and editor: create and update.
+    // Only admin may archive / delete.
+
+    match /campaigns/{campaignId} {
+      allow read: if resource.data.status == "active" || isAdminOrEditor();
+
+      allow create,
+            update: if isAdminOrEditor();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── donations ─────────────────────────────────────────────────────────────
+    // No public access. No client writes (server-only via Admin SDK).
+    // Only admin may read.
+
+    match /donations/{donationId} {
+      allow read:  if isAdmin();
+      allow write: if false;
+    }
+
+    // ── events ────────────────────────────────────────────────────────────────
+    // Public: read published events.
+    // Admin and editor: create and update.
+
+    match /events/{eventId} {
+      allow read: if resource.data.status == "published" || isAdminOrEditor();
+
+      allow create,
+            update: if isAdminOrEditor();
+
+      allow delete: if isAdmin();
+
+      // ── events / registrations ────────────────────────────────────────────
+      // Public: create only — validated fields, cannot read list.
+      // Admin and editor: read.
+
+      match /registrations/{registrationId} {
+        allow create: if
+          request.resource.data.keys().hasOnly([
+            "name", "email", "phone", "attendeeCount", "notes"
+          ]);
+
+        allow read: if isAdminOrEditor();
+
+        allow update,
+              delete: if isAdmin();
+      }
+    }
+
+    // ── auditLogs ─────────────────────────────────────────────────────────────
+    // Append-only. Admin and editor can create. Only admin can read.
+    // No update or delete for anyone.
+
+    match /auditLogs/{auditId} {
+      allow read:   if isAdmin();
+      allow create: if isAdminOrEditor();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── announcements ─────────────────────────────────────────────────────────
+    // Public: read published announcements.
+    // Admin and editor: full CRUD.
+
+    match /announcements/{announcementId} {
+      allow read: if resource.data.status == "published" || isAdminOrEditor();
+      allow create, update: if isAdminOrEditor();
+      allow delete: if isAdminOrEditor();
+    }
+
+    // ── notifications ─────────────────────────────────────────────────────────
+    // Staff may only read and update their own notifications.
+    // Admin may write (create) notifications for any staff member.
+
+    match /notifications/{notificationId} {
+      allow read, update: if isAuthenticated() &&
+        resource.data.staffId == request.auth.uid;
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

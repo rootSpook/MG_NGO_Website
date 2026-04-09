@@ -1,0 +1,83 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Firebase Storage Security Rules
+// Project: ngo-mg-website-47a1a
+//
+// Path structure
+// ──────────────
+// public/   – Publicly readable assets (images, PDFs shown on the website).
+//             Only admin or editor may upload or overwrite.
+// private/  – Staff-only assets (internal documents, reports).
+//             Only admin or editor may read or write.
+//
+// Delete is restricted to admin across all paths.
+// All other paths are denied by default.
+//
+// Upload constraints (both paths):
+//   • Max file size : 10 MB
+//   • Allowed types : image/jpeg, image/png, image/gif, image/webp,
+//                     application/pdf
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper functions ─────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function staffRole() {
+      return firestore.get(
+        /databases/(default)/documents/staff/$(request.auth.uid)
+      ).data.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && staffRole() == "admin";
+    }
+
+    function isAdminOrEditor() {
+      return isAuthenticated() && staffRole() in ["admin", "editor"];
+    }
+
+    // ── Upload validation ─────────────────────────────────────────────────────
+
+    function isValidUpload() {
+      return request.resource.size <= 10 * 1024 * 1024 &&
+             request.resource.contentType in [
+               "image/jpeg",
+               "image/png",
+               "image/gif",
+               "image/webp",
+               "application/pdf"
+             ];
+    }
+
+    // ── public/ ───────────────────────────────────────────────────────────────
+    // Anyone can read. Only admin or editor can write (with validation).
+    // Only admin can delete.
+
+    match /public/{allPaths=**} {
+      allow read:   if true;
+      allow write:  if isAdminOrEditor() && isValidUpload();
+      allow delete: if isAdmin();
+    }
+
+    // ── private/ ──────────────────────────────────────────────────────────────
+    // Only authenticated staff can read or write.
+    // Only admin can delete.
+
+    match /private/{allPaths=**} {
+      allow read:   if isAdminOrEditor();
+      allow write:  if isAdminOrEditor() && isValidUpload();
+      allow delete: if isAdmin();
+    }
+
+    // ── Default: deny everything else ────────────────────────────────────────
+    match /{allOtherPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
