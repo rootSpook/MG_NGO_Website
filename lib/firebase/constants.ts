@@ -14,6 +14,8 @@ export const COLLECTIONS = {
   DONATIONS: "donations",
   EVENTS: "events",
   AUDIT_LOGS: "auditLogs",
+  ANNOUNCEMENTS: "announcements",
+  NOTIFICATIONS: "notifications",
 } as const;
 
 // Sub-collection names

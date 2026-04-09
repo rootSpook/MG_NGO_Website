@@ -215,5 +215,26 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if false;
     }
+
+    // ── announcements ─────────────────────────────────────────────────────────
+    // Public: read published announcements.
+    // Admin and editor: full CRUD.
+
+    match /announcements/{announcementId} {
+      allow read: if resource.data.status == "published" || isAdminOrEditor();
+      allow create, update: if isAdminOrEditor();
+      allow delete: if isAdminOrEditor();
+    }
+
+    // ── notifications ─────────────────────────────────────────────────────────
+    // Staff may only read and update their own notifications.
+    // Admin may write (create) notifications for any staff member.
+
+    match /notifications/{notificationId} {
+      allow read, update: if isAuthenticated() &&
+        resource.data.staffId == request.auth.uid;
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
