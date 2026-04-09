@@ -1,7 +1,10 @@
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { getAboutPageData } from "@/lib/publicPagesContent"
 
-export default function AboutUsPage() {
+export default async function AboutUsPage() {
+  const aboutContent = await getAboutPageData()
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
@@ -11,18 +14,9 @@ export default function AboutUsPage() {
         <section className="py-12 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold text-teal-600 mb-6">About Us</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-teal-600 mb-6">{aboutContent.title}</h1>
               <p className="text-gray-700 leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat dolor sit
-                amet orci imperdiet, vitae laoreet mi vulputate. Nulla pulvinar ultricies odio quis
-                tincidunt. Aenean id fermentum urna. Morbi et lacinia neque. Sed venenatis hendrerit
-                quam. Nulla bibendum sed enim in sodales. Nullam cursus tellus eget lorem molestie,
-                elementum tristique magna dignissim. Cras dictum sapien at mi consequat mollis.
-                Vivamus a tristique mi. Vivamus id ante aliquam, gravida lorem nec, vehicula augue.
-                Integer ac bibendum purus. Fusce vel purus vel erat fringilla mattis. Aenean gravida,
-                quam non pretium facilisis, nunc erat dictum tortor, sit amet euismod nisi nisl aliquam
-                purus. Vestibulum convallis, arcu eu condimentum vulputate, odio metus pretium
-                sem, id cursus ipsum mauris at massa.
+                {aboutContent.intro}
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -56,31 +50,31 @@ export default function AboutUsPage() {
 
         {/* Vision Section */}
         <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Vision</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Vizyon</h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2 ml-2">
-            <li>Quisque finibus lacus in diam vestibulum, vitae aliquam tortor aliquet.</li>
-            <li>Ut placerat neque at vulputate mollis.</li>
+            {aboutContent.vision.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </section>
 
         {/* Mission Section */}
         <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Mission</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Misyon</h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2 ml-2">
-            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-            <li>Nullam accumsan ex sit amet varius placerat.</li>
-            <li>Nulla dapibus ex sed nunc scelerisque dictum.</li>
-            <li>Nunc sed nisl posuere, eleifend nibh id, auctor augue.</li>
+            {aboutContent.mission.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </section>
 
         {/* Meet Our Team Section */}
         <section className="py-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-6">Meet Our Team</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-6">Ekibimiz</h2>
 
           <ul className="space-y-8">
-            {/* Person 1 */}
-            <li className="flex gap-6 items-start">
+            {aboutContent.team.map((member) => (
+              <li key={member.name} className="flex gap-6 items-start">
               <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center">
                   <svg
@@ -99,49 +93,13 @@ export default function AboutUsPage() {
                 </div>
               </div>
               <div>
-                <p className="font-medium text-gray-900 mb-2">• Person1</p>
+                <p className="font-medium text-gray-900 mb-2">• {member.name}</p>
                 <p className="text-gray-700 leading-relaxed text-sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat dolor sit amet orci imperdiet,
-                  vitae laoreet mi vulputate. Nulla pulvinar ultricies odio quis tincidunt. Aenean id fermentum urna. Morbi et
-                  lacinia neque. Sed venenatis hendrerit quam. Nulla bibendum sed enim in sodales. Nullam cursus tellus
-                  eget lorem molestie, elementum tristique magna dignissim. Cras dictum sapien at mi consequat mollis.
-                  Vivamus a tristique mi. Vivamus id ante aliquam, gravida lorem nec, vehicula augue. Integer ac bibendum
-                  purus. Fusce vel purus vel erat fringilla mattis.
+                  {member.description}
                 </p>
               </div>
             </li>
-
-            {/* Person 2 */}
-            <li className="flex gap-6 items-start">
-              <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg
-                    width="60"
-                    height="60"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="30" cy="22" r="12" fill="#9CA3AF" />
-                    <path
-                      d="M10 55C10 42 18 35 30 35C42 35 50 42 50 55"
-                      fill="#9CA3AF"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900 mb-2">• Person2</p>
-                <p className="text-gray-700 leading-relaxed text-sm">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat dolor sit amet orci imperdiet,
-                  vitae laoreet mi vulputate. Nulla pulvinar ultricies odio quis tincidunt. Aenean id fermentum urna. Morbi et
-                  lacinia neque. Sed venenatis hendrerit quam. Nulla bibendum sed enim in sodales. Nullam cursus tellus
-                  eget lorem molestie, elementum tristique magna dignissim. Cras dictum sapien at mi consequat mollis.
-                  Vivamus a tristique mi. Vivamus id ante aliquam, gravida lorem nec, vehicula augue. Integer ac bibendum
-                  purus. Fusce vel purus vel erat fringilla mattis.
-                </p>
-              </div>
-            </li>
+            ))}
           </ul>
         </section>
       </main>

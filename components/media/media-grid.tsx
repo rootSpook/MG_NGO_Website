@@ -4,76 +4,19 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, ArrowRight } from "lucide-react"
+import { MediaListItem } from "@/lib/publicContent"
 
-const categories = [
-  "All",
-  "News",
-  "Events",
-  "Press",
-  "Announcements",
-]
+interface MediaGridProps {
+  title: string
+  categories: string[]
+  items: MediaListItem[]
+  loadMoreLabel: string
+}
 
-const mediaItems = [
-  {
-    id: 1,
-    title: "New Treatment Center Opens in Istanbul",
-    excerpt: "A specialized MG treatment center has been inaugurated at Sabancı University Hospital, offering comprehensive care.",
-    date: "March 8, 2025",
-    category: "News",
-    image: "bg-gradient-to-br from-blue-400 to-blue-600",
-    readTime: "3 min read",
-  },
-  {
-    id: 2,
-    title: "Spring Community Gathering 2025",
-    excerpt: "Join us for our annual spring gathering bringing together patients, families, and medical professionals.",
-    date: "March 5, 2025",
-    category: "Events",
-    image: "bg-gradient-to-br from-green-400 to-green-600",
-    readTime: "2 min read",
-  },
-  {
-    id: 3,
-    title: "Partnership with European MG Foundation",
-    excerpt: "We are excited to announce our new partnership to expand research collaboration across Europe.",
-    date: "February 28, 2025",
-    category: "Press",
-    image: "bg-gradient-to-br from-purple-400 to-purple-600",
-    readTime: "4 min read",
-  },
-  {
-    id: 4,
-    title: "Updated Patient Resources Available",
-    excerpt: "New downloadable guides and resources are now available in Turkish for patients and caregivers.",
-    date: "February 20, 2025",
-    category: "Announcements",
-    image: "bg-gradient-to-br from-orange-400 to-orange-600",
-    readTime: "2 min read",
-  },
-  {
-    id: 5,
-    title: "Dr. Ayşe Yılmaz Joins Advisory Board",
-    excerpt: "Renowned neurologist Dr. Ayşe Yılmaz brings decades of MG expertise to our medical advisory board.",
-    date: "February 15, 2025",
-    category: "News",
-    image: "bg-gradient-to-br from-teal-400 to-teal-600",
-    readTime: "3 min read",
-  },
-  {
-    id: 6,
-    title: "Volunteer Training Program Launch",
-    excerpt: "Applications are now open for our comprehensive volunteer training program starting in April.",
-    date: "February 10, 2025",
-    category: "Announcements",
-    image: "bg-gradient-to-br from-pink-400 to-pink-600",
-    readTime: "2 min read",
-  },
-]
-
-export function MediaGrid() {
+export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGridProps) {
   const [activeCategory, setActiveCategory] = useState("All")
 
-  const filteredMedia = mediaItems.filter(
+  const filteredMedia = items.filter(
     (item) => activeCategory === "All" || item.category === activeCategory
   )
 
@@ -81,7 +24,7 @@ export function MediaGrid() {
     <section className="py-12 md:py-16">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
-          Latest Updates
+          {title}
         </h2>
 
         {/* Category Tabs */}
@@ -109,7 +52,7 @@ export function MediaGrid() {
               className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group cursor-pointer"
             >
               {/* Image */}
-              <div className={`h-48 ${item.image} flex items-center justify-center relative overflow-hidden`}>
+              <div className={`h-48 ${item.imageClass} flex items-center justify-center relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
               </div>
 
@@ -142,7 +85,7 @@ export function MediaGrid() {
         {/* Load More */}
         <div className="text-center mt-10">
           <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
-            Load More
+            {loadMoreLabel}
             <ArrowRight size={18} className="ml-2" />
           </Button>
         </div>
