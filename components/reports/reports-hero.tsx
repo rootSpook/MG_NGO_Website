@@ -1,7 +1,12 @@
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { ReportsPageData } from "@/lib/publicContent"
 
-export function ReportsHero() {
+interface ReportsHeroProps {
+  data: ReportsPageData["hero"]
+}
+
+export function ReportsHero({ data }: ReportsHeroProps) {
   return (
     <section className="relative bg-gradient-to-r from-slate-700 to-slate-600 py-16 md:py-24">
       {/* Background Pattern */}
@@ -15,18 +20,17 @@ export function ReportsHero() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-white/70 mb-6">
           <Link href="/" className="hover:text-white transition-colors">
-            Home
+            Ana Sayfa
           </Link>
           <ChevronRight size={16} />
-          <span className="text-white">Reports</span>
+          <span className="text-white">{data.breadcrumbCurrent}</span>
         </nav>
 
         <h1 className="text-3xl md:text-5xl font-bold text-teal-400 mb-4">
-          Reports & Publications
+          {data.title}
         </h1>
         <p className="text-white/90 text-lg md:text-xl max-w-2xl leading-relaxed">
-          Access our comprehensive research reports, medical publications, and downloadable resources 
-          about Myasthenia Gravis. Stay informed with the latest findings and community insights.
+          {data.description}
         </p>
       </div>
     </section>
