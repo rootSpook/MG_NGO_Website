@@ -114,12 +114,22 @@ export interface ContentItem {
   tagIds: string[];
   ogImageAssetRef: DocumentReference | null;
   coverAssetRef: DocumentReference | null;
+  /** Direct image URL, used when no Firebase Storage asset is uploaded yet */
+  coverImageUrl: string | null;
   attachmentAssetRefs: DocumentReference[];
   seoTitle: string | null;
   seoDescription: string | null;
   canonicalUrl: string | null;
-  createdBy: DocumentReference;
-  updatedBy: DocumentReference;
+  /** Author display name, used by blog posts */
+  authorName: string | null;
+  /** Number of pages, used by reports (type == "policy") */
+  pages: number | null;
+  /** File format label, used by reports (type == "policy") */
+  format: string | null;
+  /** Arbitrary structured data for CMS-managed pages (type == "page") */
+  pageData: Record<string, unknown> | null;
+  createdBy: DocumentReference | string | null;
+  updatedBy: DocumentReference | string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   archivedAt: Timestamp | null;
@@ -156,7 +166,12 @@ export interface MediaAsset {
   width: number | null;
   height: number | null;
   altText: string | null;
-  uploadedBy: DocumentReference;
+  description: string | null;
+  tags: string[];
+  featured: boolean;
+  /** Associates asset with a specific page slot (e.g. "home-slider", "about-gallery") */
+  pageKey: string | null;
+  uploadedBy: DocumentReference | string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   deletedAt: Timestamp | null;
@@ -190,15 +205,18 @@ export interface ContactMessage {
 export interface Campaign {
   title: string;
   slug: string;
+  subtitle: string | null;
   description: string | null;
   status: CampaignStatus;
   goalAmount: number | null;
+  raisedAmount: number;
   currency: string;
+  imageUrl: string | null;
   startsAt: Timestamp | null;
   endsAt: Timestamp | null;
   coverAssetRef: DocumentReference | null;
-  createdBy: DocumentReference;
-  updatedBy: DocumentReference;
+  createdBy: DocumentReference | string | null;
+  updatedBy: DocumentReference | string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   archivedAt: Timestamp | null;

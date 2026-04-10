@@ -136,11 +136,18 @@ service cloud.firestore {
 
     match /contactMessages/{messageId} {
       allow create: if
-        // Public submission — only allow the declared public fields
+        // Public submission — allow all fields the client sends, but lock down
+        // workflow/audit fields so the submitter cannot manipulate them.
         request.resource.data.keys().hasOnly([
           "senderName", "senderEmail", "senderPhone",
-          "subject", "messageBody"
-        ]);
+          "subject", "messageBody",
+          "status", "handledBy", "handledAt", "internalNotes",
+          "ipAddress", "userAgent", "createdAt", "updatedAt", "deletedAt"
+        ]) &&
+        request.resource.data.status == "new" &&
+        request.resource.data.handledBy == null &&
+        request.resource.data.handledAt == null &&
+        request.resource.data.deletedAt == null;
 
       allow read: if isAdminOrEditor();
 
