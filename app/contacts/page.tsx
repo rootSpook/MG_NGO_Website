@@ -1,3 +1,6 @@
+// TO-DO: there are still some static info like email and phone number
+// these need to be changed.
+
 "use client"
 
 import { useState } from "react"
@@ -5,14 +8,50 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Mail, Phone, Home, Plus, Minus } from "lucide-react"
 import { contactPageTemplate } from "@/lib/publicPagesContent"
+import { submitContactMessage } from "@/lib/firebase/services"
 
 const pageContent = contactPageTemplate
 
 export default function ContactUsPage() {
   const [openFaq, setOpenFaq] = useState<number>(0)
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [message, setMessage] = useState("")
+  const [agreed, setAgreed] = useState(false)
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [errorMsg, setErrorMsg] = useState("")
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? -1 : index)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!agreed) {
+      setErrorMsg("Lütfen KVKK Aydınlatma Metni'ni okuyup onaylayın.")
+      return
+    }
+    setStatus("loading")
+    setErrorMsg("")
+    try {
+      await submitContactMessage({
+        senderName: name,
+        senderEmail: email,
+        senderPhone: phone || undefined,
+        subject: "Web Sitesi İletişim Formu",
+        messageBody: message,
+      })
+      setStatus("success")
+      setName("")
+      setEmail("")
+      setPhone("")
+      setMessage("")
+      setAgreed(false)
+    } catch (err) {
+      setStatus("error")
+      setErrorMsg(err instanceof Error ? err.message : "Bir hata oluştu. Lütfen tekrar deneyin.")
+    }
   }
 
   return (
@@ -51,48 +90,82 @@ export default function ContactUsPage() {
                   topluluğumuz için çok değerli.
                 </p>
 
-                <form className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Ad Soyad"
-                    className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input
-                      type="email"
-                      placeholder="E-posta Adresiniz"
-                      className="w-full pl-12 pr-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-
-                  <input
-                    type="tel"
-                    placeholder="Telefon Numarası"
-                    className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-
-                  <textarea
-                    placeholder="Size nasıl yardımcı olabiliriz?"
-                    rows={4}
-                    className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-                  />
-
-                  <div className="flex items-center justify-between pt-2">
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
-                      <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
-                      <span>I have read and agree to the KVKK Information Notice.</span>
-                    </label>
-
+                {status === "success" ? (
+                  <div className="rounded-lg bg-teal-50 border border-teal-200 px-5 py-6 text-center">
+                    <p className="text-teal-700 font-medium">Mesajınız iletildi!</p>
+                    <p className="text-teal-600 text-sm mt-1">En kısa sürede geri dönüş yapacağız.</p>
                     <button
-                      type="submit"
-                      className="px-6 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+                      onClick={() => setStatus("idle")}
+                      className="mt-4 text-sm text-teal-600 underline"
                     >
-                      Gönder
+                      Yeni mesaj gönder
                     </button>
                   </div>
-                </form>
+                ) : (
+                  <form className="space-y-4" onSubmit={handleSubmit}>
+                    <input
+                      type="text"
+                      placeholder="Ad Soyad"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input
+                        type="email"
+                        placeholder="E-posta Adresiniz"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                    </div>
+
+                    <input
+                      type="tel"
+                      placeholder="Telefon Numarası"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+
+                    <textarea
+                      placeholder="Size nasıl yardımcı olabiliriz?"
+                      required
+                      rows={4}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                    />
+
+                    {errorMsg && (
+                      <p className="text-sm text-red-600">{errorMsg}</p>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2">
+                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={agreed}
+                          onChange={(e) => setAgreed(e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300"
+                        />
+                        <span>KVKK Aydınlatma Metni'ni okudum ve onaylıyorum.</span>
+                      </label>
+
+                      <button
+                        type="submit"
+                        disabled={status === "loading"}
+                        className="px-6 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors disabled:opacity-60"
+                      >
+                        {status === "loading" ? "Gönderiliyor…" : "Gönder"}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             </div>
           </div>
@@ -104,40 +177,27 @@ export default function ContactUsPage() {
             {/* Map Placeholder */}
             <div className="w-full lg:w-1/2">
               <div className="bg-gray-200 rounded-lg overflow-hidden aspect-[4/3]">
-                <img
-                  src="https://maps.googleapis.com/maps/api/staticmap?center=40.8667,29.3667&zoom=12&size=600x450&maptype=roadmap&markers=color:red%7C40.8667,29.3667&key=placeholder"
-                  alt="Tuzla, İstanbul konumunu gösteren harita"
-                  className="w-full h-full object-cover opacity-0"
-                />
-                <div className="w-full h-full flex items-center justify-center bg-gray-300 -mt-full" style={{ marginTop: "-100%" }}>
-                  <div className="text-center">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <svg viewBox="0 0 400 300" className="w-full h-full">
-                        {/* Simple map representation */}
-                        <rect fill="#e8e8e8" width="400" height="300" />
-                        {/* Roads */}
-                        <path d="M0 150 L400 150" stroke="#fff" strokeWidth="8" />
-                        <path d="M200 0 L200 300" stroke="#fff" strokeWidth="6" />
-                        <path d="M50 50 L350 250" stroke="#fff" strokeWidth="4" />
-                        <path d="M100 0 L100 300" stroke="#fff" strokeWidth="3" />
-                        <path d="M300 0 L300 300" stroke="#fff" strokeWidth="3" />
-                        <path d="M0 80 L400 80" stroke="#fff" strokeWidth="3" />
-                        <path d="M0 220 L400 220" stroke="#fff" strokeWidth="3" />
-                        {/* Location marker */}
-                        <circle cx="200" cy="150" r="12" fill="#ef4444" />
-                        <circle cx="200" cy="150" r="6" fill="#fff" />
-                        {/* Area labels */}
-                        <text x="60" y="40" fontSize="10" fill="#666">Sanayi</text>
-                        <text x="300" y="40" fontSize="10" fill="#666">Harem İstanbul</text>
-                        <text x="320" y="100" fontSize="10" fill="#666">İSTANBUL</text>
-                        <text x="150" y="180" fontSize="10" fill="#666">Sabanci Üniversitesi</text>
-                        <text x="100" y="220" fontSize="10" fill="#666">DİZAYN ANTREPO</text>
-                        <text x="50" y="260" fontSize="10" fill="#666">Tuzla Belediyesi</text>
-                        <text x="300" y="260" fontSize="10" fill="#666">Kirazlı</text>
-                        <text x="180" y="290" fontSize="10" fill="#666">Çayırova</text>
-                      </svg>
-                    </div>
-                  </div>
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+                  <svg viewBox="0 0 400 300" className="w-full h-full">
+                    <rect fill="#e8e8e8" width="400" height="300" />
+                    <path d="M0 150 L400 150" stroke="#fff" strokeWidth="8" />
+                    <path d="M200 0 L200 300" stroke="#fff" strokeWidth="6" />
+                    <path d="M50 50 L350 250" stroke="#fff" strokeWidth="4" />
+                    <path d="M100 0 L100 300" stroke="#fff" strokeWidth="3" />
+                    <path d="M300 0 L300 300" stroke="#fff" strokeWidth="3" />
+                    <path d="M0 80 L400 80" stroke="#fff" strokeWidth="3" />
+                    <path d="M0 220 L400 220" stroke="#fff" strokeWidth="3" />
+                    <circle cx="200" cy="150" r="12" fill="#ef4444" />
+                    <circle cx="200" cy="150" r="6" fill="#fff" />
+                    <text x="60" y="40" fontSize="10" fill="#666">Sanayi</text>
+                    <text x="300" y="40" fontSize="10" fill="#666">Harem İstanbul</text>
+                    <text x="320" y="100" fontSize="10" fill="#666">İSTANBUL</text>
+                    <text x="150" y="180" fontSize="10" fill="#666">Sabanci Üniversitesi</text>
+                    <text x="100" y="220" fontSize="10" fill="#666">DİZAYN ANTREPO</text>
+                    <text x="50" y="260" fontSize="10" fill="#666">Tuzla Belediyesi</text>
+                    <text x="300" y="260" fontSize="10" fill="#666">Kirazlı</text>
+                    <text x="180" y="290" fontSize="10" fill="#666">Çayırova</text>
+                  </svg>
                 </div>
               </div>
             </div>

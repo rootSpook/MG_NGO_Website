@@ -13,3 +13,6 @@ serviceAccountKey.json
 notes.md
 CLAUDE.md
 .firebaserc
+.claude/
+.firebase/
+.vscode/

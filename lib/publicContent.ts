@@ -1,4 +1,25 @@
-import { mockBlogs } from "@/lib/editorPanelMockData";
+/**
+ * Public content functions — read live data from Firestore.
+ * All functions fall back to seed data if Firestore returns nothing,
+ * so the site is never empty even on a fresh deployment before seeding.
+ */
+
+import {
+  getPublishedContentByType,
+  getContentBySlug,
+  getActiveCampaigns,
+  getPublicMediaAssets,
+  getSiteSettings,
+} from "@/lib/firebase/services";
+import {
+  seedBlogPosts,
+  seedCampaigns,
+  seedMediaAssets,
+  seedReports,
+  seedSettings,
+} from "@/lib/firebase/seedData";
+
+// ── Types (kept here so existing imports don't break) ─────────────────────────
 
 export interface PublicBlogPost {
   id: string;
@@ -128,134 +149,184 @@ export interface ReportsPageData {
   loadMoreLabel: string;
 }
 
-function slugify(value: string) {
-  return value
-    .replace(/ı/g, "i")
-    .replace(/İ/g, "i")
-    .replace(/ş/g, "s")
-    .replace(/Ş/g, "s")
-    .replace(/ğ/g, "g")
-    .replace(/Ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/Ü/g, "u")
-    .replace(/ö/g, "o")
-    .replace(/Ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/Ç/g, "c")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const FALLBACK_COVER =
+  "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1400&auto=format&fit=crop";
+
+function firestoreTimestampToISO(ts: unknown): string {
+  if (!ts) return new Date().toISOString();
+  if (typeof (ts as { toDate?: () => Date }).toDate === "function") {
+    return (ts as { toDate: () => Date }).toDate().toISOString();
+  }
+  return String(ts);
 }
 
-const blogCoverById: Record<string, string> = {
-  "blog-1":
-    "https://images.unsplash.com/photo-1576765607924-b18f0c4f4f77?q=80&w=1400&auto=format&fit=crop",
-  "blog-2":
-    "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=1400&auto=format&fit=crop",
-  "blog-3":
-    "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=1400&auto=format&fit=crop",
-};
-
-const blogBodyById: Record<string, string[]> = {
-  "blog-1": [
-    "Myasthenia Gravis belirtileri kisiden kisiye degisebilir. En yaygin belirtiler arasinda goz kapaginda dusme, cift gorme, cigneme ve yutma guclugu yer alir.",
-    "Semptomlar gun icinde degisiklik gosterebilir ve yorgunlukla artabilir. Erken tani ve dogru takip, yasam kalitesini belirgin sekilde artirir.",
-    "Dernegimiz bu surecte hastalarin ve yakinlarinin guvenilir bilgiye ulasmasi icin egitim ve destek calismalari yurutmektedir.",
-  ],
-  "blog-2": [
-    "Yillik bagis kampanyamizda elde edilen katkiyla daha fazla hastaya ulasilmasi, yeni egitim iceriklerinin hazirlanmasi ve yerel etkinliklerin guclendirilmesi hedeflenmistir.",
-    "Toplanan kaynaklarin seffaf bir sekilde raporlanmasi, bagiscilarimizin surece duydugu guveni artirmaktadir.",
-    "Onumuzdeki donemde odagimiz, hasta destek gruplarini farkli sehirlere yaymak ve gonullu agini guclendirmek olacak.",
-  ],
-  "blog-3": [
-    "Istanbul'da duzenlenen farkindalik etkinligimizde hekimler, hastalar, hasta yakinlari ve gonulluler bir araya geldi.",
-    "Program kapsaminda erken tani, guncel tedavi secenekleri ve sosyal destek mekanizmalari uzerine oturumlar gerceklestirildi.",
-    "Bu bulusmalar, toplumsal farkindaligi artirmanin yani sira hastalarin yalniz olmadigini gosteren guclu bir dayanisma ortami olusturuyor.",
-  ],
-};
+// ── Blogs ─────────────────────────────────────────────────────────────────────
 
 export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
-  const publishedBlogs = mockBlogs
-    .filter((item) => item.status === "published")
-    .sort(
-      (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    )
-    .map((item) => ({
-      id: item.id,
-      slug: slugify(item.title),
-      title: item.title,
-      excerpt: item.summary,
-      publishedAt: item.publishedAt,
-      coverImage:
-        blogCoverById[item.id] ||
-        "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1400&auto=format&fit=crop",
-      content: blogBodyById[item.id] || [item.summary],
-    }));
+  try {
+    const items = await getPublishedContentByType("post");
+    if (items.length > 0) {
+      return items.map((item) => ({
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        excerpt: item.excerpt ?? "",
+        publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
+        coverImage: item.coverImageUrl ?? FALLBACK_COVER,
+        content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
+      }));
+    }
+  } catch (err) {
+    console.error("[publicContent] getPublishedBlogs Firestore error:", err);
+  }
 
-  return Promise.resolve(publishedBlogs);
+  // Fallback to seed data
+  return seedBlogPosts
+    .filter((b) => b.status === "published")
+    .map((b) => ({
+      id: b.id,
+      slug: b.slug,
+      title: b.title,
+      excerpt: b.excerpt,
+      publishedAt: b.publishedAt ?? new Date().toISOString().split("T")[0],
+      coverImage: b.coverImageUrl ?? FALLBACK_COVER,
+      content: b.bodyMarkdown ? b.bodyMarkdown.split("\n\n") : [],
+    }));
 }
 
 export async function getBlogBySlug(
   slug: string
 ): Promise<PublicBlogPost | null> {
-  const blogs = await getPublishedBlogs();
-  return blogs.find((blog) => blog.slug === slug) || null;
+  try {
+    const item = await getContentBySlug(slug);
+    if (item) {
+      return {
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        excerpt: item.excerpt ?? "",
+        publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
+        coverImage: item.coverImageUrl ?? FALLBACK_COVER,
+        content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
+      };
+    }
+  } catch (err) {
+    console.error("[publicContent] getBlogBySlug Firestore error:", err);
+  }
+
+  // Fallback to seed data
+  const found = seedBlogPosts.find((b) => b.slug === slug);
+  if (!found) return null;
+  return {
+    id: found.id,
+    slug: found.slug,
+    title: found.title,
+    excerpt: found.excerpt,
+    publishedAt: found.publishedAt ?? new Date().toISOString().split("T")[0],
+    coverImage: found.coverImageUrl ?? FALLBACK_COVER,
+    content: found.bodyMarkdown ? found.bodyMarkdown.split("\n\n") : [],
+  };
 }
 
+// ── Donation page ─────────────────────────────────────────────────────────────
+
 export async function getDonationPageData(): Promise<DonationPageData> {
-  return Promise.resolve({
+  let campaigns: DonationCampaign[] = [];
+
+  try {
+    const firestoreCampaigns = await getActiveCampaigns();
+    if (firestoreCampaigns.length > 0) {
+      campaigns = firestoreCampaigns.map((c) => ({
+        id: c.id,
+        title: c.title,
+        subtitle: c.subtitle ?? "",
+        description: c.description ?? "",
+        imageUrl: c.imageUrl ?? FALLBACK_COVER,
+        currentAmount: c.raisedAmount ?? 0,
+        targetAmount: c.goalAmount ?? 0,
+      }));
+    }
+  } catch (err) {
+    console.error("[publicContent] getDonationPageData Firestore error:", err);
+  }
+
+  if (campaigns.length === 0) {
+    campaigns = seedCampaigns.map((c) => ({
+      id: c.id,
+      title: c.title,
+      subtitle: c.subtitle,
+      description: c.description,
+      imageUrl: c.imageUrl,
+      currentAmount: c.raisedAmount,
+      targetAmount: c.goalAmount,
+    }));
+  }
+
+  // Site settings supply bank details
+  let bankName = seedSettings.bankName;
+  let accountName = seedSettings.accountName;
+  let iban = seedSettings.iban;
+  let swiftCode = seedSettings.swiftCode;
+  let monthlyMessage = seedSettings.monthlyMessage;
+
+  try {
+    const settings = await getSiteSettings();
+    if (settings) {
+      bankName = (settings as unknown as Record<string, string>).bankName ?? bankName;
+      accountName = (settings as unknown as Record<string, string>).accountName ?? accountName;
+      iban = (settings as unknown as Record<string, string>).iban ?? iban;
+      swiftCode = (settings as unknown as Record<string, string>).swiftCode ?? swiftCode;
+      monthlyMessage = (settings as unknown as Record<string, string>).monthlyMessage ?? monthlyMessage;
+    }
+  } catch {
+    // use seed defaults
+  }
+
+  return {
     title: "Myasthenia Gravis Topluluğunu Destekleyin",
     subtitle:
       "Yapacaginiz bagislar; farkindalik calismalarina ve MG ile yasayan hastalara destek olmamiza yardimci olur.",
-    bankName: "Turkiye Is Bankasi",
-    accountName: "MG Yasam Dernegi",
-    iban: "TR00 0000 0000 0000 0000 0000 00",
-    swiftCode: "ISBKTRIS",
-    monthlyMessage: "Aylık bağış ile sürekli destek olabilirsiniz.",
-    campaigns: [
-      {
-        id: "campaign-1",
-        title: "Gorunmeyen Yorgunlukla Mucadele",
-        subtitle: "Gorunmeyeni gor",
-        description:
-          "Psikososyal destek gruplari ile hastalarin yasam kalitesini guclendirmeyi hedefliyoruz.",
-        imageUrl:
-          "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?q=80&w=1200&auto=format&fit=crop",
-        currentAmount: 14250,
-        targetAmount: 25000,
-      },
-      {
-        id: "campaign-2",
-        title: "Tedaviye Erisim Icin Destek",
-        subtitle: "Boslugu kapat",
-        description:
-          "Ilac ve tedavi sureclerinde ihtiyac duyan ailelere yonelik destek fonu olusturuyoruz.",
-        imageUrl:
-          "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=1200&auto=format&fit=crop",
-        currentAmount: 9800,
-        targetAmount: 20000,
-      },
-      {
-        id: "campaign-3",
-        title: "Bir Nefese Bir Umut",
-        subtitle: "Bir nefese bir umut",
-        description:
-          "MG hastalari icin uzman destegi, egitim ve topluluk bulusmalarina katki sagliyoruz.",
-        imageUrl:
-          "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop",
-        currentAmount: 5210,
-        targetAmount: 15000,
-      },
-    ],
-  });
+    bankName,
+    accountName,
+    iban,
+    swiftCode,
+    monthlyMessage,
+    campaigns,
+  };
 }
 
+// ── Media page ────────────────────────────────────────────────────────────────
+
 export async function getMediaPageData(): Promise<MediaPageData> {
-  return Promise.resolve({
+  let galleryImages: MediaGalleryItem[] = [];
+
+  try {
+    const assets = await getPublicMediaAssets();
+    const galleryAssets = assets.filter((a) => a.pageKey === "media-gallery");
+    if (galleryAssets.length > 0) {
+      galleryImages = galleryAssets.map((a, i) => ({
+        id: i + 1,
+        title: a.altText ?? a.originalFilename,
+        colorClass: "bg-gradient-to-br from-teal-400 to-teal-600",
+      }));
+    }
+  } catch (err) {
+    console.error("[publicContent] getMediaPageData Firestore error:", err);
+  }
+
+  if (galleryImages.length === 0) {
+    galleryImages = seedMediaAssets
+      .filter((a) => a.pageKey === "media-gallery")
+      .map((a, i) => ({
+        id: i + 1,
+        title: a.altText,
+        colorClass: "bg-gradient-to-br from-teal-400 to-teal-600",
+      }));
+  }
+
+  return {
     hero: {
       breadcrumbCurrent: "Medya",
       title: "Medya ve Haberler",
@@ -277,139 +348,98 @@ export async function getMediaPageData(): Promise<MediaPageData> {
     listSectionTitle: "Son Güncellemeler",
     categories: ["Tümü", "Haber", "Etkinlik", "Basın", "Duyuru"],
     items: [
-      {
-        id: 1,
-        title: "İstanbul'da Yeni Tedavi Merkezi Açıldı",
-        excerpt:
-          "Sabancı Üniversitesi Hastanesi bünyesinde kapsamlı bakım sunan yeni bir MG tedavi merkezi hizmete girdi.",
-        date: "8 Mart 2025",
-        category: "Haber",
-        imageClass: "bg-gradient-to-br from-blue-400 to-blue-600",
-        readTime: "3 dk okuma",
-      },
-      {
-        id: 2,
-        title: "2025 Bahar Topluluk Buluşması",
-        excerpt:
-          "Hastaları, yakınlarını ve sağlık profesyonellerini bir araya getiren yıllık bahar buluşmamıza katılın.",
-        date: "5 Mart 2025",
-        category: "Etkinlik",
-        imageClass: "bg-gradient-to-br from-green-400 to-green-600",
-        readTime: "2 dk okuma",
-      },
-      {
-        id: 3,
-        title: "Avrupa MG Vakfı ile Ortaklık",
-        excerpt:
-          "Avrupa genelinde araştırma iş birliklerini genişletmek için yeni ortaklığımızı duyurmaktan mutluluk duyuyoruz.",
-        date: "28 Şubat 2025",
-        category: "Basın",
-        imageClass: "bg-gradient-to-br from-purple-400 to-purple-600",
-        readTime: "4 dk okuma",
-      },
-      {
-        id: 4,
-        title: "Güncellenmiş Hasta Kaynakları Yayında",
-        excerpt:
-          "Hastalar ve bakım verenler için Türkçe indirilebilir yeni rehberler ve kaynaklar erişime açıldı.",
-        date: "20 Şubat 2025",
-        category: "Duyuru",
-        imageClass: "bg-gradient-to-br from-orange-400 to-orange-600",
-        readTime: "2 dk okuma",
-      },
-      {
-        id: 5,
-        title: "Dr. Ayşe Yılmaz Danışma Kuruluna Katıldı",
-        excerpt:
-          "Nöroloji alanında uzman Dr. Ayşe Yılmaz, yıllara dayanan MG deneyimiyle tıbbi danışma kurulumuza katıldı.",
-        date: "15 Şubat 2025",
-        category: "Haber",
-        imageClass: "bg-gradient-to-br from-teal-400 to-teal-600",
-        readTime: "3 dk okuma",
-      },
-      {
-        id: 6,
-        title: "Gönüllü Eğitim Programı Başladı",
-        excerpt:
-          "Nisan ayında başlayacak kapsamlı gönüllü eğitim programımız için başvurular açıldı.",
-        date: "10 Şubat 2025",
-        category: "Duyuru",
-        imageClass: "bg-gradient-to-br from-pink-400 to-pink-600",
-        readTime: "2 dk okuma",
-      },
+      { id: 1, title: "İstanbul'da Yeni Tedavi Merkezi Açıldı", excerpt: "Sabancı Üniversitesi Hastanesi bünyesinde kapsamlı bakım sunan yeni bir MG tedavi merkezi hizmete girdi.", date: "8 Mart 2025", category: "Haber", imageClass: "bg-gradient-to-br from-blue-400 to-blue-600", readTime: "3 dk okuma" },
+      { id: 2, title: "2025 Bahar Topluluk Buluşması", excerpt: "Hastaları, yakınlarını ve sağlık profesyonellerini bir araya getiren yıllık bahar buluşmamıza katılın.", date: "5 Mart 2025", category: "Etkinlik", imageClass: "bg-gradient-to-br from-green-400 to-green-600", readTime: "2 dk okuma" },
+      { id: 3, title: "Avrupa MG Vakfı ile Ortaklık", excerpt: "Avrupa genelinde araştırma iş birliklerini genişletmek için yeni ortaklığımızı duyurmaktan mutluluk duyuyoruz.", date: "28 Şubat 2025", category: "Basın", imageClass: "bg-gradient-to-br from-purple-400 to-purple-600", readTime: "4 dk okuma" },
+      { id: 4, title: "Güncellenmiş Hasta Kaynakları Yayında", excerpt: "Hastalar ve bakım verenler için Türkçe indirilebilir yeni rehberler ve kaynaklar erişime açıldı.", date: "20 Şubat 2025", category: "Duyuru", imageClass: "bg-gradient-to-br from-orange-400 to-orange-600", readTime: "2 dk okuma" },
+      { id: 5, title: "Dr. Ayşe Yılmaz Danışma Kuruluna Katıldı", excerpt: "Nöroloji alanında uzman Dr. Ayşe Yılmaz, yıllara dayanan MG deneyimiyle tıbbi danışma kurulumuza katıldı.", date: "15 Şubat 2025", category: "Haber", imageClass: "bg-gradient-to-br from-teal-400 to-teal-600", readTime: "3 dk okuma" },
+      { id: 6, title: "Gönüllü Eğitim Programı Başladı", excerpt: "Nisan ayında başlayacak kapsamlı gönüllü eğitim programımız için başvurular açıldı.", date: "10 Şubat 2025", category: "Duyuru", imageClass: "bg-gradient-to-br from-pink-400 to-pink-600", readTime: "2 dk okuma" },
     ],
     loadMoreLabel: "Daha Fazla",
     gallery: {
       title: "Fotoğraf Galerisi",
       viewAllLabel: "Tüm Fotoğrafları Gör",
-      images: [
-        {
-          id: 1,
-          title: "MG Farkındalık Ayı Yürüyüşü 2024",
-          colorClass: "bg-gradient-to-br from-teal-400 to-teal-600",
-        },
-        {
-          id: 2,
-          title: "Yıllık Konferans 2024",
-          colorClass: "bg-gradient-to-br from-blue-400 to-blue-600",
-        },
-        {
-          id: 3,
-          title: "Topluluk Destek Toplantısı",
-          colorClass: "bg-gradient-to-br from-green-400 to-green-600",
-        },
-        {
-          id: 4,
-          title: "Gönüllü Takdir Etkinliği",
-          colorClass: "bg-gradient-to-br from-purple-400 to-purple-600",
-        },
-        {
-          id: 5,
-          title: "Tıbbi Sempozyum 2024",
-          colorClass: "bg-gradient-to-br from-orange-400 to-orange-600",
-        },
-        {
-          id: 6,
-          title: "Hasta Savunuculuğu Atölyesi",
-          colorClass: "bg-gradient-to-br from-pink-400 to-pink-600",
-        },
-        {
-          id: 7,
-          title: "Dünya MG Günü Kutlaması",
-          colorClass: "bg-gradient-to-br from-cyan-400 to-cyan-600",
-        },
-        {
-          id: 8,
-          title: "Araştırma Ortaklığı İmza Töreni",
-          colorClass: "bg-gradient-to-br from-indigo-400 to-indigo-600",
-        },
+      images: galleryImages.length > 0 ? galleryImages : [
+        { id: 1, title: "MG Farkındalık Ayı Yürüyüşü 2024", colorClass: "bg-gradient-to-br from-teal-400 to-teal-600" },
+        { id: 2, title: "Yıllık Konferans 2024", colorClass: "bg-gradient-to-br from-blue-400 to-blue-600" },
+        { id: 3, title: "Topluluk Destek Toplantısı", colorClass: "bg-gradient-to-br from-green-400 to-green-600" },
+        { id: 4, title: "Gönüllü Takdir Etkinliği", colorClass: "bg-gradient-to-br from-purple-400 to-purple-600" },
       ],
     },
     cta: {
       newsletterTitle: "Güncel Kalın",
-      newsletterDescription:
-        "En güncel haberleri, etkinlik duyurularını ve kaynakları doğrudan e-posta kutunuza almak için bültenimize abone olun.",
+      newsletterDescription: "En güncel haberleri, etkinlik duyurularını ve kaynakları doğrudan e-posta kutunuza almak için bültenimize abone olun.",
       newsletterInputPlaceholder: "E-posta adresinizi girin",
       newsletterButtonLabel: "Bültene Abone Ol",
-      newsletterNote:
-        "Abone olarak tarafımızdan e-posta almayı kabul etmiş olursunuz. İstediğiniz zaman abonelikten çıkabilirsiniz.",
+      newsletterNote: "Abone olarak tarafımızdan e-posta almayı kabul etmiş olursunuz. İstediğiniz zaman abonelikten çıkabilirsiniz.",
       pressTitle: "Basın ve Medya Kiti",
-      pressDescription:
-        "Medya kullanımı için logolar, marka kılavuzu, bilgi notları ve yüksek çözünürlüklü görseller içeren basın kitimizi indirin.",
+      pressDescription: "Medya kullanımı için logolar, marka kılavuzu, bilgi notları ve yüksek çözünürlüklü görseller içeren basın kitimizi indirin.",
       pressButtonLabel: "Basın Kitini İndir",
       pressEmail: "press@mg.org.tr",
       pressPhone: "+90 000 000 00 00",
       bannerTitle: "Paylaşmak istediğiniz bir hikaye mi var?",
-      bannerDescription:
-        "Sizden haber almayı çok isteriz. MG yolculuğunuzu topluluğumuzla paylaşın.",
+      bannerDescription: "Sizden haber almayı çok isteriz. MG yolculuğunuzu topluluğumuzla paylaşın.",
       bannerButtonLabel: "Bize Ulaşın",
       bannerButtonHref: "/contacts",
     },
-  });
+  };
 }
 
+// ── Reports page ──────────────────────────────────────────────────────────────
+
 export async function getReportsPageData(): Promise<ReportsPageData> {
-  return Promise.resolve({
+  let reports: ReportListItem[] = [];
+  let featuredTitle = "";
+  let featuredDescription = "";
+  let featuredDate = "";
+  let featuredPages = 0;
+  let featuredFormat = "PDF";
+
+  try {
+    const items = await getPublishedContentByType("policy");
+    if (items.length > 0) {
+      const featuredItem = items.find((i) => i.featured) ?? items[0];
+      featuredTitle = featuredItem.title;
+      featuredDescription = featuredItem.excerpt ?? "";
+      featuredDate = new Date(firestoreTimestampToISO(featuredItem.publishedAt))
+        .toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+      featuredPages = featuredItem.pages ?? 0;
+      featuredFormat = featuredItem.format ?? "PDF";
+
+      reports = items.map((item, i) => ({
+        id: i + 1,
+        title: item.title,
+        summary: item.excerpt ?? "",
+        date: new Date(firestoreTimestampToISO(item.publishedAt)).toLocaleDateString("tr-TR", { month: "long", year: "numeric" }),
+        category: item.categoryId ?? "Genel",
+        pages: item.pages ?? 0,
+        format: item.format ?? "PDF",
+      }));
+    }
+  } catch (err) {
+    console.error("[publicContent] getReportsPageData Firestore error:", err);
+  }
+
+  if (reports.length === 0) {
+    const featured = seedReports.find((r) => r.featured) ?? seedReports[0];
+    featuredTitle = featured.title;
+    featuredDescription = featured.excerpt;
+    featuredDate = new Date(featured.publishedAt).toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+    featuredPages = featured.pages;
+    featuredFormat = featured.format;
+
+    reports = seedReports.map((r, i) => ({
+      id: i + 1,
+      title: r.title,
+      summary: r.excerpt,
+      date: new Date(r.publishedAt).toLocaleDateString("tr-TR", { month: "long", year: "numeric" }),
+      category: r.categoryId,
+      pages: r.pages,
+      format: r.format,
+    }));
+  }
+
+  return {
     hero: {
       breadcrumbCurrent: "Raporlar",
       title: "Raporlar ve Yayınlar",
@@ -420,88 +450,21 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
       sectionTitle: "Öne Çıkan Rapor",
       badgeLabel: "Yeni",
       category: "Yıllık Rapor",
-      title: "Myasthenia Gravis Yaşam Derneği 2024 Yıllık Raporu",
-      description:
-        "Yıllık raporumuz; topluluk girişimlerini, araştırma ortaklıklarını, farkındalık kampanyalarını ve birlikte oluşturduğumuz etkiyi kapsar.",
-      date: "Ocak 2025",
-      pagesLabel: "48 Sayfa",
-      formatLabel: "PDF Formatı",
+      title: featuredTitle,
+      description: featuredDescription,
+      date: featuredDate,
+      pagesLabel: `${featuredPages} Sayfa`,
+      formatLabel: `${featuredFormat} Formatı`,
       downloadLabel: "Raporu İndir",
       readOnlineLabel: "Çevrim İçi Oku",
-      coverCaption: "Yıllık Rapor 2024",
+      coverCaption: featuredTitle,
     },
     listSectionTitle: "Tüm Raporlar",
-    categories: [
-      "Tümü",
-      "Yıllık Raporlar",
-      "Araştırma",
-      "Tıbbi Kılavuzlar",
-      "Topluluk",
-    ],
-    reports: [
-      {
-        id: 1,
-        title: "Myasthenia Gravis'i Anlamak: Hasta Rehberi",
-        summary:
-          "Tedavi seçenekleri ve günlük yönetim stratejileri dahil olmak üzere MG ile yaşam hakkında hastalar ve aileler için kapsamlı bir rehber.",
-        date: "Aralık 2024",
-        category: "Tıbbi Kılavuzlar",
-        pages: 32,
-        format: "PDF",
-      },
-      {
-        id: 2,
-        title: "2024 Araştırma Ortaklıkları Özeti",
-        summary:
-          "Türkiye genelindeki önde gelen nöroloji kurumlarıyla yürüttüğümüz ortak araştırma girişimlerinin özeti.",
-        date: "Kasım 2024",
-        category: "Araştırma",
-        pages: 24,
-        format: "PDF",
-      },
-      {
-        id: 3,
-        title: "Topluluk Etki Raporu 2024 3. Çeyrek",
-        summary:
-          "Topluluk etkinlikleri, destek grubu faaliyetleri ve hasta erişim programlarına dair çeyreklik rapor.",
-        date: "Ekim 2024",
-        category: "Topluluk",
-        pages: 18,
-        format: "PDF",
-      },
-      {
-        id: 4,
-        title: "MG Farkındalık Ayı Kampanya Sonuçları",
-        summary:
-          "Farkındalık kampanyamızın erişim, etkileşim ve temel çıktılar açısından analizi.",
-        date: "Ağustos 2024",
-        category: "Topluluk",
-        pages: 16,
-        format: "PDF",
-      },
-      {
-        id: 5,
-        title: "Myasthenia Gravis Tedavisinde 2024 Gelişmeleri",
-        summary:
-          "Yeni tedaviler ve klinik çalışma sonuçları dahil MG tedavi seçeneklerindeki en güncel gelişmeler.",
-        date: "Temmuz 2024",
-        category: "Araştırma",
-        pages: 28,
-        format: "PDF",
-      },
-      {
-        id: 6,
-        title: "Yıllık Rapor 2023",
-        summary:
-          "Kurumsal faaliyetleri, mali özeti ve stratejik hedefleri kapsayan kapsamlı yıllık rapor.",
-        date: "Ocak 2024",
-        category: "Yıllık Raporlar",
-        pages: 52,
-        format: "PDF",
-      },
-    ],
+    categories: ["Tümü", "Yıllık Raporlar", "Araştırma", "Tıbbi Kılavuzlar", "Topluluk"],
+    reports,
     searchPlaceholder: "Raporlarda ara...",
     emptyStateText: "Kriterlerinize uygun rapor bulunamadı.",
     loadMoreLabel: "Daha Fazla Rapor",
-  });
+  };
 }
+
