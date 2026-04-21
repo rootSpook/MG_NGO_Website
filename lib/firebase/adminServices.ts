@@ -3,14 +3,16 @@ import {
   doc,
   addDoc,
   getDocs,
+  getDoc,
   updateDoc,
+  setDoc,
   query,
   where,
   serverTimestamp,
   type DocumentData,
 } from "firebase/firestore";
 import { db, auth } from "./config";
-import { COLLECTIONS } from "./constants";
+import { COLLECTIONS, DOCUMENT_IDS } from "./constants";
 
 export interface AdminDashboardStats {
   totalBlogs: number;
@@ -326,6 +328,141 @@ export async function deleteAdminReport(id: string): Promise<void> {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+}
+
+// ── Page management ───────────────────────────────────────────────────────────
+
+export interface AdminPage {
+  id: string;
+  slug: string;
+  title: string;
+  bodyMarkdown: string;
+  status: "draft" | "published";
+  updatedAt: string;
+}
+
+export async function getAdminPages(): Promise<AdminPage[]> {
+  const snap = await getDocs(
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("type", "==", "page"),
+      where("deletedAt", "==", null)
+    )
+  );
+  return snap.docs.map((d) => {
+    const data = d.data();
+    const ts = data.updatedAt;
+    return {
+      id: d.id,
+      slug: data.slug ?? "",
+      title: data.title ?? "",
+      bodyMarkdown: data.bodyMarkdown ?? "",
+      status: (data.status as AdminPage["status"]) ?? "draft",
+      updatedAt: ts?.toDate ? ts.toDate().toISOString() : "",
+    };
+  });
+}
+
+export async function upsertAdminPage(
+  slug: string,
+  title: string,
+  bodyMarkdown: string,
+  status: AdminPage["status"]
+): Promise<void> {
+  const uid = auth.currentUser?.uid ?? null;
+  const snap = await getDocs(
+    query(collection(db, COLLECTIONS.CONTENT_ITEMS), where("slug", "==", slug), where("type", "==", "page"))
+  );
+  if (!snap.empty) {
+    await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, snap.docs[0].id), {
+      title,
+      bodyMarkdown,
+      status,
+      updatedBy: uid,
+      updatedAt: serverTimestamp(),
+      ...(status === "published" ? { publishedAt: serverTimestamp() } : {}),
+    });
+  } else {
+    await addDoc(collection(db, COLLECTIONS.CONTENT_ITEMS), {
+      type: "page",
+      slug,
+      title,
+      bodyMarkdown,
+      bodyHtml: null,
+      status,
+      excerpt: null,
+      featured: false,
+      sortOrder: null,
+      categoryRef: null,
+      categoryId: null,
+      tagRefs: [],
+      tagIds: [],
+      ogImageAssetRef: null,
+      coverAssetRef: null,
+      coverImageUrl: null,
+      attachmentAssetRefs: [],
+      seoTitle: null,
+      seoDescription: null,
+      canonicalUrl: null,
+      authorName: null,
+      pages: null,
+      format: null,
+      pageData: null,
+      publishedAt: status === "published" ? serverTimestamp() : null,
+      createdBy: uid,
+      updatedBy: uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      archivedAt: null,
+      deletedAt: null,
+    });
+  }
+}
+
+// ── Site settings ─────────────────────────────────────────────────────────────
+
+export interface SiteSettings {
+  siteName: string;
+  tagline: string;
+  contactEmail: string;
+  contactPhone: string;
+  address: string;
+  socialFacebook: string;
+  socialTwitter: string;
+  socialInstagram: string;
+  socialLinkedin: string;
+  socialYoutube: string;
+  metaDescription: string;
+}
+
+export async function getSiteSettings(): Promise<Partial<SiteSettings>> {
+  const snap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.SITE_SETTINGS));
+  if (!snap.exists()) return {};
+  const data = snap.data();
+  return {
+    siteName: data.siteName ?? "",
+    tagline: data.tagline ?? "",
+    contactEmail: data.contactEmail ?? "",
+    contactPhone: data.contactPhone ?? "",
+    address: data.address ?? "",
+    socialFacebook: data.socialFacebook ?? "",
+    socialTwitter: data.socialTwitter ?? "",
+    socialInstagram: data.socialInstagram ?? "",
+    socialLinkedin: data.socialLinkedin ?? "",
+    socialYoutube: data.socialYoutube ?? "",
+    metaDescription: data.metaDescription ?? "",
+  };
+}
+
+export async function updateSiteSettings(
+  data: Partial<SiteSettings>
+): Promise<void> {
+  const uid = auth.currentUser?.uid ?? null;
+  await setDoc(
+    doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.SITE_SETTINGS),
+    { ...data, updatedBy: uid, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
 }
 
 // ── Contact messages ──────────────────────────────────────────────────────────

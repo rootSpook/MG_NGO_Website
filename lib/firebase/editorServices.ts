@@ -19,6 +19,10 @@ import type {
   MediaItem,
   AnnouncementItem,
   NotificationItem,
+  CampaignItem,
+  CategoryItem,
+  TagItem,
+  StaffMember,
 } from "@/types/editorPanel";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -390,4 +394,227 @@ export async function getEditorNotifications(): Promise<NotificationItem[]> {
 
 export async function markNotificationRead(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.NOTIFICATIONS, id), { isRead: true });
+}
+
+// ── Campaigns ─────────────────────────────────────────────────────────────────
+
+export async function getEditorCampaigns(): Promise<CampaignItem[]> {
+  const q = query(
+    collection(db, COLLECTIONS.CAMPAIGNS),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      title: data.title ?? "",
+      description: data.description ?? "",
+      goalAmount: data.goalAmount ?? 0,
+      currency: data.currency ?? "TRY",
+      raisedAmount: data.raisedAmount ?? 0,
+      status: (data.status as CampaignItem["status"]) ?? "draft",
+      startDate: tsToDateString(data.startDate),
+      endDate: tsToDateString(data.endDate),
+      coverImageUrl: data.coverImageUrl ?? "",
+      featured: data.featured ?? false,
+    };
+  });
+}
+
+export async function createEditorCampaign(
+  campaign: Omit<CampaignItem, "id">
+): Promise<string> {
+  const userId = uid();
+  const ref = await addDoc(collection(db, COLLECTIONS.CAMPAIGNS), {
+    title: campaign.title,
+    slug: slugify(campaign.title),
+    description: campaign.description,
+    goalAmount: campaign.goalAmount,
+    currency: campaign.currency,
+    raisedAmount: 0,
+    status: campaign.status,
+    startDate: campaign.startDate
+      ? Timestamp.fromDate(new Date(campaign.startDate))
+      : null,
+    endDate: campaign.endDate
+      ? Timestamp.fromDate(new Date(campaign.endDate))
+      : null,
+    coverImageUrl: campaign.coverImageUrl,
+    featured: campaign.featured,
+    createdBy: userId,
+    updatedBy: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    deletedAt: null,
+  });
+  return ref.id;
+}
+
+export async function updateEditorCampaign(
+  id: string,
+  data: Partial<CampaignItem>
+): Promise<void> {
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
+  if (data.title !== undefined) {
+    update.title = data.title;
+    update.slug = slugify(data.title);
+  }
+  if (data.description !== undefined) update.description = data.description;
+  if (data.goalAmount !== undefined) update.goalAmount = data.goalAmount;
+  if (data.currency !== undefined) update.currency = data.currency;
+  if (data.status !== undefined) update.status = data.status;
+  if (data.startDate !== undefined)
+    update.startDate = data.startDate
+      ? Timestamp.fromDate(new Date(data.startDate))
+      : null;
+  if (data.endDate !== undefined)
+    update.endDate = data.endDate
+      ? Timestamp.fromDate(new Date(data.endDate))
+      : null;
+  if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl;
+  if (data.featured !== undefined) update.featured = data.featured;
+  await updateDoc(doc(db, COLLECTIONS.CAMPAIGNS, id), update);
+}
+
+export async function deleteEditorCampaign(id: string): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.CAMPAIGNS, id), {
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// ── Categories ────────────────────────────────────────────────────────────────
+
+export async function getEditorCategories(type?: string): Promise<CategoryItem[]> {
+  const q = type
+    ? query(
+        collection(db, COLLECTIONS.CATEGORIES),
+        where("type", "==", type),
+        orderBy("sortOrder", "asc")
+      )
+    : query(collection(db, COLLECTIONS.CATEGORIES), orderBy("sortOrder", "asc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      name: data.name ?? "",
+      slug: data.slug ?? "",
+      type: data.type ?? "",
+      sortOrder: data.sortOrder ?? 0,
+    };
+  });
+}
+
+export async function createEditorCategory(
+  category: Omit<CategoryItem, "id">
+): Promise<string> {
+  const userId = uid();
+  const ref = await addDoc(collection(db, COLLECTIONS.CATEGORIES), {
+    name: category.name,
+    slug: category.slug || slugify(category.name),
+    type: category.type,
+    sortOrder: category.sortOrder,
+    createdBy: userId,
+    updatedBy: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function updateEditorCategory(
+  id: string,
+  data: Partial<Omit<CategoryItem, "id">>
+): Promise<void> {
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
+  if (data.name !== undefined) update.name = data.name;
+  if (data.slug !== undefined) update.slug = data.slug;
+  if (data.type !== undefined) update.type = data.type;
+  if (data.sortOrder !== undefined) update.sortOrder = data.sortOrder;
+  await updateDoc(doc(db, COLLECTIONS.CATEGORIES, id), update);
+}
+
+export async function deleteEditorCategory(id: string): Promise<void> {
+  const { deleteDoc } = await import("firebase/firestore");
+  await deleteDoc(doc(db, COLLECTIONS.CATEGORIES, id));
+}
+
+// ── Tags ──────────────────────────────────────────────────────────────────────
+
+export async function getEditorTags(type?: string): Promise<TagItem[]> {
+  const q = type
+    ? query(collection(db, COLLECTIONS.TAGS), where("type", "==", type))
+    : query(collection(db, COLLECTIONS.TAGS));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      name: data.name ?? "",
+      slug: data.slug ?? "",
+      type: data.type ?? "",
+    };
+  });
+}
+
+export async function createEditorTag(tag: Omit<TagItem, "id">): Promise<string> {
+  const userId = uid();
+  const ref = await addDoc(collection(db, COLLECTIONS.TAGS), {
+    name: tag.name,
+    slug: tag.slug || slugify(tag.name),
+    type: tag.type,
+    createdBy: userId,
+    updatedBy: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function updateEditorTag(
+  id: string,
+  data: Partial<Omit<TagItem, "id">>
+): Promise<void> {
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
+  if (data.name !== undefined) update.name = data.name;
+  if (data.slug !== undefined) update.slug = data.slug;
+  if (data.type !== undefined) update.type = data.type;
+  await updateDoc(doc(db, COLLECTIONS.TAGS, id), update);
+}
+
+export async function deleteEditorTag(id: string): Promise<void> {
+  const { deleteDoc } = await import("firebase/firestore");
+  await deleteDoc(doc(db, COLLECTIONS.TAGS, id));
+}
+
+// ── Staff Members ─────────────────────────────────────────────────────────────
+
+export async function getStaffMembers(): Promise<StaffMember[]> {
+  const snap = await getDocs(collection(db, COLLECTIONS.STAFF));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      displayName: data.displayName ?? "",
+      email: data.email ?? "",
+      role: (data.role as StaffMember["role"]) ?? "editor",
+      photoUrl: data.photoUrl ?? "",
+      isActive: data.isActive ?? true,
+      createdAt: tsToISOString(data.createdAt),
+    };
+  });
+}
+
+export async function updateStaffMember(
+  id: string,
+  data: Partial<Omit<StaffMember, "id" | "createdAt">>
+): Promise<void> {
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
+  if (data.displayName !== undefined) update.displayName = data.displayName;
+  if (data.role !== undefined) update.role = data.role;
+  if (data.photoUrl !== undefined) update.photoUrl = data.photoUrl;
+  if (data.isActive !== undefined) update.isActive = data.isActive;
+  await updateDoc(doc(db, COLLECTIONS.STAFF, id), update);
 }
