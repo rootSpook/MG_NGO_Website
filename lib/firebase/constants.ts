@@ -16,6 +16,10 @@ export const COLLECTIONS = {
   AUDIT_LOGS: "auditLogs",
   ANNOUNCEMENTS: "announcements",
   NOTIFICATIONS: "notifications",
+  VOLUNTEER_APPLICATIONS: "volunteerApplications",
+  BOARD_MEMBERS: "boardMembers",
+  SUPPORTERS: "supporters",
+  IBAN_ENTRIES: "ibanEntries",
 } as const;
 
 // Sub-collection names

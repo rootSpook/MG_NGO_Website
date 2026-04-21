@@ -4,7 +4,6 @@ import {
   getDocs,
   addDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   orderBy,
@@ -236,7 +235,10 @@ export async function updateEditorEvent(id: string, data: Partial<EventItem>): P
 }
 
 export async function deleteEditorEvent(id: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTIONS.EVENTS, id));
+  await updateDoc(doc(db, COLLECTIONS.EVENTS, id), {
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 // ── Media Assets ───────────────────────────────────────────────��──────────────
@@ -357,7 +359,10 @@ export async function updateEditorAnnouncement(
 }
 
 export async function deleteEditorAnnouncement(id: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id));
+  await updateDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id), {
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 // ── Notifications ─────────────────────────────────────────────────────────────

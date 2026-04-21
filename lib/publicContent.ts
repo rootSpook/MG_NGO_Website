@@ -10,6 +10,7 @@ import {
   getActiveCampaigns,
   getPublicMediaAssets,
   getSiteSettings,
+  getPublishedEvents,
 } from "@/lib/firebase/services";
 import {
   seedBlogPosts,
@@ -17,6 +18,7 @@ import {
   seedMediaAssets,
   seedReports,
   seedSettings,
+  seedEvents,
 } from "@/lib/firebase/seedData";
 
 // ── Types (kept here so existing imports don't break) ─────────────────────────
@@ -26,6 +28,7 @@ export interface PublicBlogPost {
   slug: string;
   title: string;
   excerpt: string;
+  author: string;
   publishedAt: string;
   coverImage: string;
   content: string[];
@@ -173,6 +176,7 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
         slug: item.slug,
         title: item.title,
         excerpt: item.excerpt ?? "",
+        author: item.authorName ?? "",
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
@@ -190,6 +194,7 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
       slug: b.slug,
       title: b.title,
       excerpt: b.excerpt,
+      author: b.authorName ?? "",
       publishedAt: b.publishedAt ?? new Date().toISOString().split("T")[0],
       coverImage: b.coverImageUrl ?? FALLBACK_COVER,
       content: b.bodyMarkdown ? b.bodyMarkdown.split("\n\n") : [],
@@ -207,6 +212,7 @@ export async function getBlogBySlug(
         slug: item.slug,
         title: item.title,
         excerpt: item.excerpt ?? "",
+        author: item.authorName ?? "",
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
@@ -224,9 +230,115 @@ export async function getBlogBySlug(
     slug: found.slug,
     title: found.title,
     excerpt: found.excerpt,
+    author: found.authorName ?? "",
     publishedAt: found.publishedAt ?? new Date().toISOString().split("T")[0],
     coverImage: found.coverImageUrl ?? FALLBACK_COVER,
     content: found.bodyMarkdown ? found.bodyMarkdown.split("\n\n") : [],
+  };
+}
+
+// ── Public events ─────────────────────────────────────────────────────────────
+
+export interface PublicEvent {
+  id: string;
+  slug: string;
+  title: string;
+  startsAt: string;
+  endsAt: string | null;
+  isOnline: boolean;
+  onlineUrl: string | null;
+  locationName: string;
+  city: string;
+  venue: string;
+  eventType: string;
+  capacity: number;
+}
+
+export async function getPublicEvents(): Promise<PublicEvent[]> {
+  try {
+    const items = await getPublishedEvents();
+    if (items.length > 0) {
+      return items.map((e) => ({
+        id: e.id,
+        slug: e.slug,
+        title: e.title,
+        startsAt: firestoreTimestampToISO(e.startsAt),
+        endsAt: e.endsAt ? firestoreTimestampToISO(e.endsAt) : null,
+        isOnline: e.isOnline,
+        onlineUrl: e.onlineUrl ?? null,
+        locationName: e.locationName ?? "",
+        city: (e as unknown as Record<string, string>).city ?? "",
+        venue: (e as unknown as Record<string, string>).venue ?? "",
+        eventType: (e as unknown as Record<string, string>).eventType ?? "",
+        capacity: e.capacity ?? 0,
+      }));
+    }
+  } catch (err) {
+    console.error("[publicContent] getPublicEvents Firestore error:", err);
+  }
+
+  return seedEvents
+    .filter((e) => e.status === "published")
+    .map((e) => ({
+      id: e.id,
+      slug: e.slug,
+      title: e.title,
+      startsAt: e.startsAt,
+      endsAt: e.endsAt,
+      isOnline: e.isOnline,
+      onlineUrl: e.onlineUrl,
+      locationName: e.locationName,
+      city: e.city,
+      venue: e.venue,
+      eventType: e.eventType,
+      capacity: e.capacity,
+    }));
+}
+
+// ── MG information pages ──────────────────────────────────────────────────────
+
+export interface MGSection {
+  slug: string;
+  title: string;
+  description: string;
+}
+
+export const MG_SECTIONS: MGSection[] = [
+  { slug: "mg-nedir", title: "MG Nedir?", description: "Myasthenia Gravis hastalığı hakkında temel bilgiler." },
+  { slug: "mg-tipleri", title: "MG Tipleri", description: "Hastalığın farklı klinik formları ve sınıflandırması." },
+  { slug: "belirtiler", title: "Belirtiler", description: "MG'nin yaygın ve nadir görülen belirti ve semptomları." },
+  { slug: "tedavi", title: "Tedavi", description: "İlaç tedavileri, plazmaferez ve diğer tedavi seçenekleri." },
+  { slug: "riskli-ilaclar", title: "Riskli İlaçlar", description: "MG hastalarında kullanımı sakıncalı olan ilaçların listesi." },
+  { slug: "timektomi", title: "Timektomi", description: "Timus bezi ameliyatı ve MG tedavisindeki rolü." },
+  { slug: "mg-ile-yasam", title: "MG ile Yaşam", description: "Günlük hayatı kolaylaştıracak pratik öneriler ve destek kaynakları." },
+];
+
+export interface MGPageContent {
+  slug: string;
+  title: string;
+  body: string;
+}
+
+export async function getMGPageContent(slug: string): Promise<MGPageContent | null> {
+  try {
+    const item = await getContentBySlug(slug);
+    if (item && item.type === "page") {
+      return {
+        slug: item.slug,
+        title: item.title,
+        body: item.bodyMarkdown ?? "",
+      };
+    }
+  } catch (err) {
+    console.error("[publicContent] getMGPageContent Firestore error:", err);
+  }
+
+  const section = MG_SECTIONS.find((s) => s.slug === slug);
+  if (!section) return null;
+  return {
+    slug: section.slug,
+    title: section.title,
+    body: section.description,
   };
 }
 

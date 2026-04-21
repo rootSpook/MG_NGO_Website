@@ -125,6 +125,36 @@ export interface ContactMessageInput {
   messageBody: string;
 }
 
+// ── Volunteer applications ────────────────────────────────────────────────────
+
+export interface VolunteerApplicationInput {
+  fullName: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  motivation: string;
+}
+
+export async function submitVolunteerApplication(
+  data: VolunteerApplicationInput
+): Promise<string> {
+  const ref = await addDoc(
+    collection(db, COLLECTIONS.VOLUNTEER_APPLICATIONS),
+    {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone ?? null,
+      city: data.city ?? null,
+      motivation: data.motivation,
+      status: "new",
+      createdAt: serverTimestamp(),
+    }
+  );
+  return ref.id;
+}
+
+// ── Contact messages ──────────────────────────────────────────────────────────
+
 export async function submitContactMessage(
   data: ContactMessageInput
 ): Promise<string> {

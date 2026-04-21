@@ -8,7 +8,9 @@ import { useState } from "react"
 const navLinks = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/about", label: "Hakkımızda" },
+  { href: "/mg", label: "MG Hakkında" },
   { href: "/blogs", label: "Bloglar" },
+  { href: "/events", label: "Etkinlikler" },
   { href: "/reports", label: "Raporlar" },
   { href: "/media", label: "Medya" },
   { href: "/contacts", label: "İletişim" },
