@@ -10,7 +10,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./config";
-import { COLLECTIONS, CONTENT_STATUS, EVENT_STATUS, CONTACT_STATUS } from "./constants";
+import { COLLECTIONS, CONTENT_STATUS, EVENT_STATUS, CONTACT_STATUS, CAMPAIGN_STATUS } from "./constants";
 import type {
   SiteSettings,
   ContentItem,
@@ -18,6 +18,8 @@ import type {
   Category,
   Tag,
   ContactMessage,
+  MediaAsset,
+  Campaign,
 } from "./types";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -57,6 +59,7 @@ export async function getContentBySlug(
   const q = query(
     collection(db, COLLECTIONS.CONTENT_ITEMS),
     where("slug", "==", slug),
+    where("status", "==", CONTENT_STATUS.PUBLISHED),
     where("deletedAt", "==", null)
   );
   const snap = await getDocs(q);
@@ -88,6 +91,30 @@ export async function getTags(): Promise<(Tag & { id: string })[]> {
   return snap.docs.map((d) => fromDoc<Tag>(d));
 }
 
+// ── Media assets ──────────────────────────────────────────────────────────────
+
+export async function getPublicMediaAssets(): Promise<(MediaAsset & { id: string })[]> {
+  const q = query(
+    collection(db, COLLECTIONS.MEDIA_ASSETS),
+    where("visibility", "==", "public"),
+    where("deletedAt", "==", null),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => fromDoc<MediaAsset>(d));
+}
+
+// ── Campaigns ─────────────────────────────────────────────────────────────────
+
+export async function getActiveCampaigns(): Promise<(Campaign & { id: string })[]> {
+  const q = query(
+    collection(db, COLLECTIONS.CAMPAIGNS),
+    where("status", "==", CAMPAIGN_STATUS.ACTIVE)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => fromDoc<Campaign>(d));
+}
+
 // ── Contact messages ──────────────────────────────────────────────────────────
 
 export interface ContactMessageInput {
@@ -97,6 +124,36 @@ export interface ContactMessageInput {
   subject: string;
   messageBody: string;
 }
+
+// ── Volunteer applications ────────────────────────────────────────────────────
+
+export interface VolunteerApplicationInput {
+  fullName: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  motivation: string;
+}
+
+export async function submitVolunteerApplication(
+  data: VolunteerApplicationInput
+): Promise<string> {
+  const ref = await addDoc(
+    collection(db, COLLECTIONS.VOLUNTEER_APPLICATIONS),
+    {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone ?? null,
+      city: data.city ?? null,
+      motivation: data.motivation,
+      status: "new",
+      createdAt: serverTimestamp(),
+    }
+  );
+  return ref.id;
+}
+
+// ── Contact messages ──────────────────────────────────────────────────────────
 
 export async function submitContactMessage(
   data: ContactMessageInput

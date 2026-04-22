@@ -70,3 +70,44 @@ export interface AnnouncementItem {
   status: AnnouncementStatus;
   pinned: boolean;
 }
+
+export type CampaignStatus = "draft" | "active" | "paused" | "completed" | "archived";
+
+export interface CampaignItem {
+  id: string;
+  title: string;
+  description: string;
+  goalAmount: number;
+  currency: string;
+  raisedAmount: number;
+  status: CampaignStatus;
+  startDate: string;
+  endDate: string;
+  coverImageUrl: string;
+  featured: boolean;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  sortOrder: number;
+}
+
+export interface TagItem {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+}
+
+export interface StaffMember {
+  id: string;
+  displayName: string;
+  email: string;
+  role: "admin" | "editor";
+  photoUrl: string;
+  isActive: boolean;
+  createdAt: string;
+}

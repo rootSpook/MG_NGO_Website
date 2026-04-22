@@ -10,3 +10,11 @@ node_modules/
 .env*.local
 .DS_Store
 serviceAccountKey.json
+notes.md
+CLAUDE.md
+.firebaserc
+.claude/
+.firebase/
+.vscode/
+docs/FIREBASE_SYNC_PLAN.md
+docs/PROGRESS.md

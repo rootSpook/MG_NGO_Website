@@ -59,6 +59,22 @@ export default async function BlogsPage() {
                         {blog.title}
                       </h2>
                     </Link>
+                    {blog.excerpt && (
+                      <p className="mt-3 text-sm leading-relaxed text-gray-600 md:text-base">
+                        {blog.excerpt}
+                      </p>
+                    )}
+                    <div className="mt-4 flex items-center gap-4">
+                      {blog.author && (
+                        <span className="text-sm text-gray-500">{blog.author}</span>
+                      )}
+                      <Link
+                        href={`/blogs/${blog.slug}`}
+                        className="text-sm font-medium text-teal-600 hover:underline"
+                      >
+                        Devamını oku →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </article>

@@ -1,3 +1,13 @@
+/**
+ * Public page content functions — read live data from Firestore.
+ * Falls back to seed data if Firestore returns nothing.
+ */
+
+import { getSiteSettings, getContentBySlug } from "@/lib/firebase/services";
+import { seedPages, seedSettings } from "@/lib/firebase/seedData";
+
+// ── Types (kept for existing imports) ─────────────────────────────────────────
+
 export interface HomePageData {
   hero: {
     title: string;
@@ -41,104 +51,60 @@ export interface ContactPageData {
   }>;
 }
 
-export const homePageTemplate: HomePageData = {
-  hero: {
-    title: "Myasthenia Gravis Farkındalık Ayı",
-    description:
-      "Myasthenia Gravis ile yasayan milyonlarca insan icin farkindalik olusturma zamani. Dogru bilgiyi yaymayi ve dayanismayi guclendirmeyi hedefliyoruz.",
-    ctaLabel: "Daha Fazla Bilgi",
-    ctaHref: "/about",
-  },
-  about: {
-    title: "Myasthenia Gravis Yasam Dernegi Nedir?",
-    description:
-      "MG hastalari ve yakinlarina yonelik farkindalik olusturmak, dogru bilgi saglamak ve destekleyici bir topluluk olusturmak amaciyla calisiyoruz.",
-    ctaLabel: "Daha Fazla Bilgi",
-    ctaHref: "/about",
-  },
-  quickLinks: [
-    {
-      title: "Raporlar ve Yayınlar",
-      description:
-        "Araştırma raporları, tıbbi kılavuzlar ve indirilebilir kaynaklara ulaşın.",
-      href: "/reports",
-    },
-    {
-      title: "Medya ve Haberler",
-      description:
-        "Güncel haberleri, etkinlikleri ve topluluk hikayelerini takip edin.",
-      href: "/media",
-    },
-    {
-      title: "Amacımıza Destek Olun",
-      description:
-        "Bağışlarınız MG topluluğuna yönelik çalışmalarımızı sürdürmemizi sağlar.",
-      href: "/donate",
-    },
-  ],
-};
+// ── Fallbacks from seed data ──────────────────────────────────────────────────
 
-export const aboutPageTemplate: AboutPageData = {
-  title: "Hakkımızda",
-  intro:
-    "Dernegimiz, MG ile yasayan bireylerin ve yakinlarinin yasam kalitesini artirmak, dogru bilgiye erisim saglamak ve guclu bir topluluk olusturmak icin calisir.",
-  vision: [
-    "Hasta ve yakinlarinin her yerde guvenilir bilgiye erisebildigi bir topluluk olusturmak.",
-    "Farkindalik ve erken tani bilincini toplum genelinde guclendirmek.",
-  ],
-  mission: [
-    "Egitim, farkindalik ve destek programlari duzenlemek.",
-    "Hastalar, yakinlar ve uzmanlar arasinda kopru kurmak.",
-    "Kaynaklara erisimi kolaylastiracak topluluk aglari olusturmak.",
-  ],
-  team: [
-    {
-      name: "Person1",
-      description:
-        "Topluluk iletisimini ve hasta destek programlarini koordine eder.",
-    },
-    {
-      name: "Person2",
-      description:
-        "Farkindalik kampanyalari ve gonullu sureclerinin yonetimini destekler.",
-    },
-  ],
-};
+const homeSeed = seedPages.find((p) => p.slug === "anasayfa")!;
+const aboutSeed = seedPages.find((p) => p.slug === "hakkimizda")!;
+const contactSeed = seedPages.find((p) => p.slug === "iletisim")!;
 
-export const contactPageTemplate: ContactPageData = {
-  title: "İletişim",
-  intro:
-    "Sorulariniz, gonulluluk talepleriniz veya is birligi onerileriniz icin bizimle iletisime gecin.",
-  email: "info@MG.org.tr",
-  phone: "+90 000000000",
-  location: "Orta Mahalle, Universite Caddesi No:27 Tuzla, 34956 Istanbul",
-  faq: [
-    {
-      question: "MG topluluğunu nasıl destekleyebilirim?",
-      answer:
-        "Bağış yapabilir, gönüllü olabilir, etkinliklere katılabilir veya farkındalık çalışmalarına destek verebilirsiniz.",
-    },
-    {
-      question: "Nasıl gönüllü olabilirim?",
-      answer:
-        "Web sitemizdeki gönüllü formunu doldurarak ya da doğrudan bizimle iletişime geçerek sürece katılabilirsiniz.",
-    },
-    {
-      question: "Topluluk etkinliklerine nasıl katılabilirim?",
-      answer:
-        "Etkinlik takvimimizi takip ederek duyurulan kayıt adımlarıyla katılım sağlayabilirsiniz.",
-    },
-  ],
-};
+export const homePageTemplate = homeSeed.pageData as unknown as HomePageData;
+export const aboutPageTemplate = aboutSeed.pageData as unknown as AboutPageData;
+export const contactPageTemplate = {
+  ...(contactSeed.pageData as unknown as Omit<ContactPageData, "email" | "phone" | "location">),
+  email: seedSettings.contactEmail ?? "",
+  phone: seedSettings.contactPhone ?? "",
+  location: seedSettings.addressText ?? "",
+} satisfies ContactPageData;
+
+// ── Live Firestore functions ───────────────────────────────────────────────────
 
 export async function getHomePageData(): Promise<HomePageData> {
-  return Promise.resolve(homePageTemplate);
+  try {
+    const item = await getContentBySlug("anasayfa");
+    if (item?.pageData) return item.pageData as unknown as HomePageData;
+  } catch (err) {
+    console.error("[publicPagesContent] getHomePageData error:", err);
+  }
+  return homePageTemplate;
 }
 
 export async function getAboutPageData(): Promise<AboutPageData> {
-  return Promise.resolve(aboutPageTemplate);
+  try {
+    const item = await getContentBySlug("hakkimizda");
+    if (item?.pageData) return item.pageData as unknown as AboutPageData;
+  } catch (err) {
+    console.error("[publicPagesContent] getAboutPageData error:", err);
+  }
+  return aboutPageTemplate;
 }
 
 export async function getContactPageData(): Promise<ContactPageData> {
-  return Promise.resolve(contactPageTemplate);
+  try {
+    const [item, settings] = await Promise.all([
+      getContentBySlug("iletisim"),
+      getSiteSettings(),
+    ]);
+    const pageData = item?.pageData as unknown as Partial<ContactPageData> | undefined;
+    return {
+      title: pageData?.title ?? contactPageTemplate.title,
+      intro: pageData?.intro ?? contactPageTemplate.intro,
+      faq: pageData?.faq ?? contactPageTemplate.faq,
+      email: settings?.contactEmail ?? contactPageTemplate.email,
+      phone: settings?.contactPhone ?? contactPageTemplate.phone,
+      location: settings?.addressText ?? contactPageTemplate.location,
+    };
+  } catch (err) {
+    console.error("[publicPagesContent] getContactPageData error:", err);
+  }
+  return contactPageTemplate;
 }

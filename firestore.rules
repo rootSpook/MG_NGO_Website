@@ -136,11 +136,18 @@ service cloud.firestore {
 
     match /contactMessages/{messageId} {
       allow create: if
-        // Public submission — only allow the declared public fields
+        // Public submission — allow all fields the client sends, but lock down
+        // workflow/audit fields so the submitter cannot manipulate them.
         request.resource.data.keys().hasOnly([
           "senderName", "senderEmail", "senderPhone",
-          "subject", "messageBody"
-        ]);
+          "subject", "messageBody",
+          "status", "handledBy", "handledAt", "internalNotes",
+          "ipAddress", "userAgent", "createdAt", "updatedAt", "deletedAt"
+        ]) &&
+        request.resource.data.status == "new" &&
+        request.resource.data.handledBy == null &&
+        request.resource.data.handledAt == null &&
+        request.resource.data.deletedAt == null;
 
       allow read: if isAdminOrEditor();
 
@@ -224,6 +231,51 @@ service cloud.firestore {
       allow read: if resource.data.status == "published" || isAdminOrEditor();
       allow create, update: if isAdminOrEditor();
       allow delete: if isAdminOrEditor();
+    }
+
+    // ── ibanEntries ───────────────────────────────────────────────────────────
+    // Admin-only read and write (financial data).
+
+    match /ibanEntries/{entryId} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── boardMembers ──────────────────────────────────────────────────────────
+    // Public read. Only admin may write.
+
+    match /boardMembers/{memberId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── supporters ────────────────────────────────────────────────────────────
+    // Public read. Only admin may write.
+
+    match /supporters/{supporterId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── volunteerApplications ─────────────────────────────────────────────────
+    // Public: create only — validated fields.
+    // Admin and editor: read. Only admin may update or delete.
+
+    match /volunteerApplications/{applicationId} {
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          "fullName", "email", "phone", "city", "motivation",
+          "status", "createdAt"
+        ]) &&
+        request.resource.data.status == "new";
+
+      allow read: if isAdminOrEditor();
+
+      allow update,
+            delete: if isAdmin();
     }
 
     // ── notifications ─────────────────────────────────────────────────────────
