@@ -13,8 +13,11 @@ import {
   ScrollText,
   BarChart2,
   CreditCard,
+  Navigation,
+  AlertTriangle,
 } from "lucide-react";
 import { getAdminDashboardStats, AdminDashboardStats } from "@/lib/firebase/adminServices";
+import { useAuth } from "@/lib/firebase/AuthContext";
 
 const statCards = (s: AdminDashboardStats) => [
   {
@@ -56,6 +59,7 @@ const statCards = (s: AdminDashboardStats) => [
 
 const quickLinks = [
   { label: "Ana Sayfa İçeriği", href: "/admin/homepage", icon: Home, color: "bg-teal-50 hover:bg-teal-100 text-teal-700" },
+  { label: "Menü Yönetimi", href: "/admin/menu", icon: Navigation, color: "bg-violet-50 hover:bg-violet-100 text-violet-700" },
   { label: "Yönetim Kurulu", href: "/admin/board-members", icon: Users, color: "bg-blue-50 hover:bg-blue-100 text-blue-700" },
   { label: "Destekçiler", href: "/admin/supporters", icon: Users, color: "bg-green-50 hover:bg-green-100 text-green-700" },
   { label: "İletişim Mesajları", href: "/admin/contacts", icon: Mail, color: "bg-red-50 hover:bg-red-100 text-red-700" },
@@ -66,13 +70,26 @@ const quickLinks = [
 ];
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [permissionError, setPermissionError] = useState(false);
 
   useEffect(() => {
     getAdminDashboardStats()
-      .then(setStats)
-      .catch(console.error)
+      .then((data) => {
+        setStats(data);
+        setPermissionError(false);
+      })
+      .catch((err: unknown) => {
+        const code = (err as { code?: string })?.code;
+        if (code === "permission-denied") {
+          setPermissionError(true);
+        } else {
+          // Use warn so Turbopack dev overlay is not triggered
+          console.warn("[Admin] Dashboard stats unavailable:", (err as Error)?.message);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -82,6 +99,49 @@ export default function AdminDashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Site içeriklerine genel bakış</p>
       </div>
+
+      {/* Firestore permissions error — shown when cloud rules deny access */}
+      {permissionError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-red-500 mt-0.5" />
+            <div className="space-y-2 text-sm">
+              <p className="font-semibold text-red-800">
+                Firestore erişim hatası — Eksik izinler
+              </p>
+              <p className="text-red-700">
+                Giriş yapılan hesap ({user?.email}) için Firestore&apos;da
+                gerekli yetki belgesi bulunamadı veya kurallar henüz yayınlanmadı.
+              </p>
+              <p className="font-medium text-red-800 mt-2">Çözüm adımları:</p>
+              <ol className="list-decimal list-inside space-y-1 text-red-700">
+                <li>
+                  <strong>Firebase Console → Firestore Database</strong> bölümüne gidin.
+                </li>
+                <li>
+                  <code className="rounded bg-red-100 px-1 font-mono">staff</code>{" "}
+                  koleksiyonunda giriş yaptığınız Firebase Auth UID&apos;iniz ile
+                  bir belge oluşturun.
+                </li>
+                <li>
+                  Belgeye{" "}
+                  <code className="rounded bg-red-100 px-1 font-mono">role: &quot;admin&quot;</code>{" "}
+                  alanı ekleyin.
+                </li>
+                <li>
+                  Firestore güvenlik kurallarını dağıtın:{" "}
+                  <code className="rounded bg-red-100 px-1 font-mono">
+                    firebase deploy --only firestore:rules
+                  </code>
+                </li>
+              </ol>
+              <p className="text-xs text-red-500 mt-1">
+                Auth UID: <code className="font-mono">{user?.uid}</code>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

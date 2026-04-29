@@ -1,7 +1,8 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { getDonationPageData } from "@/lib/publicContent";
+import { getDonationPageData, getDonationIbanEntries } from "@/lib/publicContent";
 import { HeartHandshake, Pill, ScanSearch } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 export const metadata = {
   title: "Bagis Yap | Myasthenia Gravis Yasam Dernegi",
@@ -18,7 +19,10 @@ function formatCurrency(value: number) {
 }
 
 export default async function DonatePage() {
-  const donateData = await getDonationPageData();
+  const [donateData, ibanEntries] = await Promise.all([
+    getDonationPageData(),
+    getDonationIbanEntries(),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
@@ -33,27 +37,47 @@ export default async function DonatePage() {
               </h1>
               <p className="mt-5 max-w-2xl text-gray-700">{donateData.subtitle}</p>
 
-              <div className="mt-7 rounded-lg bg-white p-5 shadow-sm">
+              {/* IBAN entries from Firestore */}
+              <div className="mt-7 space-y-4">
                 <h2 className="text-lg font-semibold text-teal-700">Banka Havalesi ile Bagis</h2>
-                <p className="mt-3 text-sm text-gray-700">
+                <p className="text-sm text-gray-700">
                   Bagislariniz dernek faaliyetleri, hasta destek programlari ve farkindalik
                   calismalari icin kullanilir.
                 </p>
 
-                <div className="mt-4 space-y-1 text-sm text-gray-700">
-                  <p>
-                    <span className="font-semibold">Banka:</span> {donateData.bankName}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Hesap Adi:</span> {donateData.accountName}
-                  </p>
-                  <p>
-                    <span className="font-semibold">IBAN:</span> {donateData.iban}
-                  </p>
-                  <p>
-                    <span className="font-semibold">SWIFT:</span> {donateData.swiftCode}
-                  </p>
-                </div>
+                {ibanEntries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="rounded-lg bg-white p-5 shadow-sm border border-gray-100"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-base font-semibold text-teal-700">
+                        {entry.bankName}
+                      </span>
+                      <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-600">
+                        {entry.currency}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-sm text-gray-700">
+                      <p>
+                        <span className="font-semibold">Hesap Sahibi:</span> {entry.accountHolder}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <p>
+                          <span className="font-semibold">IBAN:</span>{" "}
+                          <span className="font-mono">{entry.iban}</span>
+                        </p>
+                        <CopyButton text={entry.iban} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {ibanEntries.length === 0 && (
+                  <div className="rounded-lg bg-white p-5 shadow-sm text-sm text-gray-500">
+                    Banka bilgisi henüz eklenmemiş.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -181,3 +205,4 @@ export default async function DonatePage() {
     </div>
   );
 }
+

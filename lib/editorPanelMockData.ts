@@ -15,6 +15,7 @@ import {
       status: "published",
       author: "Editor 1",
       summary: "MG alanındaki güncel tedavi yaklaşımlarını özetleyen bilgilendirici içerik.",
+      bodyMarkdown: "",
     },
     {
       id: "blog-2",
@@ -24,6 +25,7 @@ import {
       status: "published",
       author: "Editor 1",
       summary: "Yıllık bağış kampanyasında öne çıkan gelişmeler ve sonuçlar.",
+      bodyMarkdown: "",
     },
     {
       id: "blog-3",
@@ -33,6 +35,7 @@ import {
       status: "published",
       author: "Editor 1",
       summary: "İstanbul’da düzenlenen farkındalık etkinliğine dair kısa özet.",
+      bodyMarkdown: "",
     },
     {
       id: "blog-4",
@@ -42,6 +45,7 @@ import {
       status: "draft",
       author: "Editor 1",
       summary: "Yeni gönüllü programı için hazırlanan taslak gönderi.",
+      bodyMarkdown: "",
     },
     {
       id: "blog-5",
@@ -51,6 +55,7 @@ import {
       status: "draft",
       author: "Editor 1",
       summary: "Hasta ve yakınları için hazırlanan destek rehberi taslağı.",
+      bodyMarkdown: "",
     },
   ];
   

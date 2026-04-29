@@ -19,6 +19,8 @@ export interface BlogPost {
   status: BlogStatus;
   author: string;
   summary: string;
+  bodyMarkdown: string;
+  coverImageUrl?: string;
 }
 
 export type EventStatus = "planned" | "active" | "done" | "cancelled";

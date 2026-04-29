@@ -11,7 +11,13 @@ import {
   getPublicMediaAssets,
   getSiteSettings,
   getPublishedEvents,
+  getPublicIbanEntries,
+  getPublicSupporters,
+  type PublicIbanEntry,
+  type PublicSupporter,
 } from "@/lib/firebase/services";
+
+export type { PublicIbanEntry, PublicSupporter };
 import {
   seedBlogPosts,
   seedCampaigns,
@@ -31,6 +37,8 @@ export interface PublicBlogPost {
   author: string;
   publishedAt: string;
   coverImage: string;
+  bodyMarkdown: string;
+  /** @deprecated use bodyMarkdown – kept for backward compat */
   content: string[];
 }
 
@@ -179,6 +187,7 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
         author: item.authorName ?? "",
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
+        bodyMarkdown: item.bodyMarkdown ?? "",
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
       }));
     }
@@ -197,6 +206,7 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
       author: b.authorName ?? "",
       publishedAt: b.publishedAt ?? new Date().toISOString().split("T")[0],
       coverImage: b.coverImageUrl ?? FALLBACK_COVER,
+      bodyMarkdown: b.bodyMarkdown ?? "",
       content: b.bodyMarkdown ? b.bodyMarkdown.split("\n\n") : [],
     }));
 }
@@ -215,6 +225,7 @@ export async function getBlogBySlug(
         author: item.authorName ?? "",
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
+        bodyMarkdown: item.bodyMarkdown ?? "",
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
       };
     }
@@ -233,6 +244,7 @@ export async function getBlogBySlug(
     author: found.authorName ?? "",
     publishedAt: found.publishedAt ?? new Date().toISOString().split("T")[0],
     coverImage: found.coverImageUrl ?? FALLBACK_COVER,
+    bodyMarkdown: found.bodyMarkdown ?? "",
     content: found.bodyMarkdown ? found.bodyMarkdown.split("\n\n") : [],
   };
 }
@@ -342,6 +354,40 @@ export async function getMGPageContent(slug: string): Promise<MGPageContent | nu
   };
 }
 
+// ── Donation IBAN entries (from ibanEntries collection) ───────────────────────
+
+export async function getDonationIbanEntries(): Promise<PublicIbanEntry[]> {
+  try {
+    const entries = await getPublicIbanEntries();
+    if (entries.length > 0) return entries;
+  } catch (err) {
+    console.error("[publicContent] getDonationIbanEntries Firestore error:", err);
+  }
+  // Seed fallback: build a single entry from seed settings
+  return [
+    {
+      id: "seed",
+      bankName: seedSettings.bankName ?? "",
+      accountHolder: seedSettings.accountName ?? "",
+      iban: seedSettings.iban ?? "",
+      currency: "TRY",
+      sortOrder: 0,
+    },
+  ];
+}
+
+// ── Public supporters ─────────────────────────────────────────────────────────
+
+export async function getSupportersForPublic(): Promise<PublicSupporter[]> {
+  try {
+    const supporters = await getPublicSupporters();
+    if (supporters.length > 0) return supporters;
+  } catch (err) {
+    console.error("[publicContent] getSupportersForPublic Firestore error:", err);
+  }
+  return [];
+}
+
 // ── Donation page ─────────────────────────────────────────────────────────────
 
 export async function getDonationPageData(): Promise<DonationPageData> {
@@ -376,34 +422,30 @@ export async function getDonationPageData(): Promise<DonationPageData> {
     }));
   }
 
-  // Site settings supply bank details
-  let bankName = seedSettings.bankName;
-  let accountName = seedSettings.accountName;
-  let iban = seedSettings.iban;
-  let swiftCode = seedSettings.swiftCode;
+  // monthlyMessage from site settings with seed fallback
   let monthlyMessage = seedSettings.monthlyMessage;
-
   try {
     const settings = await getSiteSettings();
     if (settings) {
-      bankName = (settings as unknown as Record<string, string>).bankName ?? bankName;
-      accountName = (settings as unknown as Record<string, string>).accountName ?? accountName;
-      iban = (settings as unknown as Record<string, string>).iban ?? iban;
-      swiftCode = (settings as unknown as Record<string, string>).swiftCode ?? swiftCode;
-      monthlyMessage = (settings as unknown as Record<string, string>).monthlyMessage ?? monthlyMessage;
+      monthlyMessage =
+        (settings as unknown as Record<string, string>).monthlyMessage ?? monthlyMessage;
     }
   } catch {
-    // use seed defaults
+    // use seed default
   }
+
+  // Primary IBAN for the quick-display section (first entry or seed)
+  const ibanEntries = await getDonationIbanEntries();
+  const primary = ibanEntries[0];
 
   return {
     title: "Myasthenia Gravis Topluluğunu Destekleyin",
     subtitle:
       "Yapacaginiz bagislar; farkindalik calismalarina ve MG ile yasayan hastalara destek olmamiza yardimci olur.",
-    bankName,
-    accountName,
-    iban,
-    swiftCode,
+    bankName: primary?.bankName ?? seedSettings.bankName ?? "",
+    accountName: primary?.accountHolder ?? seedSettings.accountName ?? "",
+    iban: primary?.iban ?? seedSettings.iban ?? "",
+    swiftCode: seedSettings.swiftCode ?? "",
     monthlyMessage,
     campaigns,
   };

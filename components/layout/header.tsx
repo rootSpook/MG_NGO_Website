@@ -3,21 +3,19 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
-import { useState } from "react"
-
-const navLinks = [
-  { href: "/", label: "Ana Sayfa" },
-  { href: "/about", label: "Hakkımızda" },
-  { href: "/mg", label: "MG Hakkında" },
-  { href: "/blogs", label: "Bloglar" },
-  { href: "/events", label: "Etkinlikler" },
-  { href: "/reports", label: "Raporlar" },
-  { href: "/media", label: "Medya" },
-  { href: "/contacts", label: "İletişim" },
-]
+import { useEffect, useState } from "react"
+import { DEFAULT_NAV_ITEMS, getNavConfig, type NavItem } from "@/lib/firebase/navServices"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [navItems, setNavItems] = useState<NavItem[]>(DEFAULT_NAV_ITEMS)
+
+  useEffect(() => {
+    getNavConfig().then(setNavItems).catch(() => setNavItems(DEFAULT_NAV_ITEMS))
+  }, [])
+
+  const visibleItems = navItems.filter((item) => item.isVisible && !item.isDonateButton)
+  const donateItem = navItems.find((item) => item.isDonateButton && item.isVisible)
 
   return (
     <header className="w-full">
@@ -43,7 +41,7 @@ export function Header() {
               <circle cx="30" cy="5" r="2" fill="#0D9488" />
               <circle cx="25" cy="20" r="2" fill="#0D9488" />
               <circle cx="15" cy="20" r="2" fill="#0D9488" />
-              
+
               {/* MG Letters */}
               <text
                 x="35"
@@ -55,7 +53,7 @@ export function Header() {
               >
                 MG
               </text>
-              
+
               {/* Organization name */}
               <text
                 x="5"
@@ -87,21 +85,23 @@ export function Header() {
           <div className="flex items-center justify-between md:justify-center py-3">
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
+              {visibleItems.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.key}
                   href={link.href}
                   className="text-white text-sm hover:text-teal-300 transition-colors"
                 >
                   {link.label}
                 </Link>
               ))}
-              <Button
-                asChild
-                className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded"
-              >
-                <Link href="/donate">Bağış Yap</Link>
-              </Button>
+              {donateItem && (
+                <Button
+                  asChild
+                  className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded"
+                >
+                  <Link href={donateItem.href}>{donateItem.label}</Link>
+                </Button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -117,9 +117,9 @@ export function Header() {
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 flex flex-col gap-3">
-              {navLinks.map((link) => (
+              {visibleItems.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.key}
                   href={link.href}
                   className="text-white text-sm hover:text-teal-300 transition-colors py-2"
                   onClick={() => setMobileMenuOpen(false)}
@@ -127,12 +127,16 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
-              <Button
-                asChild
-                className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded w-fit"
-              >
-                <Link href="/donate">Bağış Yap</Link>
-              </Button>
+              {donateItem && (
+                <Button
+                  asChild
+                  className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded w-fit"
+                >
+                  <Link href={donateItem.href} onClick={() => setMobileMenuOpen(false)}>
+                    {donateItem.label}
+                  </Link>
+                </Button>
+              )}
             </div>
           )}
         </div>

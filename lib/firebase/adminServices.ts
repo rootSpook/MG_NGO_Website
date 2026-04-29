@@ -23,25 +23,54 @@ export interface AdminDashboardStats {
   pendingVolunteers: number;
 }
 
+import type { Query } from "firebase/firestore";
+
+async function safeCount(q: Query<DocumentData>): Promise<number> {
+  try {
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch {
+    return 0;
+  }
+}
+
+async function safeDocs(q: Query<DocumentData>) {
+  try {
+    return await getDocs(q);
+  } catch {
+    return null;
+  }
+}
+
 export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-  const [blogsSnap, eventsSnap, announcementsSnap, messagesSnap, volunteersSnap] =
+  const [blogsSnap, totalEvents, totalAnnouncements, pendingMessages, pendingVolunteers] =
     await Promise.all([
-      getDocs(
+      safeDocs(
         query(
           collection(db, COLLECTIONS.CONTENT_ITEMS),
           where("type", "==", "post"),
           where("deletedAt", "==", null)
         )
       ),
-      getDocs(collection(db, COLLECTIONS.EVENTS)),
-      getDocs(collection(db, COLLECTIONS.ANNOUNCEMENTS)),
-      getDocs(
+      safeCount(
+        query(
+          collection(db, COLLECTIONS.EVENTS),
+          where("status", "==", "published")
+        )
+      ),
+      safeCount(
+        query(
+          collection(db, COLLECTIONS.ANNOUNCEMENTS),
+          where("status", "==", "published")
+        )
+      ),
+      safeCount(
         query(
           collection(db, COLLECTIONS.CONTACT_MESSAGES),
           where("status", "==", "new")
         )
       ),
-      getDocs(
+      safeCount(
         query(
           collection(db, COLLECTIONS.VOLUNTEER_APPLICATIONS),
           where("status", "==", "new")
@@ -49,17 +78,18 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
       ),
     ]);
 
-  const publishedBlogs = blogsSnap.docs.filter(
+  const totalBlogs = blogsSnap?.size ?? 0;
+  const publishedBlogs = blogsSnap?.docs.filter(
     (d) => d.data().status === "published"
-  ).length;
+  ).length ?? 0;
 
   return {
-    totalBlogs: blogsSnap.size,
+    totalBlogs,
     publishedBlogs,
-    totalEvents: eventsSnap.size,
-    totalAnnouncements: announcementsSnap.size,
-    pendingMessages: messagesSnap.size,
-    pendingVolunteers: volunteersSnap.size,
+    totalEvents,
+    totalAnnouncements,
+    pendingMessages,
+    pendingVolunteers,
   };
 }
 
