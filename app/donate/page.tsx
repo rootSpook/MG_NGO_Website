@@ -176,25 +176,25 @@ export default async function DonatePage() {
           <div className="grid gap-6 md:grid-cols-3">
             <article className="rounded-lg bg-white p-6 text-center shadow-sm">
               <Pill className="mx-auto h-11 w-11 text-black" />
-              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Tibbi Erisim</h3>
+              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Tıbbi Erişim</h3>
               <p className="mt-2 text-sm text-gray-600">
-                Hastalarin ihtiyac duydugu tedavi ve ilaclara ulasmasina katki saglar.
+                Hastalarin ihtiyaç duyduğu tedavi ve ilaçlara ulaşmasına katkı sağlar.
               </p>
             </article>
 
             <article className="rounded-lg bg-white p-6 text-center shadow-sm">
               <HeartHandshake className="mx-auto h-11 w-11 text-black" />
-              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Hasta Destegi</h3>
+              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Hasta Desteği</h3>
               <p className="mt-2 text-sm text-gray-600">
-                Destek gruplari ve danismanlik hizmetlerini finanse eder.
+                Destek gruplari ve danışmanlık hizmetlerini finanse eder.
               </p>
             </article>
 
             <article className="rounded-lg bg-white p-6 text-center shadow-sm">
               <ScanSearch className="mx-auto h-11 w-11 text-black" />
-              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Farkindalik</h3>
+              <h3 className="mt-4 text-2xl font-semibold text-gray-900">Farkındalık</h3>
               <p className="mt-2 text-sm text-gray-600">
-                Toplumda erken tani bilincini ve dogru bilgi erisimini guclendirir.
+                Toplumda erken tanı bilincini ve doğru bilgi erişimini güçlendirir.
               </p>
             </article>
           </div>
