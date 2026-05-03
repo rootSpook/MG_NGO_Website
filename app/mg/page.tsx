@@ -15,12 +15,12 @@ export default function MGLandingPage() {
       <Header />
 
       <main className="flex-1">
-        <section className="bg-teal-700 py-12 px-4 md:px-6">
+        <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
               Myasthenia Gravis
             </h1>
-            <p className="mt-4 text-teal-100 md:text-lg">
+            <p className="mt-4 text-primary-foreground/90 md:text-lg">
               Hastalık hakkında bilmeniz gereken her şey — belirtilerden
               tedaviye, günlük yaşam ipuçlarına kadar.
             </p>
@@ -35,13 +35,13 @@ export default function MGLandingPage() {
                 href={`/mg/${section.slug}`}
                 className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
               >
-                <h2 className="mb-2 text-lg font-semibold text-teal-700 group-hover:underline">
+                <h2 className="mb-2 text-lg font-semibold text-[var(--theme-title-text,var(--primary))] group-hover:underline">
                   {section.title}
                 </h2>
                 <p className="text-sm leading-relaxed text-gray-600">
                   {section.description}
                 </p>
-                <span className="mt-4 inline-block text-sm font-medium text-teal-600">
+                <span className="mt-4 inline-block text-sm font-medium text-primary">
                   Devamını oku →
                 </span>
               </Link>

@@ -64,7 +64,7 @@ export default function ContactUsPage() {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
             {/* Left - Contact Info */}
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold text-teal-600 mb-6">{pageContent.title}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">{pageContent.title}</h1>
               <p className="text-gray-700 leading-relaxed mb-6">
                 {pageContent.intro}
               </p>
@@ -91,12 +91,12 @@ export default function ContactUsPage() {
                 </p>
 
                 {status === "success" ? (
-                  <div className="rounded-lg bg-teal-50 border border-teal-200 px-5 py-6 text-center">
-                    <p className="text-teal-700 font-medium">Mesajınız iletildi!</p>
-                    <p className="text-teal-600 text-sm mt-1">En kısa sürede geri dönüş yapacağız.</p>
+                  <div className="rounded-lg bg-secondary/50 border border-primary px-5 py-6 text-center">
+                    <p className="text-primary font-medium">Mesajınız iletildi!</p>
+                    <p className="text-primary text-sm mt-1">En kısa sürede geri dönüş yapacağız.</p>
                     <button
                       onClick={() => setStatus("idle")}
-                      className="mt-4 text-sm text-teal-600 underline"
+                      className="mt-4 text-sm text-primary underline"
                     >
                       Yeni mesaj gönder
                     </button>
@@ -109,7 +109,7 @@ export default function ContactUsPage() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
 
                     <div className="relative">
@@ -120,7 +120,7 @@ export default function ContactUsPage() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full pl-12 pr-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
 
@@ -129,7 +129,7 @@ export default function ContactUsPage() {
                       placeholder="Telefon Numarası"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
 
                     <textarea
@@ -138,7 +138,7 @@ export default function ContactUsPage() {
                       rows={4}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                     />
 
                     {errorMsg && (
@@ -159,7 +159,7 @@ export default function ContactUsPage() {
                       <button
                         type="submit"
                         disabled={status === "loading"}
-                        className="px-6 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors disabled:opacity-60"
+                        className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary transition-colors disabled:opacity-60"
                       >
                         {status === "loading" ? "Gönderiliyor…" : "Gönder"}
                       </button>
@@ -204,7 +204,7 @@ export default function ContactUsPage() {
 
             {/* Location Info */}
             <div className="w-full lg:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Konumumuz</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">Konumumuz</h2>
               <p className="text-gray-700 leading-relaxed mb-6">
                 Derneğimiz, MG topluluğunu etkinlikler, kaynaklar ve destek programlarıyla bir araya getirir.
                 Bu merkezden yürüttüğümüz çalışmalarla farkındalığı artırmayı ve dayanışmayı güçlendirmeyi hedefliyoruz.
@@ -220,8 +220,8 @@ export default function ContactUsPage() {
 
         {/* FAQ Section */}
         <section className="py-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <p className="text-teal-600 font-medium mb-1">SSS</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-6">Sık Sorulan Sorular</h2>
+          <p className="text-primary font-medium mb-1">SSS</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">Sık Sorulan Sorular</h2>
 
           <div className="space-y-3">
             {pageContent.faq.map((item, index) => (

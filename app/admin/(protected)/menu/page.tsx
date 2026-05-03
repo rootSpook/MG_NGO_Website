@@ -173,7 +173,7 @@ export default function MenuManagementPage() {
         <div className="flex gap-2 flex-wrap shrink-0">
           <button
             onClick={openWizard}
-            className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
           >
             <Plus className="h-4 w-4" />
             Yeni Sayfa Ekle
@@ -188,7 +188,7 @@ export default function MenuManagementPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-1.5 rounded-lg border border-teal-300 bg-white px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-50 disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-lg border border-primary bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-secondary/50 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
             {saving ? "Kaydediliyor…" : saved ? "Kaydedildi ✓" : "Sıralamayı Kaydet"}
@@ -244,7 +244,7 @@ export default function MenuManagementPage() {
                 <p className="font-medium text-gray-900 flex items-center gap-2">
                   {item.label}
                   {item.isDonateButton && (
-                    <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700">Buton</span>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-primary">Buton</span>
                   )}
                   {item.pageType === "cms" && (
                     <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-700">CMS</span>
@@ -264,7 +264,7 @@ export default function MenuManagementPage() {
               {item.pageSlug && (
                 <button
                   onClick={() => router.push(`/admin/menu/${item.key}`)}
-                  className="flex items-center gap-1.5 rounded-lg border border-teal-200 px-3 py-1.5 text-sm text-teal-700 hover:bg-teal-50"
+                  className="flex items-center gap-1.5 rounded-lg border border-primary px-3 py-1.5 text-sm text-primary hover:bg-secondary/50"
                 >
                   <LayoutList className="h-4 w-4" />
                   İçeriği Yönet
@@ -311,7 +311,7 @@ export default function MenuManagementPage() {
                 <div className="mt-1 flex items-center gap-1.5">
                   {[1, 2, 3].map((s) => (
                     <div key={s} className={`h-1.5 w-8 rounded-full transition-colors ${
-                      wizardStep >= s ? "bg-teal-500" : "bg-gray-200"
+                      wizardStep >= s ? "bg-secondary/500" : "bg-gray-200"
                     }`} />
                   ))}
                   <span className="ml-1 text-xs text-gray-400">Adım {wizardStep} / 3</span>
@@ -333,7 +333,7 @@ export default function MenuManagementPage() {
                     Menü Etiketi
                   </label>
                   <input
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     placeholder="örn. Parkinson Farkındalık"
                     value={wizardLabel}
                     onChange={(e) => handleLabelChange(e.target.value)}
@@ -349,7 +349,7 @@ export default function MenuManagementPage() {
                       /pages/
                     </span>
                     <input
-                      className="flex-1 rounded-r-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      className="flex-1 rounded-r-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       value={wizardKey}
                       onChange={(e) => {
                         setWizardKey(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
@@ -380,23 +380,23 @@ export default function MenuManagementPage() {
                       onClick={() => setWizardTemplate(type)}
                       className={`flex flex-col gap-2 rounded-xl border p-4 text-left transition-all ${
                         wizardTemplate === type
-                          ? "border-teal-400 bg-teal-50 ring-1 ring-teal-400"
-                          : "border-gray-200 hover:border-teal-200 hover:bg-teal-50/40"
+                          ? "border-primary bg-secondary/50 ring-1 ring-primary"
+                          : "border-gray-200 hover:border-primary hover:bg-secondary/50/40"
                       }`}
                     >
                       <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                        wizardTemplate === type ? "bg-teal-100" : "bg-gray-100"
+                        wizardTemplate === type ? "bg-secondary" : "bg-gray-100"
                       }`}>
-                        <Icon className={`h-5 w-5 ${wizardTemplate === type ? "text-teal-600" : "text-gray-500"}`} />
+                        <Icon className={`h-5 w-5 ${wizardTemplate === type ? "text-primary" : "text-gray-500"}`} />
                       </div>
                       <div>
-                        <p className={`text-sm font-semibold ${wizardTemplate === type ? "text-teal-700" : "text-gray-700"}`}>
+                        <p className={`text-sm font-semibold ${wizardTemplate === type ? "text-primary" : "text-gray-700"}`}>
                           {TEMPLATE_LABELS[type]}
                         </p>
                         <p className="mt-0.5 text-xs text-gray-400">{description}</p>
                       </div>
                       {wizardTemplate === type && (
-                        <Check className="absolute right-3 top-3 h-4 w-4 text-teal-500" />
+                        <Check className="absolute right-3 top-3 h-4 w-4 text-primary-foreground/900" />
                       )}
                     </button>
                   ))}
@@ -437,7 +437,7 @@ export default function MenuManagementPage() {
                 <button
                   disabled={(wizardStep === 1 && !step1Valid) || (wizardStep === 2 && !step2Valid)}
                   onClick={() => setWizardStep((s) => (s + 1) as 2 | 3)}
-                  className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-50"
                 >
                   İleri
                   <ArrowRight className="h-4 w-4" />
@@ -446,7 +446,7 @@ export default function MenuManagementPage() {
                 <button
                   onClick={handleWizardCreate}
                   disabled={wizardSaving}
-                  className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
                 >
                   <Check className="h-4 w-4" />
                   {wizardSaving ? "Oluşturuluyor…" : "Sayfayı Oluştur"}

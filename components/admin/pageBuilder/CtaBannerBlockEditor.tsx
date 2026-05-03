@@ -3,7 +3,7 @@
 import type { CtaBannerBlockData } from "@/types/pageBuilder";
 
 const inputCls =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
 interface CtaBannerBlockEditorProps {
   data: Record<string, unknown>;
@@ -81,7 +81,7 @@ export function CtaBannerBlockEditor({ data, onChange }: CtaBannerBlockEditorPro
               onClick={() => set({ variant: v })}
               className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
                 (d.variant ?? "teal") === v
-                  ? "border-teal-500 bg-teal-50 text-teal-700"
+                  ? "border-primary bg-secondary/50 text-primary"
                   : "border-gray-200 text-gray-500 hover:bg-gray-50"
               }`}
             >

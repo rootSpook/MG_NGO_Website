@@ -35,10 +35,10 @@ function ReportForm({
     setForm((p) => ({ ...p, [field]: value }));
 
   const cls =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
   return (
-    <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-5">
+    <div className="space-y-3 rounded-xl border border-primary bg-secondary/50 p-5">
       <div>
         <label className="mb-1 block text-xs font-medium text-gray-600">Rapor Başlığı</label>
         <input className={cls} value={form.title} onChange={(e) => set("title", e.target.value)} />
@@ -81,7 +81,7 @@ function ReportForm({
         <button
           onClick={() => onSave(form)}
           disabled={saving || !form.title.trim()}
-          className="flex items-center gap-1 rounded-lg bg-teal-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="flex items-center gap-1 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
         >
           <Check className="h-4 w-4" /> {saving ? "Kaydediliyor…" : "Kaydet"}
         </button>
@@ -139,7 +139,7 @@ export default function AdminReportsPage() {
         {!adding && (
           <button
             onClick={() => { setAdding(true); setEditingId(null); }}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
           >
             <Plus className="h-4 w-4" /> Rapor Ekle
           </button>
@@ -182,7 +182,7 @@ export default function AdminReportsPage() {
                     <span className="rounded-full bg-gray-100 px-2 py-0.5">{report.category}</span>
                     <span>{report.year}</span>
                     {report.fileUrl && (
-                      <a href={report.fileUrl} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">
+                      <a href={report.fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         PDF görüntüle
                       </a>
                     )}

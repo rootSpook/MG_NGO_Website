@@ -31,18 +31,18 @@ function EventCard({ event }: { event: PublicEvent }) {
 
   return (
     <article className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-      <div className={`rounded-t-xl px-5 py-3 text-sm font-semibold ${isPast ? "bg-gray-200 text-gray-600" : "bg-teal-600 text-white"}`}>
+      <div className={`rounded-t-xl px-5 py-3 text-sm font-semibold ${isPast ? "bg-gray-200 text-gray-600" : "bg-primary text-white"}`}>
         {event.eventType}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <h2 className="text-lg font-bold leading-snug text-teal-700">
+        <h2 className="text-lg font-bold leading-snug text-[var(--theme-title-text,var(--primary))]">
           {event.title}
         </h2>
 
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 flex-shrink-0 text-teal-500" />
+            <Calendar className="h-4 w-4 flex-shrink-0 text-primary" />
             <span>
               {formatDateTR(event.startsAt)}{" "}
               <span className="text-gray-400">·</span>{" "}
@@ -53,9 +53,9 @@ function EventCard({ event }: { event: PublicEvent }) {
 
           <div className="flex items-center gap-2">
             {event.isOnline ? (
-              <Monitor className="h-4 w-4 flex-shrink-0 text-teal-500" />
+              <Monitor className="h-4 w-4 flex-shrink-0 text-primary" />
             ) : (
-              <MapPin className="h-4 w-4 flex-shrink-0 text-teal-500" />
+              <MapPin className="h-4 w-4 flex-shrink-0 text-primary" />
             )}
             <span>
               {event.isOnline
@@ -66,7 +66,7 @@ function EventCard({ event }: { event: PublicEvent }) {
 
           {event.capacity > 0 && (
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 flex-shrink-0 text-teal-500" />
+              <Users className="h-4 w-4 flex-shrink-0 text-primary" />
               <span>Kapasite: {event.capacity} kişi</span>
             </div>
           )}
@@ -80,7 +80,7 @@ function EventCard({ event }: { event: PublicEvent }) {
           ) : (
             <Link
               href="/contacts"
-              className="inline-block rounded-full bg-teal-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-700"
+              className="inline-block rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary"
             >
               Bilgi Al
             </Link>
@@ -103,12 +103,12 @@ export default async function EventsPage() {
       <Header />
 
       <main className="flex-1">
-        <section className="bg-teal-700 py-12 px-4 md:px-6">
+        <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-5xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
               Etkinlikler
             </h1>
-            <p className="mt-4 text-teal-100 md:text-lg">
+            <p className="mt-4 text-primary-foreground/90 md:text-lg">
               Toplantılar, webinarlar ve destek grubu buluşmalarımıza katılın.
             </p>
           </div>
@@ -117,7 +117,7 @@ export default async function EventsPage() {
         <section className="mx-auto max-w-5xl px-4 py-12 md:px-6">
           {upcoming.length > 0 ? (
             <>
-              <h2 className="mb-6 text-2xl font-bold text-teal-700">
+              <h2 className="mb-6 text-2xl font-bold text-[var(--theme-title-text,var(--primary))]">
                 Yaklaşan Etkinlikler
               </h2>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

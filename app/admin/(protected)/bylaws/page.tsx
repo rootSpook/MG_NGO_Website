@@ -41,7 +41,7 @@ export default function BylawsPage() {
   }
 
   const cls =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
   if (loading) {
     return (
@@ -63,7 +63,7 @@ export default function BylawsPage() {
         <button
           onClick={handleSave}
           disabled={status === "saving"}
-          className="rounded-lg bg-teal-600 px-5 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
         >
           {status === "saving" ? "Kaydediliyor…" : status === "saved" ? "✓ Kaydedildi" : "Kaydet"}
         </button>
@@ -98,13 +98,13 @@ export default function BylawsPage() {
 
         {fileUrl && (
           <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-            <FileText className="h-5 w-5 text-teal-600" />
+            <FileText className="h-5 w-5 text-primary" />
             <span className="flex-1 truncate text-sm text-gray-700">{fileUrl}</span>
             <a
               href={fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-teal-600 hover:underline"
+              className="flex items-center gap-1 text-sm text-primary hover:underline"
             >
               <ExternalLink className="h-4 w-4" /> Görüntüle
             </a>

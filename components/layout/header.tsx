@@ -6,6 +6,9 @@ import { Menu, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { DEFAULT_NAV_ITEMS, getNavConfig, type NavItem } from "@/lib/firebase/navServices"
 
+/**
+ * Renders the public site header with dynamic navigation links and mobile menu support.
+ */
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navItems, setNavItems] = useState<NavItem[]>(DEFAULT_NAV_ITEMS)
@@ -34,22 +37,21 @@ export function Header() {
               {/* Circuit lines */}
               <path
                 d="M5 10 H25 V5 H30 M5 15 H20 V20 H25 M5 20 H15"
-                stroke="#0D9488"
+                stroke="#1d4ed8"
                 strokeWidth="2"
                 fill="none"
               />
-              <circle cx="30" cy="5" r="2" fill="#0D9488" />
-              <circle cx="25" cy="20" r="2" fill="#0D9488" />
-              <circle cx="15" cy="20" r="2" fill="#0D9488" />
+              <circle cx="30" cy="5" r="2" fill="#1d4ed8" />
+              <circle cx="25" cy="20" r="2" fill="#1d4ed8" />
+              <circle cx="15" cy="20" r="2" fill="#1d4ed8" />
 
               {/* MG Letters */}
               <text
                 x="35"
                 y="35"
-                fontFamily="Arial, sans-serif"
                 fontSize="32"
                 fontWeight="bold"
-                fill="#0D9488"
+                fill="#1d4ed8"
               >
                 MG
               </text>
@@ -61,7 +63,7 @@ export function Header() {
                 fontFamily="Arial, sans-serif"
                 fontSize="8"
                 fontWeight="bold"
-                fill="#0D9488"
+                fill="#1d4ed8"
               >
                 MYASTHENİA GRAVİS
               </text>
@@ -80,7 +82,10 @@ export function Header() {
       </div>
 
       {/* Navigation Section */}
-      <nav className="bg-slate-600">
+      <nav
+        className="transition-colors"
+        style={{ backgroundColor: "var(--theme-navbar-bg, #475569)" }}
+      >
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-between md:justify-center py-3">
             {/* Desktop Navigation */}
@@ -89,7 +94,7 @@ export function Header() {
                 <Link
                   key={link.key}
                   href={link.href}
-                  className="text-white text-sm hover:text-teal-300 transition-colors"
+                  className="text-white text-sm transition-colors hover:text-[var(--theme-primary-hover,#1e40af)]"
                 >
                   {link.label}
                 </Link>
@@ -97,7 +102,7 @@ export function Header() {
               {donateItem && (
                 <Button
                   asChild
-                  className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded"
+                  className="bg-primary hover:bg-primary/90 text-white text-sm px-4 py-2 rounded"
                 >
                   <Link href={donateItem.href}>{donateItem.label}</Link>
                 </Button>
@@ -121,7 +126,7 @@ export function Header() {
                 <Link
                   key={link.key}
                   href={link.href}
-                  className="text-white text-sm hover:text-teal-300 transition-colors py-2"
+                  className="text-white text-sm transition-colors py-2 hover:text-primary/90"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -130,7 +135,7 @@ export function Header() {
               {donateItem && (
                 <Button
                   asChild
-                  className="bg-teal-600 hover:bg-teal-700 text-white text-sm px-4 py-2 rounded w-fit"
+                  className="bg-primary hover:bg-primary/90 text-white text-sm px-4 py-2 rounded w-fit"
                 >
                   <Link href={donateItem.href} onClick={() => setMobileMenuOpen(false)}>
                     {donateItem.label}

@@ -19,7 +19,7 @@ function Field({
   multiline?: boolean;
 }) {
   const cls =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
   return (
     <div>
       <label className="mb-1 block text-xs font-medium text-gray-600">
@@ -128,7 +128,7 @@ export default function HomepageContentPage() {
         <button
           onClick={handleSave}
           disabled={status === "saving"}
-          className="rounded-lg bg-teal-600 px-5 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
         >
           {status === "saving" ? "Kaydediliyor…" : status === "saved" ? "✓ Kaydedildi" : "Kaydet"}
         </button>

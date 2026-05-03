@@ -37,7 +37,7 @@ export function ReportsGrid({
   return (
     <section className="py-12 md:py-16">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-8">
           {title}
         </h2>
 
@@ -51,7 +51,7 @@ export function ReportsGrid({
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+              className="pl-10 border-gray-300 focus:border-primary focus:ring-primary"
             />
           </div>
 
@@ -63,7 +63,7 @@ export function ReportsGrid({
                 onClick={() => setActiveCategory(category)}
                 className={`px-4 py-2 text-sm rounded-full transition-colors ${
                   activeCategory === category
-                    ? "bg-teal-600 text-white"
+                    ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -87,7 +87,7 @@ export function ReportsGrid({
 
               {/* Report Content */}
               <div className="p-5">
-                <Badge variant="outline" className="mb-3 text-xs text-teal-600 border-teal-600">
+                <Badge variant="outline" className="mb-3 text-xs text-primary border-primary">
                   {report.category}
                 </Badge>
 
@@ -110,7 +110,7 @@ export function ReportsGrid({
 
                 <Button
                   size="sm"
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                  className="w-full bg-primary hover:bg-primary text-white"
                 >
                   <Download size={16} className="mr-2" />
                   İndir {report.format}
@@ -131,7 +131,7 @@ export function ReportsGrid({
         {/* Load More */}
         {filteredReports.length > 0 && (
           <div className="text-center mt-10">
-            <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
+            <Button variant="outline" className="border-primary text-primary hover:bg-secondary/50">
               {loadMoreLabel}
             </Button>
           </div>

@@ -27,7 +27,7 @@ function formatDate(iso: string) {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
 /** Which admin section handles a 'special' nav key */
 const SPECIAL_MANAGE_LINKS: Record<string, { label: string; href: string }> = {
@@ -260,7 +260,7 @@ export default function MenuItemContentPage() {
           </button>
           <div>
             <p className="text-xs text-gray-400">
-              <button onClick={() => router.push("/admin/menu")} className="hover:text-teal-600 hover:underline">
+              <button onClick={() => router.push("/admin/menu")} className="hover:text-primary hover:underline">
                 Menü Yönetimi
               </button>
               {" / "}<span className="text-gray-600">{navItem.label}</span>
@@ -274,7 +274,7 @@ export default function MenuItemContentPage() {
                 href={`/pages/${navItem.pageSlug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-teal-600 hover:underline"
+                className="text-primary hover:underline"
               >
                 Sayfayı görüntüle ↗
               </a>
@@ -288,7 +288,7 @@ export default function MenuItemContentPage() {
             onClick={() => setPreviewMode((p) => !p)}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
               previewMode
-                ? "border-teal-300 bg-teal-50 text-teal-700"
+                ? "border-primary bg-secondary/50 text-primary"
                 : "border-gray-200 text-gray-500 hover:bg-gray-50"
             }`}
           >
@@ -301,7 +301,7 @@ export default function MenuItemContentPage() {
             <select
               value={draftStatus}
               onChange={(e) => { setDraftStatus(e.target.value as "draft" | "published"); markDirty(); }}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none"
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
             >
               <option value="draft">Taslak</option>
               <option value="published">Yayında</option>
@@ -322,7 +322,7 @@ export default function MenuItemContentPage() {
           <button
             onClick={handleSave}
             disabled={saving || !dirty}
-            className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-50"
           >
             <Check className="h-4 w-4" />
             {saving ? "Kaydediliyor…" : saved ? "Kaydedildi ✓" : "Kaydet"}
@@ -422,7 +422,7 @@ export default function MenuItemContentPage() {
 function Breadcrumb({ label, onBack }: { label: string; onBack: () => void }) {
   return (
     <p className="text-sm text-gray-500">
-      <button onClick={onBack} className="hover:text-teal-600 hover:underline">
+      <button onClick={onBack} className="hover:text-primary hover:underline">
         Menü Yönetimi
       </button>
       {" / "}

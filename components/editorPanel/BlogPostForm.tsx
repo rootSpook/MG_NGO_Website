@@ -290,7 +290,7 @@ export default function BlogPostForm({
           />
         ) : (
           <div
-            className="min-h-[480px] w-full rounded-[10px] bg-white px-6 py-5 prose prose-sm max-w-none prose-headings:text-gray-900 prose-a:text-teal-600"
+            className="min-h-[480px] w-full rounded-[10px] bg-white px-6 py-5 prose prose-sm max-w-none prose-headings:text-gray-900 prose-a:text-primary"
             dangerouslySetInnerHTML={{
               __html: previewHtml || "<p class='text-gray-400'>İçerik girilmedi…</p>",
             }}

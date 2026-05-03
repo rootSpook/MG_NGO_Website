@@ -23,7 +23,7 @@ export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGrid
   return (
     <section className="py-12 md:py-16">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-8">
           {title}
         </h2>
 
@@ -35,7 +35,7 @@ export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGrid
               onClick={() => setActiveCategory(category)}
               className={`px-4 py-2 text-sm rounded-full transition-colors ${
                 activeCategory === category
-                  ? "bg-teal-600 text-white"
+                  ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
@@ -58,11 +58,11 @@ export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGrid
 
               {/* Content */}
               <div className="p-5">
-                <Badge variant="outline" className="mb-3 text-xs text-teal-600 border-teal-600">
+                <Badge variant="outline" className="mb-3 text-xs text-primary border-primary">
                   {item.category}
                 </Badge>
 
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[var(--theme-title-text,var(--primary))] transition-colors">
                   {item.title}
                 </h3>
 
@@ -84,7 +84,7 @@ export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGrid
 
         {/* Load More */}
         <div className="text-center mt-10">
-          <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
+          <Button variant="outline" className="border-primary text-primary hover:bg-secondary/50">
             {loadMoreLabel}
             <ArrowRight size={18} className="ml-2" />
           </Button>

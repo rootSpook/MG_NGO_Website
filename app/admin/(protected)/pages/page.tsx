@@ -34,18 +34,18 @@ export default function PageManagementRedirectPage() {
 
       <Link
         href="/admin/menu"
-        className="flex items-center justify-between rounded-xl border border-teal-200 bg-white px-5 py-4 shadow-sm hover:border-teal-400 hover:bg-teal-50 transition-colors group"
+        className="flex items-center justify-between rounded-xl border border-primary bg-white px-5 py-4 shadow-sm hover:border-primary hover:bg-secondary/50 transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100">
-            <NavigationIcon className="h-5 w-5 text-teal-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+            <NavigationIcon className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="font-semibold text-gray-900 group-hover:text-teal-700">Menü Yönetimi</p>
+            <p className="font-semibold text-gray-900 group-hover:text-primary">Menü Yönetimi</p>
             <p className="text-xs text-gray-400">Tüm sayfaları buradan yönetin</p>
           </div>
         </div>
-        <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-teal-500" />
+        <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-primary-foreground/900" />
       </Link>
     </div>
   );

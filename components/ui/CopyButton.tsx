@@ -21,10 +21,10 @@ export function CopyButton({ text }: { text: string }) {
       type="button"
       title="Kopyala"
       onClick={handleCopy}
-      className="rounded p-1 text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+      className="rounded p-1 text-gray-400 hover:text-primary hover:bg-secondary/50 transition-colors"
     >
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-teal-600" />
+        <Check className="h-3.5 w-3.5 text-primary" />
       ) : (
         <Copy className="h-3.5 w-3.5" />
       )}

@@ -17,7 +17,7 @@ export function RichTextBlockEditor({ data, onChange }: RichTextBlockEditorProps
       </label>
       <textarea
         rows={12}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs leading-relaxed focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-y"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs leading-relaxed focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-y"
         value={d.markdown ?? ""}
         placeholder="Markdown formatında içerik yazın…"
         onChange={(e) => onChange({ ...d, markdown: e.target.value })}

@@ -58,7 +58,7 @@ const TYPE_COLORS: Record<BlockType, string> = {
   "report-list": "bg-orange-100 text-orange-700",
   "team-grid": "bg-pink-100 text-pink-700",
   "faq-accordion": "bg-cyan-100 text-cyan-700",
-  "cta-banner": "bg-teal-100 text-teal-700",
+  "cta-banner": "bg-secondary text-primary",
   "stats-bar": "bg-green-100 text-green-700",
 };
 
@@ -187,7 +187,7 @@ export function BlockEditorCanvas({ sections, onChange }: BlockEditorCanvasProps
           <div
             key={section.id}
             className={`rounded-xl border bg-white shadow-sm transition-shadow ${
-              isExpanded ? "border-teal-300 shadow-md" : "border-gray-200"
+              isExpanded ? "border-primary shadow-md" : "border-gray-200"
             }`}
           >
             {/* Block header row */}
@@ -258,7 +258,7 @@ export function BlockEditorCanvas({ sections, onChange }: BlockEditorCanvasProps
                   onClick={() => setExpandedId(isExpanded ? null : section.id)}
                   className={`rounded-lg p-1.5 transition-colors ${
                     isExpanded
-                      ? "bg-teal-100 text-teal-600"
+                      ? "bg-secondary text-primary"
                       : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                   }`}
                   title={isExpanded ? "Kapat" : "Düzenle"}
@@ -288,7 +288,7 @@ export function BlockEditorCanvas({ sections, onChange }: BlockEditorCanvasProps
       {/* Add block button */}
       <button
         onClick={() => setShowSelector(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3.5 text-sm font-medium text-gray-400 transition-colors hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3.5 text-sm font-medium text-gray-400 transition-colors hover:border-primary hover:bg-secondary/50 hover:text-primary"
       >
         <Plus className="h-4 w-4" />
         Blok Ekle

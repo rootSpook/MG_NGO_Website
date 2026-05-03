@@ -14,7 +14,7 @@ export default async function AboutUsPage() {
         <section className="py-12 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold text-teal-600 mb-6">{aboutContent.title}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">{aboutContent.title}</h1>
               <p className="text-gray-700 leading-relaxed">
                 {aboutContent.intro}
               </p>
@@ -31,15 +31,15 @@ export default async function AboutUsPage() {
                 {/* Teal Awareness Ribbon */}
                 <path
                   d="M100 0C100 0 60 60 60 100C60 140 80 160 100 200C120 160 140 140 140 100C140 60 100 0 100 0Z"
-                  fill="#0D9488"
+                  fill="currentColor" className="text-primary"
                 />
                 <path
                   d="M100 200C80 220 40 260 30 280C50 270 80 250 100 240C120 250 150 270 170 280C160 260 120 220 100 200Z"
-                  fill="#0D9488"
+                  fill="currentColor" className="text-primary"
                 />
                 <path
                   d="M85 80C85 80 75 100 80 120C85 140 95 150 100 160"
-                  stroke="#0A7A72"
+                  stroke="currentColor" className="text-primary opacity-50"
                   strokeWidth="3"
                   fill="none"
                 />
@@ -50,7 +50,7 @@ export default async function AboutUsPage() {
 
         {/* Vision Section */}
         <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Vizyon</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">Vizyon</h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2 ml-2">
             {aboutContent.vision.map((item) => (
               <li key={item}>{item}</li>
@@ -60,7 +60,7 @@ export default async function AboutUsPage() {
 
         {/* Mission Section */}
         <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Misyon</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">Misyon</h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2 ml-2">
             {aboutContent.mission.map((item) => (
               <li key={item}>{item}</li>
@@ -70,7 +70,7 @@ export default async function AboutUsPage() {
 
         {/* Meet Our Team Section */}
         <section className="py-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-6">Ekibimiz</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">Ekibimiz</h2>
 
           <ul className="space-y-8">
             {aboutContent.team.map((member) => (
