@@ -69,6 +69,8 @@ export async function getEditorBlogs(): Promise<BlogPost[]> {
       status: (data.status as BlogPost["status"]) ?? "draft",
       author: data.authorName ?? "",
       summary: data.excerpt ?? data.summary ?? "",
+      bodyMarkdown: data.bodyMarkdown ?? "",
+      coverImageUrl: data.coverImageUrl ?? "",
     };
   });
 }
@@ -85,7 +87,7 @@ export async function createEditorBlog(blog: Omit<BlogPost, "id">): Promise<stri
     category: blog.category,
     status: blog.status,
     authorName: blog.author,
-    bodyMarkdown: "",
+    bodyMarkdown: blog.bodyMarkdown ?? "",
     bodyHtml: null,
     featured: false,
     sortOrder: null,
@@ -131,6 +133,8 @@ export async function updateEditorBlog(id: string, data: Partial<BlogPost>): Pro
     if (data.status === "published") update.publishedAt = serverTimestamp();
   }
   if (data.author !== undefined) update.authorName = data.author;
+  if (data.bodyMarkdown !== undefined) update.bodyMarkdown = data.bodyMarkdown;
+  if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl;
 
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), update);
 }

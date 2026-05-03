@@ -4,9 +4,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, FileText, Newspaper, Heart } from "lucide-react"
 import { getHomePageData } from "@/lib/publicPagesContent"
+import { getSupportersForPublic } from "@/lib/publicContent"
 
 export default async function HomePage() {
-  const homeContent = await getHomePageData()
+  const [homeContent, supporters] = await Promise.all([
+    getHomePageData(),
+    getSupportersForPublic(),
+  ])
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -128,6 +132,43 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+        {/* Supporters Section — only rendered when data exists in Firestore */}
+        {supporters.length > 0 && (
+          <section className="py-12 border-t border-gray-100">
+            <div className="max-w-6xl mx-auto px-6">
+              <p className="text-center text-sm font-medium uppercase tracking-widest text-gray-400 mb-8">
+                Destekçilerimiz
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-8">
+                {supporters.map((s) =>
+                  s.logoUrl ? (
+                    <a
+                      key={s.id}
+                      href={s.websiteUrl || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-60 hover:opacity-100 transition-opacity"
+                      title={s.name}
+                    >
+                      <img
+                        src={s.logoUrl}
+                        alt={s.name}
+                        className="h-10 w-auto max-w-[120px] object-contain"
+                      />
+                    </a>
+                  ) : (
+                    <span
+                      key={s.id}
+                      className="text-sm font-semibold text-gray-400"
+                    >
+                      {s.name}
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>

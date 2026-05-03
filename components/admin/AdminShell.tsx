@@ -10,22 +10,22 @@ import {
   Users,
   Heart,
   Mail,
-  FileText,
   ScrollText,
   BarChart2,
   CreditCard,
   LogOut,
   Menu,
   X,
+  NavigationIcon,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Ana Sayfa İçeriği", href: "/admin/homepage", icon: Home },
+  { label: "Menü Yönetimi", href: "/admin/menu", icon: NavigationIcon },
   { label: "Yönetim Kurulu", href: "/admin/board-members", icon: Users },
   { label: "Destekçiler", href: "/admin/supporters", icon: Heart },
   { label: "İletişim Mesajları", href: "/admin/contacts", icon: Mail },
-  { label: "Sayfa Yönetimi", href: "/admin/pages", icon: FileText },
   { label: "Tüzük", href: "/admin/bylaws", icon: ScrollText },
   { label: "Raporlar", href: "/admin/reports", icon: BarChart2 },
   { label: "IBAN Bilgileri", href: "/admin/iban", icon: CreditCard },
@@ -40,7 +40,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen bg-gray-100">
       <aside
         className={`flex flex-col border-r border-gray-200 bg-white transition-all duration-300 ${
-          collapsed ? "w-[72px]" : "w-[240px]"
+          collapsed ? "w-18" : "w-60"
         }`}
       >
         <div className="flex h-14 items-center justify-between border-b border-gray-200 px-4">
@@ -57,7 +57,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
         <nav className="flex-1 space-y-1 px-2 py-4">
           {navItems.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href;
+            const isActive =
+            href === "/admin"
+              ? pathname === "/admin"
+              : pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}
@@ -95,7 +98,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <div className="flex flex-1 flex-col">
         <header className="flex h-14 items-center border-b border-gray-200 bg-white px-6">
           <span className="text-sm font-semibold text-gray-700">
-            {navItems.find((i) => i.href === pathname)?.label ?? "Admin Panel"}
+            {navItems.find((i) =>
+              i.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === i.href || pathname.startsWith(i.href + "/")
+            )?.label ?? "Admin Panel"}
           </span>
         </header>
         <main className="flex-1 overflow-auto p-6">{children}</main>

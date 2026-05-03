@@ -23,25 +23,54 @@ export interface AdminDashboardStats {
   pendingVolunteers: number;
 }
 
+import type { Query } from "firebase/firestore";
+
+async function safeCount(q: Query<DocumentData>): Promise<number> {
+  try {
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch {
+    return 0;
+  }
+}
+
+async function safeDocs(q: Query<DocumentData>) {
+  try {
+    return await getDocs(q);
+  } catch {
+    return null;
+  }
+}
+
 export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-  const [blogsSnap, eventsSnap, announcementsSnap, messagesSnap, volunteersSnap] =
+  const [blogsSnap, totalEvents, totalAnnouncements, pendingMessages, pendingVolunteers] =
     await Promise.all([
-      getDocs(
+      safeDocs(
         query(
           collection(db, COLLECTIONS.CONTENT_ITEMS),
           where("type", "==", "post"),
           where("deletedAt", "==", null)
         )
       ),
-      getDocs(collection(db, COLLECTIONS.EVENTS)),
-      getDocs(collection(db, COLLECTIONS.ANNOUNCEMENTS)),
-      getDocs(
+      safeCount(
+        query(
+          collection(db, COLLECTIONS.EVENTS),
+          where("status", "==", "published")
+        )
+      ),
+      safeCount(
+        query(
+          collection(db, COLLECTIONS.ANNOUNCEMENTS),
+          where("status", "==", "published")
+        )
+      ),
+      safeCount(
         query(
           collection(db, COLLECTIONS.CONTACT_MESSAGES),
           where("status", "==", "new")
         )
       ),
-      getDocs(
+      safeCount(
         query(
           collection(db, COLLECTIONS.VOLUNTEER_APPLICATIONS),
           where("status", "==", "new")
@@ -49,17 +78,18 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
       ),
     ]);
 
-  const publishedBlogs = blogsSnap.docs.filter(
+  const totalBlogs = blogsSnap?.size ?? 0;
+  const publishedBlogs = blogsSnap?.docs.filter(
     (d) => d.data().status === "published"
-  ).length;
+  ).length ?? 0;
 
   return {
-    totalBlogs: blogsSnap.size,
+    totalBlogs,
     publishedBlogs,
-    totalEvents: eventsSnap.size,
-    totalAnnouncements: announcementsSnap.size,
-    pendingMessages: messagesSnap.size,
-    pendingVolunteers: volunteersSnap.size,
+    totalEvents,
+    totalAnnouncements,
+    pendingMessages,
+    pendingVolunteers,
   };
 }
 
@@ -341,6 +371,29 @@ export interface AdminPage {
   updatedAt: string;
 }
 
+export async function getAdminPageBySlug(slug: string): Promise<AdminPage | null> {
+  const snap = await getDocs(
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("slug", "==", slug),
+      where("type", "==", "page"),
+      where("deletedAt", "==", null)
+    )
+  );
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  const data = d.data();
+  const ts = data.updatedAt;
+  return {
+    id: d.id,
+    slug: data.slug ?? slug,
+    title: data.title ?? "",
+    bodyMarkdown: data.bodyMarkdown ?? "",
+    status: (data.status as AdminPage["status"]) ?? "draft",
+    updatedAt: ts?.toDate ? ts.toDate().toISOString() : "",
+  };
+}
+
 export async function getAdminPages(): Promise<AdminPage[]> {
   const snap = await getDocs(
     query(
@@ -519,6 +572,93 @@ export async function updateContactMessageStatus(
     handledAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+}
+
+// ── Block-based page data ─────────────────────────────────────────────────────
+
+import type { PageBlockData } from "@/types/pageBuilder";
+
+/**
+ * Fetch the block-based page data for a given slug.
+ * Returns null when the document doesn't exist yet or has no sections.
+ */
+export async function getPageBlocks(slug: string): Promise<PageBlockData | null> {
+  const snap = await getDocs(
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("slug", "==", slug),
+      where("type", "==", "page")
+    )
+  );
+  if (snap.empty) return null;
+  const raw = snap.docs[0].data().pageData as Record<string, unknown> | null;
+  if (!raw || !Array.isArray(raw.sections)) return null;
+  return raw as unknown as PageBlockData;
+}
+
+/**
+ * Persist block data for a CMS page.  Creates the document if it doesn't
+ * exist yet, otherwise updates pageData + status + publishedAt.
+ */
+export async function savePageBlocks(
+  slug: string,
+  title: string,
+  blockData: PageBlockData,
+  status: "draft" | "published"
+): Promise<void> {
+  const uid = auth.currentUser?.uid ?? null;
+  const snap = await getDocs(
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("slug", "==", slug),
+      where("type", "==", "page")
+    )
+  );
+
+  if (!snap.empty) {
+    await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, snap.docs[0].id), {
+      title,
+      pageData: blockData as unknown as Record<string, unknown>,
+      status,
+      updatedBy: uid,
+      updatedAt: serverTimestamp(),
+      ...(status === "published" ? { publishedAt: serverTimestamp() } : {}),
+    });
+  } else {
+    await addDoc(collection(db, COLLECTIONS.CONTENT_ITEMS), {
+      type: "page",
+      slug,
+      title,
+      pageData: blockData as unknown as Record<string, unknown>,
+      status,
+      excerpt: null,
+      bodyMarkdown: "",
+      bodyHtml: null,
+      featured: false,
+      sortOrder: null,
+      categoryRef: null,
+      categoryId: null,
+      tagRefs: [],
+      tagIds: [],
+      ogImageAssetRef: null,
+      coverAssetRef: null,
+      coverImageUrl: null,
+      attachmentAssetRefs: [],
+      seoTitle: null,
+      seoDescription: null,
+      canonicalUrl: null,
+      authorName: null,
+      pages: null,
+      format: null,
+      publishedAt: status === "published" ? serverTimestamp() : null,
+      createdBy: uid,
+      updatedBy: uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      archivedAt: null,
+      deletedAt: null,
+    });
+  }
 }
 
 // ── Page content upsert ───────────────────────────────────────────────────────

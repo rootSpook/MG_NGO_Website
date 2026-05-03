@@ -31,6 +31,7 @@ export const SUB_COLLECTIONS = {
 // Well-known document IDs
 export const DOCUMENT_IDS = {
   SITE_SETTINGS: "site",
+  NAVIGATION: "navigation",
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────

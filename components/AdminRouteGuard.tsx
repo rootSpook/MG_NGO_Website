@@ -6,14 +6,14 @@ import { useAuth } from "@/lib/firebase/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
 
 export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, role, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && (!user || !role)) {
       router.replace("/admin/login");
     }
-  }, [user, loading, router]);
+  }, [user, role, loading, router]);
 
   if (loading) {
     return (
@@ -23,7 +23,7 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) return null;
+  if (!user || !role) return null;
 
   return <>{children}</>;
 }

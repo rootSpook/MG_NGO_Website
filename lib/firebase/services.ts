@@ -115,6 +115,60 @@ export async function getActiveCampaigns(): Promise<(Campaign & { id: string })[
   return snap.docs.map((d) => fromDoc<Campaign>(d));
 }
 
+// ── IBAN entries (public read) ────────────────────────────────────────────────
+
+export interface PublicIbanEntry {
+  id: string;
+  bankName: string;
+  accountHolder: string;
+  iban: string;
+  currency: string;
+  sortOrder: number;
+}
+
+export async function getPublicIbanEntries(): Promise<PublicIbanEntry[]> {
+  const snap = await getDocs(collection(db, COLLECTIONS.IBAN_ENTRIES));
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        bankName: data.bankName ?? "",
+        accountHolder: data.accountHolder ?? "",
+        iban: data.iban ?? "",
+        currency: data.currency ?? "TRY",
+        sortOrder: data.sortOrder ?? 0,
+      };
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+// ── Supporters (public read) ──────────────────────────────────────────────────
+
+export interface PublicSupporter {
+  id: string;
+  name: string;
+  logoUrl: string;
+  websiteUrl: string;
+  sortOrder: number;
+}
+
+export async function getPublicSupporters(): Promise<PublicSupporter[]> {
+  const snap = await getDocs(collection(db, COLLECTIONS.SUPPORTERS));
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        name: data.name ?? "",
+        logoUrl: data.logoUrl ?? "",
+        websiteUrl: data.websiteUrl ?? "",
+        sortOrder: data.sortOrder ?? 0,
+      };
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
 // ── Contact messages ──────────────────────────────────────────────────────────
 
 export interface ContactMessageInput {
