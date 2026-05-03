@@ -35,10 +35,10 @@ export function MediaGallery({ title, viewAllLabel, images }: MediaGalleryProps)
     <section className="py-12 md:py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-teal-600">
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))]">
             {title}
           </h2>
-          <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
+          <Button variant="outline" className="border-primary text-primary hover:bg-secondary/50">
             {viewAllLabel}
           </Button>
         </div>

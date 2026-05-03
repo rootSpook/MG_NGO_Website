@@ -11,7 +11,7 @@ export function FeaturedReport({ data }: FeaturedReportProps) {
   return (
     <section className="py-12 md:py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-8">
           {data.sectionTitle}
         </h2>
 
@@ -32,7 +32,7 @@ export function FeaturedReport({ data }: FeaturedReportProps) {
 
             {/* Report Details */}
             <div className="p-6 md:p-8 flex flex-col justify-center">
-              <Badge variant="outline" className="w-fit mb-3 text-teal-600 border-teal-600">
+              <Badge variant="outline" className="w-fit mb-3 text-primary border-primary">
                 {data.category}
               </Badge>
               
@@ -56,11 +56,11 @@ export function FeaturedReport({ data }: FeaturedReportProps) {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                <Button className="bg-primary hover:bg-primary text-white">
                   <Download size={18} className="mr-2" />
                   {data.downloadLabel}
                 </Button>
-                <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
+                <Button variant="outline" className="border-primary text-primary hover:bg-secondary/50">
                   {data.readOnlineLabel}
                 </Button>
               </div>

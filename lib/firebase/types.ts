@@ -46,6 +46,15 @@ export interface SiteSettings {
   logoAssetRef: DocumentReference | null;
   primaryColor: string | null;
   secondaryColor: string | null;
+  theme?: {
+    primary?: string;
+    primaryForeground?: string;
+    secondary?: string;
+    background?: string;
+    foreground?: string;
+    fontFamily?: string | null;
+    [key: string]: any;
+  } | null;
   defaultSeoTitle: string;
   defaultSeoDescription: string;
   defaultOgImageAssetRef: DocumentReference | null;

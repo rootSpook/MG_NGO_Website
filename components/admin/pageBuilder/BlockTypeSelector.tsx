@@ -62,16 +62,16 @@ export function BlockTypeSelector({ onSelect, onClose }: BlockTypeSelectorProps)
               <button
                 key={type}
                 onClick={() => { onSelect(type); onClose(); }}
-                className="group flex flex-col items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-4 text-center transition-all hover:border-teal-200 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="group flex flex-col items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-4 text-center transition-all hover:border-primary hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-teal-100">
-                  <Icon className="h-5 w-5 text-gray-500 group-hover:text-teal-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-secondary">
+                  <Icon className="h-5 w-5 text-gray-500 group-hover:text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-gray-700 group-hover:text-teal-700 leading-tight">
+                  <p className="text-xs font-semibold text-gray-700 group-hover:text-primary leading-tight">
                     {BLOCK_TYPE_LABELS[type]}
                   </p>
-                  <p className="mt-0.5 text-[10px] leading-snug text-gray-400 group-hover:text-teal-500">
+                  <p className="mt-0.5 text-[10px] leading-snug text-gray-400 group-hover:text-primary-foreground/900">
                     {BLOCK_DESCRIPTIONS[type]}
                   </p>
                 </div>

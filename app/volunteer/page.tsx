@@ -52,12 +52,12 @@ export default function VolunteerPage() {
       <Header />
 
       <main className="flex-1">
-        <section className="bg-teal-700 py-12 px-4 md:px-6">
+        <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
               Gönüllümüz Olun
             </h1>
-            <p className="mt-4 text-teal-100 md:text-lg">
+            <p className="mt-4 text-primary-foreground/90 md:text-lg">
               Myasthenia Gravis topluluğuna katkıda bulunmak isteyen gönüllüleri
               bekliyoruz. Birlikte daha güçlüyüz.
             </p>
@@ -67,7 +67,7 @@ export default function VolunteerPage() {
         <section className="mx-auto max-w-5xl px-4 py-12 md:px-6">
           <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
             <div>
-              <h2 className="mb-4 text-2xl font-bold text-teal-700">
+              <h2 className="mb-4 text-2xl font-bold text-[var(--theme-title-text,var(--primary))]">
                 Neden Gönüllü Olmalısınız?
               </h2>
               <p className="mb-6 leading-relaxed text-gray-700">
@@ -84,7 +84,7 @@ export default function VolunteerPage() {
                   "İdari ve ofis desteği",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-teal-600" />
+                    <span className="h-2 w-2 rounded-full bg-primary" />
                     {item}
                   </li>
                 ))}
@@ -97,16 +97,16 @@ export default function VolunteerPage() {
               </h2>
 
               {status === "success" ? (
-                <div className="rounded-lg border border-teal-200 bg-teal-50 px-5 py-6 text-center">
-                  <p className="font-medium text-teal-700">
+                <div className="rounded-lg border border-primary bg-secondary/50 px-5 py-6 text-center">
+                  <p className="font-medium text-primary">
                     Başvurunuz alındı!
                   </p>
-                  <p className="mt-1 text-sm text-teal-600">
+                  <p className="mt-1 text-sm text-primary">
                     En kısa sürede sizinle iletişime geçeceğiz.
                   </p>
                   <button
                     onClick={() => setStatus("idle")}
-                    className="mt-4 text-sm text-teal-600 underline"
+                    className="mt-4 text-sm text-primary underline"
                   >
                     Yeni başvuru yap
                   </button>
@@ -121,7 +121,7 @@ export default function VolunteerPage() {
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
@@ -133,7 +133,7 @@ export default function VolunteerPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
@@ -144,7 +144,7 @@ export default function VolunteerPage() {
                       placeholder="Telefon Numarası"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
@@ -155,7 +155,7 @@ export default function VolunteerPage() {
                       placeholder="Şehir"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
@@ -165,7 +165,7 @@ export default function VolunteerPage() {
                     rows={4}
                     value={motivation}
                     onChange={(e) => setMotivation(e.target.value)}
-                    className="w-full resize-none rounded-lg bg-gray-200 px-4 py-3 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full resize-none rounded-lg bg-gray-200 px-4 py-3 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
 
                   {errorMsg && (
@@ -186,7 +186,7 @@ export default function VolunteerPage() {
                     <button
                       type="submit"
                       disabled={status === "loading"}
-                      className="rounded-lg bg-teal-600 px-6 py-2 font-medium text-white transition-colors hover:bg-teal-700 disabled:opacity-60"
+                      className="rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary disabled:opacity-60"
                     >
                       {status === "loading" ? "Gönderiliyor…" : "Başvur"}
                     </button>

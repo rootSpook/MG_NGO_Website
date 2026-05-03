@@ -32,14 +32,14 @@ export default async function DonatePage() {
         <section className="mx-auto max-w-6xl px-4 pb-10 pt-8 md:px-6 md:pt-10">
           <div className="grid items-start gap-8 md:grid-cols-[1fr_320px]">
             <div>
-              <h1 className="max-w-xl text-4xl font-bold leading-tight text-teal-700 md:text-6xl">
+              <h1 className="max-w-xl text-4xl font-bold leading-tight text-[var(--theme-title-text,var(--primary))] md:text-6xl">
                 {donateData.title}
               </h1>
               <p className="mt-5 max-w-2xl text-gray-700">{donateData.subtitle}</p>
 
               {/* IBAN entries from Firestore */}
               <div className="mt-7 space-y-4">
-                <h2 className="text-lg font-semibold text-teal-700">Banka Havalesi ile Bagis</h2>
+                <h2 className="text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">Banka Havalesi ile Bagis</h2>
                 <p className="text-sm text-gray-700">
                   Bagislariniz dernek faaliyetleri, hasta destek programlari ve farkindalik
                   calismalari icin kullanilir.
@@ -51,10 +51,10 @@ export default async function DonatePage() {
                     className="rounded-lg bg-white p-5 shadow-sm border border-gray-100"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-base font-semibold text-teal-700">
+                      <span className="text-base font-semibold text-primary">
                         {entry.bankName}
                       </span>
-                      <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-600">
+                      <span className="rounded-full bg-secondary/50 px-2.5 py-0.5 text-xs font-medium text-primary">
                         {entry.currency}
                       </span>
                     </div>
@@ -103,7 +103,7 @@ export default async function DonatePage() {
               <p className="mt-3 text-xs text-gray-600">{donateData.monthlyMessage}</p>
               <button
                 type="button"
-                className="mt-3 h-10 w-full rounded-md bg-teal-700 text-sm font-semibold text-white hover:bg-teal-800"
+                className="mt-3 h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary"
               >
                 Bagis Yap
               </button>
@@ -111,7 +111,7 @@ export default async function DonatePage() {
           </div>
         </section>
 
-        <section className="bg-teal-600 py-12">
+        <section className="bg-primary py-12">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
             <h2 className="mb-7 text-3xl font-bold text-white md:text-5xl">
               Aktif Kampanyalar
@@ -136,7 +136,7 @@ export default async function DonatePage() {
                     />
 
                     <div className="p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                         {campaign.subtitle}
                       </p>
                       <h3 className="mt-1 text-xl font-semibold text-gray-900">
@@ -146,7 +146,7 @@ export default async function DonatePage() {
 
                       <div className="mt-4 h-2 w-full rounded-full bg-gray-200">
                         <div
-                          className="h-2 rounded-full bg-teal-600"
+                          className="h-2 rounded-full bg-primary"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -158,7 +158,7 @@ export default async function DonatePage() {
 
                       <button
                         type="button"
-                        className="mt-4 h-10 w-full rounded-md bg-teal-700 text-sm font-semibold text-white hover:bg-teal-800"
+                        className="mt-4 h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary"
                       >
                         Bagis Yap
                       </button>
@@ -171,7 +171,7 @@ export default async function DonatePage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-12 md:px-6">
-          <h2 className="mb-8 text-3xl font-bold text-teal-700 md:text-5xl">Etkiniz</h2>
+          <h2 className="mb-8 text-3xl font-bold text-[var(--theme-title-text,var(--primary))] md:text-5xl">Etkiniz</h2>
 
           <div className="grid gap-6 md:grid-cols-3">
             <article className="rounded-lg bg-white p-6 text-center shadow-sm">

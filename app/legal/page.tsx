@@ -14,7 +14,7 @@ export default function LegalPage() {
       <Header />
 
       <main className="flex-1">
-        <section className="bg-teal-700 py-12 px-4 md:px-6">
+        <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-4xl">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
               Yasal Uyarı
@@ -25,7 +25,7 @@ export default function LegalPage() {
         <section className="mx-auto max-w-4xl px-4 py-12 md:px-6">
           <div className="space-y-8 text-gray-700">
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-teal-700">
+              <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                 Kuruluş Bilgileri
               </h2>
               <p className="leading-relaxed">
@@ -38,7 +38,7 @@ export default function LegalPage() {
             </div>
 
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-teal-700">
+              <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                 Tıbbi Sorumluluk Reddi
               </h2>
               <p className="leading-relaxed">
@@ -53,7 +53,7 @@ export default function LegalPage() {
             </div>
 
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-teal-700">
+              <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                 İçerik Doğruluğu
               </h2>
               <p className="leading-relaxed">
@@ -66,7 +66,7 @@ export default function LegalPage() {
             </div>
 
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-teal-700">
+              <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                 Bağış ve Mali Şeffaflık
               </h2>
               <p className="leading-relaxed">
@@ -77,14 +77,14 @@ export default function LegalPage() {
             </div>
 
             <div>
-              <h2 className="mb-3 text-lg font-semibold text-teal-700">
+              <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                 İletişim
               </h2>
               <p className="leading-relaxed">
                 Bu sayfada yer alan bilgilerle ilgili sorularınız için{" "}
                 <Link
                   href="/contacts"
-                  className="text-teal-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   iletişim formumuzu
                 </Link>{" "}
@@ -94,7 +94,7 @@ export default function LegalPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/" className="text-sm text-gray-500 hover:text-teal-600">
+            <Link href="/" className="text-sm text-gray-500 hover:text-primary">
               ← Ana sayfaya dön
             </Link>
           </div>

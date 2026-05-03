@@ -26,7 +26,7 @@ export function ReportsHero({ data }: ReportsHeroProps) {
           <span className="text-white">{data.breadcrumbCurrent}</span>
         </nav>
 
-        <h1 className="text-3xl md:text-5xl font-bold text-teal-400 mb-4">
+        <h1 className="text-3xl md:text-5xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">
           {data.title}
         </h1>
         <p className="text-white/90 text-lg md:text-xl max-w-2xl leading-relaxed">

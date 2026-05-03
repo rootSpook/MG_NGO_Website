@@ -13,7 +13,7 @@ export function HeroBlock({ data }: HeroBlockProps) {
 
   return (
     <section
-      className={`relative overflow-hidden ${hasImage ? "min-h-85 md:min-h-105" : "bg-teal-700 py-20"}`}
+      className={`relative overflow-hidden ${hasImage ? "min-h-85 md:min-h-105" : "bg-primary py-20"}`}
     >
       {/* Background image */}
       {hasImage && (
@@ -44,7 +44,7 @@ export function HeroBlock({ data }: HeroBlockProps) {
         {subtitle && (
           <p
             className={`mt-4 max-w-xl text-lg leading-relaxed ${
-              hasImage ? "text-white/85" : "text-teal-100"
+              hasImage ? "text-white/85" : "text-primary-foreground/90"
             }`}
           >
             {subtitle}
@@ -55,7 +55,7 @@ export function HeroBlock({ data }: HeroBlockProps) {
           <div className="mt-8">
             <Link
               href={ctaHref}
-              className="inline-flex items-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-teal-700 shadow-md transition-colors hover:bg-teal-50"
+              className="inline-flex items-center rounded-full bg-white px-7 py-3 text-sm font-semibold text-primary shadow-md transition-colors hover:bg-secondary/50"
             >
               {ctaLabel}
             </Link>

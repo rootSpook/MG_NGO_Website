@@ -33,10 +33,10 @@ function SupporterForm({
     setForm((p) => ({ ...p, [field]: value }));
 
   const cls =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
   return (
-    <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-5">
+    <div className="space-y-3 rounded-xl border border-primary bg-secondary/50 p-5">
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">Destekçi Adı</label>
@@ -83,7 +83,7 @@ function SupporterForm({
         <button
           onClick={() => onSave(form)}
           disabled={saving || !form.name.trim()}
-          className="flex items-center gap-1 rounded-lg bg-teal-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="flex items-center gap-1 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
         >
           <Check className="h-4 w-4" /> {saving ? "Kaydediliyor…" : "Kaydet"}
         </button>
@@ -156,7 +156,7 @@ export default function SupportersPage() {
         {!adding && (
           <button
             onClick={() => { setAdding(true); setEditingId(null); }}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
           >
             <Plus className="h-4 w-4" /> Destekçi Ekle
           </button>
@@ -234,7 +234,7 @@ export default function SupportersPage() {
                     href={s.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 flex items-center gap-1 text-xs text-teal-600 hover:underline"
+                    className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
                   >
                     <ExternalLink className="h-3 w-3" />
                     {s.websiteUrl.replace(/^https?:\/\//, "")}

@@ -34,10 +34,10 @@ function MemberForm({
     setForm((p) => ({ ...p, [field]: value }));
 
   const cls =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
   return (
-    <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-5">
+    <div className="space-y-3 rounded-xl border border-primary bg-secondary/50 p-5">
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">Ad Soyad</label>
@@ -82,7 +82,7 @@ function MemberForm({
         <button
           onClick={() => onSave(form)}
           disabled={saving || !form.name.trim()}
-          className="flex items-center gap-1 rounded-lg bg-teal-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+          className="flex items-center gap-1 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
         >
           <Check className="h-4 w-4" /> {saving ? "Kaydediliyor…" : "Kaydet"}
         </button>
@@ -153,7 +153,7 @@ export default function BoardMembersPage() {
         {!adding && (
           <button
             onClick={() => { setAdding(true); setEditingId(null); }}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
           >
             <Plus className="h-4 w-4" /> Üye Ekle
           </button>
@@ -202,14 +202,14 @@ export default function BoardMembersPage() {
                     className="h-12 w-12 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-lg font-bold text-teal-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-lg font-bold text-primary">
                     {member.name.charAt(0)}
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900">{member.name}</p>
-                  <p className="text-sm text-teal-600">{member.title}</p>
+                  <p className="text-sm text-primary">{member.title}</p>
                   {member.bio && (
                     <p className="mt-1 truncate text-xs text-gray-500">{member.bio}</p>
                   )}

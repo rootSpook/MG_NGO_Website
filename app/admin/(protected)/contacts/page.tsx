@@ -108,7 +108,7 @@ export default function ContactMessagesPage() {
             onClick={() => setFilter(s)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               filter === s
-                ? "bg-teal-600 text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -187,7 +187,7 @@ export default function ContactMessagesPage() {
                     </label>
                     <textarea
                       rows={2}
-                      className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       value={notes[msg.id] ?? ""}
                       onChange={(e) =>
                         setNotes((p) => ({ ...p, [msg.id]: e.target.value }))
@@ -215,7 +215,7 @@ export default function ContactMessagesPage() {
                     <button
                       onClick={() => handleNotesSave(msg.id)}
                       disabled={saving === msg.id}
-                      className="ml-auto rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+                      className="ml-auto rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary disabled:opacity-60"
                     >
                       {saving === msg.id ? "Kaydediliyor…" : "Notu Kaydet"}
                     </button>

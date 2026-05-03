@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   NavigationIcon,
+  Palette,
 } from "lucide-react";
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
   { label: "Tüzük", href: "/admin/bylaws", icon: ScrollText },
   { label: "Raporlar", href: "/admin/reports", icon: BarChart2 },
   { label: "IBAN Bilgileri", href: "/admin/iban", icon: CreditCard },
+  { label: "Tema & Renkler", href: "/admin/theme", icon: Palette },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -45,7 +47,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       >
         <div className="flex h-14 items-center justify-between border-b border-gray-200 px-4">
           {!collapsed && (
-            <span className="text-sm font-bold text-teal-700">Admin Panel</span>
+            <span className="text-sm font-bold text-primary">Admin Panel</span>
           )}
           <button
             onClick={() => setCollapsed((p) => !p)}
@@ -68,7 +70,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 title={collapsed ? label : undefined}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                   isActive
-                    ? "bg-teal-50 text-teal-700"
+                    ? "bg-secondary/50 text-primary"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >

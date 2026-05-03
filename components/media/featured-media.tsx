@@ -11,7 +11,7 @@ export function FeaturedMedia({ data }: FeaturedMediaProps) {
   return (
     <section className="py-12 md:py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-8">
           {data.sectionTitle}
         </h2>
 
@@ -35,7 +35,7 @@ export function FeaturedMedia({ data }: FeaturedMediaProps) {
 
             {/* Featured Content */}
             <div className="p-6 md:p-8 flex flex-col justify-center">
-              <Badge variant="outline" className="w-fit mb-3 text-teal-600 border-teal-600">
+              <Badge variant="outline" className="w-fit mb-3 text-primary border-primary">
                 {data.category}
               </Badge>
               
@@ -56,7 +56,7 @@ export function FeaturedMedia({ data }: FeaturedMediaProps) {
                 <span>{data.readTime}</span>
               </div>
 
-              <Button className="w-fit bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="w-fit bg-primary hover:bg-primary text-white">
                 {data.actionLabel}
                 <ArrowRight size={18} className="ml-2" />
               </Button>

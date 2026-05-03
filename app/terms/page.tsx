@@ -45,12 +45,12 @@ export default function TermsPage() {
       <Header />
 
       <main className="flex-1">
-        <section className="bg-teal-700 py-12 px-4 md:px-6">
+        <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-4xl">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
               Kullanım Şartları
             </h1>
-            <p className="mt-3 text-teal-200">Son güncelleme: Ocak 2025</p>
+            <p className="mt-3 text-primary-foreground/80">Son güncelleme: Ocak 2025</p>
           </div>
         </section>
 
@@ -58,7 +58,7 @@ export default function TermsPage() {
           <div className="space-y-8">
             {sections.map((s) => (
               <div key={s.title}>
-                <h2 className="mb-3 text-lg font-semibold text-teal-700">
+                <h2 className="mb-3 text-lg font-semibold text-[var(--theme-title-text,var(--primary))]">
                   {s.title}
                 </h2>
                 <p className="leading-relaxed text-gray-700">{s.body}</p>
@@ -67,7 +67,7 @@ export default function TermsPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/" className="text-sm text-gray-500 hover:text-teal-600">
+            <Link href="/" className="text-sm text-gray-500 hover:text-primary">
               ← Ana sayfaya dön
             </Link>
           </div>

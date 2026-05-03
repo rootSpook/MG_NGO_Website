@@ -7,22 +7,22 @@ interface CtaBannerBlockProps {
 
 const variantStyles = {
   teal: {
-    section: "bg-teal-600",
+    section: "bg-primary",
     heading: "text-white",
-    body: "text-teal-100",
-    button: "bg-white text-teal-700 hover:bg-teal-50",
+    body: "text-primary-foreground/90",
+    button: "bg-white text-primary hover:bg-secondary/50",
   },
   dark: {
     section: "bg-gray-900",
     heading: "text-white",
     body: "text-gray-300",
-    button: "bg-teal-500 text-white hover:bg-teal-400",
+    button: "bg-secondary/500 text-white hover:bg-primary",
   },
   light: {
-    section: "bg-teal-50 border-y border-teal-100",
-    heading: "text-teal-800",
-    body: "text-teal-700",
-    button: "bg-teal-600 text-white hover:bg-teal-700",
+    section: "bg-secondary/50 border-y border-primary",
+    heading: "text-primary",
+    body: "text-primary",
+    button: "bg-primary text-white hover:bg-primary",
   },
 } as const;
 

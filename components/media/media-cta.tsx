@@ -16,8 +16,8 @@ export function MediaCta({ data }: MediaCtaProps) {
           {/* Newsletter Signup */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
-                <Mail className="w-6 h-6 text-teal-600" />
+              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
+                <Mail className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-gray-900">{data.newsletterTitle}</h3>
             </div>
@@ -30,9 +30,9 @@ export function MediaCta({ data }: MediaCtaProps) {
               <Input
                 type="email"
                 placeholder={data.newsletterInputPlaceholder}
-                className="border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                className="border-gray-300 focus:border-primary focus:ring-primary"
               />
-              <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+              <Button className="w-full bg-primary hover:bg-primary text-white">
                 {data.newsletterButtonLabel}
               </Button>
             </form>
@@ -55,7 +55,7 @@ export function MediaCta({ data }: MediaCtaProps) {
               {data.pressDescription}
             </p>
 
-            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white mb-6">
+            <Button className="w-full bg-secondary/500 hover:bg-primary text-white mb-6">
               <Download size={18} className="mr-2" />
               {data.pressButtonLabel}
             </Button>
@@ -75,7 +75,7 @@ export function MediaCta({ data }: MediaCtaProps) {
         </div>
 
         {/* Quick Contact Banner */}
-        <div className="mt-8 bg-teal-50 rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-8 bg-secondary/50 rounded-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-1">
               {data.bannerTitle}
@@ -84,7 +84,7 @@ export function MediaCta({ data }: MediaCtaProps) {
               {data.bannerDescription}
             </p>
           </div>
-          <Button asChild className="bg-teal-600 hover:bg-teal-700 text-white whitespace-nowrap">
+          <Button asChild className="bg-primary hover:bg-primary text-white whitespace-nowrap">
             <Link href={data.bannerButtonHref}>
               {data.bannerButtonLabel}
             </Link>

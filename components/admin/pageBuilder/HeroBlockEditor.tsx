@@ -3,7 +3,7 @@
 import type { HeroBlockData } from "@/types/pageBuilder";
 
 const inputCls =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
 
 interface HeroBlockEditorProps {
   data: Record<string, unknown>;
@@ -92,7 +92,7 @@ export function HeroBlockEditor({ data, onChange }: HeroBlockEditorProps) {
       <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
         <input
           type="checkbox"
-          className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+          className="rounded border-gray-300 text-primary focus:ring-primary"
           checked={Boolean(d.overlayDark)}
           onChange={(e) => set({ overlayDark: e.target.checked })}
         />

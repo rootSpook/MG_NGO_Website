@@ -58,7 +58,7 @@ const statCards = (s: AdminDashboardStats) => [
 ];
 
 const quickLinks = [
-  { label: "Ana Sayfa İçeriği", href: "/admin/homepage", icon: Home, color: "bg-teal-50 hover:bg-teal-100 text-teal-700" },
+  { label: "Ana Sayfa İçeriği", href: "/admin/homepage", icon: Home, color: "bg-secondary/50 hover:bg-secondary text-primary" },
   { label: "Menü Yönetimi", href: "/admin/menu", icon: Navigation, color: "bg-violet-50 hover:bg-violet-100 text-violet-700" },
   { label: "Yönetim Kurulu", href: "/admin/board-members", icon: Users, color: "bg-blue-50 hover:bg-blue-100 text-blue-700" },
   { label: "Destekçiler", href: "/admin/supporters", icon: Users, color: "bg-green-50 hover:bg-green-100 text-green-700" },
@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
         </p>
         <Link
           href="/editorPanel/dashboard"
-          className="inline-block rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+          className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
         >
           Editör Paneline Git →
         </Link>

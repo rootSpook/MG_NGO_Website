@@ -77,7 +77,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
               <p className="mb-3 text-sm text-white/90 md:text-base">
                 {formatDateTR(blog.publishedAt)}
               </p>
-              <h1 className="max-w-2xl text-3xl font-bold leading-tight text-teal-100 md:text-6xl">
+              <h1 className="max-w-2xl text-3xl font-bold leading-tight text-[var(--theme-title-text,var(--primary))]-foreground/90 md:text-6xl">
                 {blog.title}
               </h1>
               {blog.author && (
@@ -96,11 +96,11 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                   prose-headings:text-gray-900 prose-headings:font-bold
                   prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
                   prose-p:text-gray-700 prose-p:leading-8
-                  prose-a:text-teal-600 prose-a:no-underline hover:prose-a:underline
+                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
                   prose-strong:text-gray-900
                   prose-ul:list-disc prose-ol:list-decimal
                   prose-li:text-gray-700
-                  prose-blockquote:border-teal-400 prose-blockquote:text-gray-600
+                  prose-blockquote:border-primary prose-blockquote:text-gray-600
                   prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-code:text-sm
                   prose-pre:bg-gray-900 prose-pre:text-gray-100"
                 dangerouslySetInnerHTML={{ __html: bodyHtml }}

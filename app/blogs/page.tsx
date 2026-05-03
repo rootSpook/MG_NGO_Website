@@ -26,7 +26,7 @@ export default async function BlogsPage() {
 
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-          <h1 className="mb-6 text-3xl font-bold text-teal-700 md:text-4xl">
+          <h1 className="mb-6 text-3xl font-bold text-[var(--theme-title-text,var(--primary))] md:text-4xl">
             Bloglar
           </h1>
 
@@ -55,7 +55,7 @@ export default async function BlogsPage() {
                       {formatDateTR(blog.publishedAt)}
                     </p>
                     <Link href={`/blogs/${blog.slug}`}>
-                      <h2 className="text-3xl font-bold leading-tight text-teal-700 hover:underline md:text-5xl">
+                      <h2 className="text-3xl font-bold leading-tight text-[var(--theme-title-text,var(--primary))] hover:underline md:text-5xl">
                         {blog.title}
                       </h2>
                     </Link>
@@ -70,7 +70,7 @@ export default async function BlogsPage() {
                       )}
                       <Link
                         href={`/blogs/${blog.slug}`}
-                        className="text-sm font-medium text-teal-600 hover:underline"
+                        className="text-sm font-medium text-primary hover:underline"
                       >
                         Devamını oku →
                       </Link>

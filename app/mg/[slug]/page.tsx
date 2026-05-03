@@ -42,7 +42,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-4 py-10 md:px-6">
           <nav className="mb-6 text-sm text-gray-500">
-            <Link href="/mg" className="hover:text-teal-600">
+            <Link href="/mg" className="hover:text-primary">
               Myasthenia Gravis
             </Link>
             <span className="mx-2">/</span>
@@ -50,7 +50,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
           </nav>
 
           <article className="rounded-xl bg-white px-6 py-8 shadow-sm md:px-10 md:py-10">
-            <h1 className="mb-6 text-3xl font-bold text-teal-700 md:text-4xl">
+            <h1 className="mb-6 text-3xl font-bold text-[var(--theme-title-text,var(--primary))] md:text-4xl">
               {page!.title}
             </h1>
             <div className="prose prose-teal max-w-none text-gray-700">
@@ -66,7 +66,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
             {prev ? (
               <Link
                 href={`/mg/${prev.slug}`}
-                className="text-sm font-medium text-teal-600 hover:underline"
+                className="text-sm font-medium text-primary hover:underline"
               >
                 ← {prev.title}
               </Link>
@@ -76,7 +76,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
             {next ? (
               <Link
                 href={`/mg/${next.slug}`}
-                className="text-sm font-medium text-teal-600 hover:underline"
+                className="text-sm font-medium text-primary hover:underline"
               >
                 {next.title} →
               </Link>
@@ -86,7 +86,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/mg" className="text-sm text-gray-500 hover:text-teal-600">
+            <Link href="/mg" className="text-sm text-gray-500 hover:text-primary">
               ← Tüm konulara dön
             </Link>
           </div>
