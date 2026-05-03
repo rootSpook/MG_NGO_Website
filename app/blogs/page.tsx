@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getPublishedBlogs } from "@/lib/publicContent";
+import { getEditablePageContent } from "@/lib/publicPagesContent";
 
 export const metadata = {
   title: "Bloglar | Myasthenia Gravis Yasam Dernegi",
@@ -18,7 +19,10 @@ function formatDateTR(dateStr: string) {
 }
 
 export default async function BlogsPage() {
-  const blogs = await getPublishedBlogs();
+  const [blogs, pageContent] = await Promise.all([
+    getPublishedBlogs(),
+    getEditablePageContent("bloglar"),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
@@ -27,7 +31,7 @@ export default async function BlogsPage() {
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
           <h1 className="mb-6 text-3xl font-bold text-teal-700 md:text-4xl">
-            Bloglar
+            {pageContent.title}
           </h1>
 
           <div className="space-y-6">
@@ -82,7 +86,7 @@ export default async function BlogsPage() {
 
             {blogs.length === 0 && (
               <div className="rounded-lg bg-white p-10 text-center text-gray-600">
-                Henuz yayinlanmis blog bulunmuyor.
+                {pageContent.emptyText}
               </div>
             )}
           </div>

@@ -11,6 +11,13 @@ export type EditorNavKey =
 
 export type BlogStatus = "published" | "draft" | "archived";
 
+export interface BlogAttachment {
+  id: string;
+  name: string;
+  url: string;
+  size?: number;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -21,6 +28,12 @@ export interface BlogPost {
   summary: string;
   bodyMarkdown: string;
   coverImageUrl?: string;
+  /** @deprecated kept for backward compatibility — prefer attachments */
+  attachmentUrl?: string;
+  /** @deprecated kept for backward compatibility — prefer attachments */
+  attachmentName?: string;
+  /** Multiple file/document attachments shown on the public blog detail page. */
+  attachments?: BlogAttachment[];
 }
 
 export type EventStatus = "planned" | "active" | "done" | "cancelled";
@@ -37,6 +50,8 @@ export interface EventItem {
   capacity: number;
   isOnline: boolean;
   status: EventStatus;
+  attachmentUrl?: string;
+  attachmentName?: string;
 }
 
 export interface NotificationItem {
@@ -48,6 +63,8 @@ export interface NotificationItem {
 
 export type MediaVisibility = "public" | "private";
 
+export type MediaStatus = "draft" | "published";
+
 export interface MediaItem {
   id: string;
   pageKey: string;
@@ -58,6 +75,8 @@ export interface MediaItem {
   featured: boolean;
   imageUrl: string;
   createdAt: string;
+  /** Draft / Published flag — defaults to "published" for backwards compat */
+  status?: MediaStatus;
 }
 
 export type AnnouncementStatus = "published" | "draft";

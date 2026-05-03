@@ -2,8 +2,10 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { ChevronDown, Eye, Code2 } from "lucide-react";
-import { BlogPost } from "@/types/editorPanel";
+import { BlogPost, BlogAttachment } from "@/types/editorPanel";
 import { marked } from "marked";
+import { ImageUploadField } from "@/components/admin/shared/ImageUploadField";
+import { FileAttachmentManager, type AttachmentEntry } from "@/components/admin/shared/FileAttachmentManager";
 
 type BlogFormMode = "create" | "edit";
 
@@ -35,6 +37,23 @@ function renderMarkdown(md: string): string {
   }
 }
 
+/** Build a unified attachments list from either the new array or the legacy fields. */
+function getInitialAttachments(initial?: BlogPost): BlogAttachment[] {
+  if (initial?.attachments && initial.attachments.length > 0) {
+    return initial.attachments;
+  }
+  if (initial?.attachmentUrl) {
+    return [
+      {
+        id: `legacy-${Date.now()}`,
+        name: initial.attachmentName || "Ek dosya",
+        url: initial.attachmentUrl,
+      },
+    ];
+  }
+  return [];
+}
+
 export default function BlogPostForm({
   mode,
   initialData,
@@ -53,12 +72,14 @@ export default function BlogPostForm({
       summary: initialData?.summary ?? "",
       bodyMarkdown: initialData?.bodyMarkdown ?? "",
       coverImageUrl: initialData?.coverImageUrl ?? "",
+      attachmentUrl: initialData?.attachmentUrl ?? "",
+      attachmentName: initialData?.attachmentName ?? "",
+      attachments: getInitialAttachments(initialData),
     }),
     [initialData]
   );
 
   const [formData, setFormData] = useState<BlogPost>(initialForm);
-  const [imageName, setImageName] = useState("");
   const [editorTab, setEditorTab] = useState<"write" | "preview">("write");
   const [previewHtml, setPreviewHtml] = useState("");
 
@@ -73,10 +94,20 @@ export default function BlogPostForm({
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
+  function handleAttachmentsChange(next: AttachmentEntry[]) {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: next,
+      // Keep legacy single-attachment fields in sync with the first entry so
+      // older readers (public detail page) keep working.
+      attachmentUrl: next[0]?.url ?? "",
+      attachmentName: next[0]?.name ?? "",
+    }));
+  }
+
   function handleReset() {
     if (mode === "edit" && initialData) {
-      setFormData(initialData);
-      setImageName("");
+      setFormData({ ...initialData, attachments: getInitialAttachments(initialData) });
     } else {
       setFormData({
         id: `blog-${Date.now()}`,
@@ -88,8 +119,10 @@ export default function BlogPostForm({
         summary: "",
         bodyMarkdown: "",
         coverImageUrl: "",
+        attachmentUrl: "",
+        attachmentName: "",
+        attachments: [],
       });
-      setImageName("");
     }
     onClear?.();
   }
@@ -206,7 +239,7 @@ export default function BlogPostForm({
           </div>
         </div>
 
-        {/* Right column: summary + image */}
+        {/* Right column: summary + image + multi attachments */}
         <div className="space-y-5">
           <div>
             <label className="mb-2 block text-[14px] font-medium text-[#222]">
@@ -223,22 +256,28 @@ export default function BlogPostForm({
 
           <div>
             <label className="mb-2 block text-[14px] font-medium text-[#222]">
-              Kapak Görseli Ekle
+              Kapak Görseli
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                setImageName(file?.name ?? "");
-              }}
-              className="block w-full text-[14px] text-[#333]"
+            <ImageUploadField
+              label=""
+              value={formData.coverImageUrl ?? ""}
+              onChange={(url) => handleChange("coverImageUrl", url)}
+              hint="Önerilen oran 16:9. Yüklediğiniz görsel public liste ve detay sayfasında kullanılır."
             />
-            {imageName && (
-              <p className="mt-2 text-[13px] text-[#666]">
-                Seçilen dosya: {imageName}
-              </p>
-            )}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-[14px] font-medium text-[#222]">
+              Belgeler / Dosyalar
+            </label>
+            <FileAttachmentManager
+              label=""
+              hint="Birden fazla dosya yükleyebilirsiniz. Yüklenen dosyalar public blog detay sayfasında görünür."
+              value={formData.attachments ?? []}
+              onChange={handleAttachmentsChange}
+              accept="application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+              multiple
+            />
           </div>
         </div>
       </div>

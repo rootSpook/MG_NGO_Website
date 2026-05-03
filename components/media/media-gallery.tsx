@@ -51,6 +51,9 @@ export function MediaGallery({ title, viewAllLabel, images }: MediaGalleryProps)
               onClick={() => openLightbox(image.id)}
               className={`${image.colorClass} aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group`}
             >
+              {image.imageUrl && (
+                <img src={image.imageUrl} alt={image.title} className="h-full w-full object-cover" />
+              )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end p-3">
                 <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                   {image.title}
@@ -80,8 +83,15 @@ export function MediaGallery({ title, viewAllLabel, images }: MediaGalleryProps)
             </button>
 
             <div className="max-w-4xl w-full">
-              <div className={`${selectedImageData.colorClass} aspect-video rounded-lg`} />
+              <div className={`${selectedImageData.colorClass} aspect-video overflow-hidden rounded-lg`}>
+                {selectedImageData.imageUrl && (
+                  <img src={selectedImageData.imageUrl} alt={selectedImageData.title} className="h-full w-full object-contain" />
+                )}
+              </div>
               <p className="text-white text-center mt-4 text-lg">{selectedImageData.title}</p>
+              {selectedImageData.description && (
+                <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-white/75">{selectedImageData.description}</p>
+              )}
             </div>
 
             <button

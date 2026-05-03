@@ -20,6 +20,11 @@ export interface NavItem {
   pageType?: "cms" | "special" | null;
   /** Template that was chosen when the CMS page was created. Only set when pageType='cms'. */
   templateType?: TemplateType | null;
+  /**
+   * Publish state of the linked page. Drafts are hidden from the public
+   * navigation bar but remain accessible by URL. Defaults to 'published'.
+   */
+  pageStatus?: "draft" | "published" | null;
 }
 
 export const DEFAULT_NAV_ITEMS: NavItem[] = [
@@ -71,4 +76,16 @@ export async function deleteNavItem(key: string): Promise<void> {
     .filter((i) => i.key !== key)
     .map((item, idx) => ({ ...item, sortOrder: idx + 1 }));
   await saveNavConfig(filtered);
+}
+
+/** Update a single field on a nav item (e.g. pageStatus) and persist. */
+export async function patchNavItem(
+  key: string,
+  patch: Partial<NavItem>
+): Promise<void> {
+  const current = await getNavConfig();
+  const next = current.map((item) =>
+    item.key === key ? { ...item, ...patch } : item
+  );
+  await saveNavConfig(next);
 }

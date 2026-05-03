@@ -108,13 +108,19 @@ export function ReportsGrid({
                   <span>{report.pages} sayfa</span>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                >
-                  <Download size={16} className="mr-2" />
-                  İndir {report.format}
-                </Button>
+                {report.fileUrl ? (
+                  <Button asChild size="sm" className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                    <a href={report.fileUrl} target="_blank" rel="noopener noreferrer">
+                      <Download size={16} className="mr-2" />
+                      İndir {report.format}
+                    </a>
+                  </Button>
+                ) : (
+                  <Button size="sm" className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                    <Download size={16} className="mr-2" />
+                    İndir {report.format}
+                  </Button>
+                )}
               </div>
             </div>
           ))}

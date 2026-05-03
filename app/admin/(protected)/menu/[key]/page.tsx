@@ -6,15 +6,26 @@ import {
   ArrowLeft, Check, AlertCircle, FileText, Eye, EyeOff,
   Layers, WandSparkles, ExternalLink,
 } from "lucide-react";
-import { getNavConfig, type NavItem } from "@/lib/firebase/navServices";
+import { getNavConfig, patchNavItem, type NavItem } from "@/lib/firebase/navServices";
 import {
   getPageBlocks, savePageBlocks,
-  getAdminPageBySlug, type AdminPage,
+  getAdminPageBySlug, getAdminPageDataBySlug, upsertPageContent, type AdminPage,
 } from "@/lib/firebase/adminServices";
-import { revalidatePageAction } from "@/app/admin/actions";
+import { revalidatePageAction, revalidatePublicPathAction } from "@/app/admin/actions";
 import { BlockEditorCanvas } from "@/components/admin/pageBuilder/BlockEditorCanvas";
-import { PagePreview } from "@/components/admin/pageBuilder/PagePreview";
+import { InlineBlogManager } from "@/components/admin/InlineBlogManager";
+import { InlineEventManager } from "@/components/admin/InlineEventManager";
+import { InlineMediaManager } from "@/components/admin/InlineMediaManager";
+import { InlineCampaignManager } from "@/components/admin/InlineCampaignManager";
+import { InlineImpactManager } from "@/components/admin/InlineImpactManager";
+import { InlineFaqManager } from "@/components/admin/InlineFaqManager";
+import { InlineHakkimizdaManager } from "@/components/admin/InlineHakkimizdaManager";
 import type { PageSection, TemplateType, PageBlockData } from "@/types/pageBuilder";
+import { getEditablePageConfig, mergeEditablePageData } from "@/lib/pageContentConfig";
+import type { FaqItemEntry } from "@/components/admin/shared/FaqItemsEditor";
+import type { ImpactItemEntry } from "@/components/admin/shared/ImpactItemsEditor";
+import type { TeamMemberEntry } from "@/components/admin/shared/TeamMembersEditor";
+import type { ContentImageEntry } from "@/components/admin/shared/ContentImagesEditor";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -26,8 +37,32 @@ function formatDate(iso: string) {
   });
 }
 
+function lines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeSpecialPageData(key: string, draft: Record<string, string>): Record<string, unknown> {
+  if (key !== "hakkimizda") return draft;
+
+  // Vision and mission are still entered as multi-line text fields and
+  // stored as arrays. Team and images are managed through their dedicated
+  // editors (team[] / heroImage / contentImages) and merged on top of this.
+  return {
+    title: draft.title,
+    intro: draft.intro,
+    vision: lines(draft.vision ?? ""),
+    mission: lines(draft.mission ?? ""),
+  };
+}
+
 const inputCls =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
+
+const textareaCls =
+  "w-full min-h-28 rounded-lg border border-gray-300 px-3 py-2 text-sm leading-6 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500";
 
 /** Which admin section handles a 'special' nav key */
 const SPECIAL_MANAGE_LINKS: Record<string, { label: string; href: string }> = {
@@ -62,6 +97,11 @@ export default function MenuItemContentPage() {
 
   // ── Legacy markdown migration
   const [legacyPage, setLegacyPage] = useState<AdminPage | null>(null);
+  const [specialDraft, setSpecialDraft] = useState<Record<string, string>>({});
+  const [originalSpecialDraft, setOriginalSpecialDraft] = useState<Record<string, string> | null>(null);
+  const [originalSpecialPageData, setOriginalSpecialPageData] = useState<Record<string, unknown> | null>(null);
+  // Live mutable copy of structured pageData (faq, impactItems, etc.)
+  const [currentSpecialPageData, setCurrentSpecialPageData] = useState<Record<string, unknown> | null>(null);
 
   // ── UI state
   const [loadingContent, setLoadingContent] = useState(false);
@@ -69,6 +109,14 @@ export default function MenuItemContentPage() {
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState(0);
+
+  const specialConfig = getEditablePageConfig(menuKey);
+  const contentSlug = navItem?.pageSlug ?? menuKey;
+  const previewHref = navItem?.href ?? `/pages/${contentSlug}`;
+  const previewSrc = `${previewHref}${previewHref.includes("?") ? "&" : "?"}adminPreview=${previewVersion}`;
+  const isCmsPage = Boolean(navItem?.pageSlug && navItem.pageType !== "special" && !specialConfig);
+  const isSpecialEditablePage = Boolean(specialConfig);
 
   // ── Step 1: resolve nav item
   useEffect(() => {
@@ -78,14 +126,24 @@ export default function MenuItemContentPage() {
       .finally(() => setLoadingMeta(false));
   }, [menuKey]);
 
-  // ── Step 2: load page blocks once we have the nav item
+  // ── Step 2: load page content once we have the nav item
   useEffect(() => {
-    if (!navItem?.pageSlug) return;
+    if (!navItem) return;
     setLoadingContent(true);
-    const slug = navItem.pageSlug;
+    const slug = navItem.pageSlug ?? menuKey;
 
     (async () => {
       try {
+        if (specialConfig) {
+          const pageData = await getAdminPageDataBySlug(slug);
+          const merged = mergeEditablePageData(menuKey, pageData);
+          setSpecialDraft(merged);
+          setOriginalSpecialDraft(merged);
+          setOriginalSpecialPageData(pageData);
+          setCurrentSpecialPageData(pageData);
+          return;
+        }
+
         // Try block-based data first
         const blocks = await getPageBlocks(slug);
         if (blocks) {
@@ -124,7 +182,7 @@ export default function MenuItemContentPage() {
         setLoadingContent(false);
       }
     })();
-  }, [navItem]);
+  }, [navItem, menuKey]);
 
   function markDirty() {
     setDirty(true);
@@ -151,12 +209,35 @@ export default function MenuItemContentPage() {
   }
 
   async function handleSave() {
-    if (!navItem?.pageSlug) return;
+    if (!navItem) return;
     setSaving(true);
     try {
+      if (isSpecialEditablePage) {
+        const nextPageData = {
+          ...(currentSpecialPageData ?? originalSpecialPageData ?? {}),
+          ...normalizeSpecialPageData(menuKey, specialDraft),
+        };
+        await upsertPageContent(contentSlug, nextPageData);
+        await revalidatePublicPathAction(previewHref);
+        setOriginalSpecialDraft(specialDraft);
+        setOriginalSpecialPageData(nextPageData);
+        setCurrentSpecialPageData(nextPageData);
+        setPreviewVersion((v) => v + 1);
+        setSaved(true);
+        setDirty(false);
+        return;
+      }
+
+      if (!navItem.pageSlug) return;
       const blockData: PageBlockData = { templateType, sections: draftSections };
       await savePageBlocks(navItem.pageSlug, draftTitle, blockData, draftStatus);
+      // Mirror the page status on the nav item so the public navbar can hide
+      // draft pages.
+      await patchNavItem(navItem.key, { pageStatus: draftStatus });
       await revalidatePageAction(navItem.pageSlug);
+      await revalidatePublicPathAction(previewHref);
+      await revalidatePublicPathAction("/");
+      setPreviewVersion((v) => v + 1);
       setOriginalData({ title: draftTitle, status: draftStatus, sections: draftSections, templateType });
       setSaved(true);
       setDirty(false);
@@ -169,6 +250,14 @@ export default function MenuItemContentPage() {
   }
 
   function handleDiscard() {
+    if (isSpecialEditablePage && originalSpecialDraft) {
+      setSpecialDraft(originalSpecialDraft);
+      setCurrentSpecialPageData(originalSpecialPageData);
+      setDirty(false);
+      setSaved(false);
+      return;
+    }
+
     if (!originalData) return;
     setDraftTitle(originalData.title);
     setDraftStatus(originalData.status);
@@ -207,9 +296,8 @@ export default function MenuItemContentPage() {
     );
   }
 
-  // ── Special page (no CMS slug) — show info card
-  const isCmsPage = Boolean(navItem.pageSlug);
-  if (!isCmsPage) {
+  // ── Unsupported special page — show info card
+  if (!isCmsPage && !isSpecialEditablePage) {
     const link = SPECIAL_MANAGE_LINKS[navItem.key];
     return (
       <div className="space-y-6">
@@ -246,6 +334,212 @@ export default function MenuItemContentPage() {
     );
   }
 
+  if (isSpecialEditablePage && specialConfig) {
+    return (
+      <div className="space-y-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-3">
+            <button
+              onClick={() => router.push("/admin/menu")}
+              className="mt-0.5 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div>
+              <p className="text-xs text-gray-400">
+                <button onClick={() => router.push("/admin/menu")} className="hover:text-teal-600 hover:underline">
+                  Menü Yönetimi
+                </button>
+                {" / "}<span className="text-gray-600">{navItem.label}</span>
+              </p>
+              <h1 className="text-xl font-bold text-gray-900">{navItem.label}</h1>
+              <p className="text-xs text-gray-400">
+                Public URL:{" "}
+                <span className="font-mono text-gray-600">{previewHref}</span>
+                {" · "}
+                <a
+                  href={previewHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-teal-600 hover:underline"
+                >
+                  Sayfayı görüntüle ↗
+                </a>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setPreviewMode((p) => !p)}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                previewMode
+                  ? "border-teal-300 bg-teal-50 text-teal-700"
+                  : "border-gray-200 text-gray-500 hover:bg-gray-50"
+              }`}
+            >
+              {previewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {previewMode ? "Önizlemeyi Kapat" : "Önizle"}
+            </button>
+
+            {dirty && (
+              <button
+                onClick={handleDiscard}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
+              >
+                Geri Al
+              </button>
+            )}
+
+            <button
+              onClick={handleSave}
+              disabled={saving || !dirty}
+              className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-50"
+            >
+              <Check className="h-4 w-4" />
+              {saving ? "Kaydediliyor…" : saved ? "Kaydedildi ✓" : "Kaydet"}
+            </button>
+          </div>
+        </div>
+
+        {loadingContent ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-200" />
+            ))}
+          </div>
+        ) : (
+          <div className={previewMode ? "grid grid-cols-2 gap-4" : ""}>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    İçerik Blokları
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Bu alanlar public sayfadaki mevcut bölümlere bağlıdır.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {specialConfig.fields.map((field) => (
+                    <label key={field.name} className="block">
+                      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        {field.label}
+                      </span>
+                      {field.type === "textarea" ? (
+                        <textarea
+                          className={textareaCls}
+                          value={specialDraft[field.name] ?? ""}
+                          onChange={(e) => {
+                            setSpecialDraft((prev) => ({ ...prev, [field.name]: e.target.value }));
+                            markDirty();
+                          }}
+                        />
+                      ) : (
+                        <input
+                          className={inputCls}
+                          value={specialDraft[field.name] ?? ""}
+                          onChange={(e) => {
+                            setSpecialDraft((prev) => ({ ...prev, [field.name]: e.target.value }));
+                            markDirty();
+                          }}
+                        />
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {navItem.key === "bloglar" && <InlineBlogManager />}
+              {navItem.key === "etkinlikler" && <InlineEventManager />}
+              {navItem.key === "medya" && <InlineMediaManager />}
+              {navItem.key === "bagis" && (
+                <>
+                  <InlineCampaignManager />
+                  <InlineImpactManager
+                    items={
+                      (currentSpecialPageData?.impactItems as ImpactItemEntry[] | undefined) ?? []
+                    }
+                    onChange={(next) => {
+                      setCurrentSpecialPageData((prev) => ({
+                        ...(prev ?? {}),
+                        impactItems: next,
+                      }));
+                      markDirty();
+                    }}
+                  />
+                </>
+              )}
+              {navItem.key === "iletisim" && (
+                <InlineFaqManager
+                  items={
+                    (currentSpecialPageData?.faq as FaqItemEntry[] | undefined) ?? []
+                  }
+                  onChange={(next) => {
+                    setCurrentSpecialPageData((prev) => ({
+                      ...(prev ?? {}),
+                      faq: next,
+                    }));
+                    markDirty();
+                  }}
+                />
+              )}
+              {navItem.key === "hakkimizda" && (
+                <InlineHakkimizdaManager
+                  heroImage={(currentSpecialPageData?.heroImage as string | undefined) ?? ""}
+                  onHeroImageChange={(url) => {
+                    setCurrentSpecialPageData((prev) => ({
+                      ...(prev ?? {}),
+                      heroImage: url,
+                    }));
+                    markDirty();
+                  }}
+                  team={
+                    (currentSpecialPageData?.team as TeamMemberEntry[] | undefined) ?? []
+                  }
+                  onTeamChange={(next) => {
+                    setCurrentSpecialPageData((prev) => ({
+                      ...(prev ?? {}),
+                      team: next,
+                    }));
+                    markDirty();
+                  }}
+                  contentImages={
+                    (currentSpecialPageData?.contentImages as ContentImageEntry[] | undefined) ?? []
+                  }
+                  onContentImagesChange={(next) => {
+                    setCurrentSpecialPageData((prev) => ({
+                      ...(prev ?? {}),
+                      contentImages: next,
+                    }));
+                    markDirty();
+                  }}
+                />
+              )}
+              {SPECIAL_MANAGE_LINKS[navItem.key] && !["bloglar", "etkinlikler", "medya", "bagis", "iletisim"].includes(navItem.key) && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Liste/kart verileri ayrı koleksiyonlardan gelir.{" "}
+                  <a
+                    href={SPECIAL_MANAGE_LINKS[navItem.key].href}
+                    className="font-medium text-amber-700 underline"
+                  >
+                    {SPECIAL_MANAGE_LINKS[navItem.key].label}
+                  </a>{" "}
+                  ekranından yönetebilirsiniz.
+                </div>
+              )}
+            </div>
+
+            {previewMode && (
+              <LiveRoutePreview src={previewSrc} href={previewHref} />
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── Full block editor
   return (
     <div className="space-y-5">
@@ -271,7 +565,7 @@ export default function MenuItemContentPage() {
               <span className="font-mono text-gray-600">/{navItem.pageSlug}</span>
               {" · "}
               <a
-                href={`/pages/${navItem.pageSlug}`}
+                href={previewHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-teal-600 hover:underline"
@@ -390,17 +684,7 @@ export default function MenuItemContentPage() {
 
             {/* Right: preview (only when previewMode is on) */}
             {previewMode && (
-              <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm"
-                   style={{ height: "calc(100vh - 200px)" }}>
-                <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2">
-                  <Eye className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500">Canlı Önizleme</span>
-                  <span className="ml-auto text-[10px] text-gray-300">pointer-events devre dışı</span>
-                </div>
-                <div className="h-[calc(100%-36px)]">
-                  <PagePreview sections={draftSections} />
-                </div>
-              </div>
+              <LiveRoutePreview src={previewSrc} href={previewHref} />
             )}
           </div>
 
@@ -428,5 +712,34 @@ function Breadcrumb({ label, onBack }: { label: string; onBack: () => void }) {
       {" / "}
       <span className="font-medium text-gray-700">{label}</span>
     </p>
+  );
+}
+
+function LiveRoutePreview({ src, href }: { src: string; href: string }) {
+  return (
+    <div
+      className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white"
+      style={{ height: "calc(100vh - 200px)" }}
+    >
+      <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2">
+        <Eye className="h-3.5 w-3.5 text-gray-400" />
+        <span className="text-xs font-medium text-gray-500">Canlı Önizleme</span>
+        <span className="truncate font-mono text-[10px] text-gray-300">{href}</span>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto text-[10px] font-medium text-teal-600 hover:underline"
+        >
+          Yeni sekmede aç
+        </a>
+      </div>
+      <iframe
+        key={src}
+        src={src}
+        title={`${href} önizleme`}
+        className="h-[calc(100%-36px)] w-full bg-white"
+      />
+    </div>
   );
 }

@@ -394,6 +394,21 @@ export async function getAdminPageBySlug(slug: string): Promise<AdminPage | null
   };
 }
 
+export async function getAdminPageDataBySlug(
+  slug: string
+): Promise<Record<string, unknown> | null> {
+  const snap = await getDocs(
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("slug", "==", slug),
+      where("type", "==", "page"),
+      where("deletedAt", "==", null)
+    )
+  );
+  if (snap.empty) return null;
+  return (snap.docs[0].data().pageData as Record<string, unknown> | null) ?? null;
+}
+
 export async function getAdminPages(): Promise<AdminPage[]> {
   const snap = await getDocs(
     query(

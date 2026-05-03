@@ -53,6 +53,9 @@ export function MediaGrid({ title, categories, items, loadMoreLabel }: MediaGrid
             >
               {/* Image */}
               <div className={`h-48 ${item.imageClass} flex items-center justify-center relative overflow-hidden`}>
+                {item.imageUrl && (
+                  <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
               </div>
 

@@ -112,7 +112,13 @@ export async function getActiveCampaigns(): Promise<(Campaign & { id: string })[
     where("status", "==", CAMPAIGN_STATUS.ACTIVE)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => fromDoc<Campaign>(d));
+  return (
+    snap.docs
+      // Hide soft-deleted campaigns — filter client-side to avoid the
+      // composite index Firestore would otherwise require.
+      .filter((d) => !d.data().deletedAt)
+      .map((d) => fromDoc<Campaign>(d))
+  );
 }
 
 // ── IBAN entries (public read) ────────────────────────────────────────────────
