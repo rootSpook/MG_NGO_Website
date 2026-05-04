@@ -12,6 +12,11 @@ import { BlockTypeSelector } from "./BlockTypeSelector";
 import { HeroBlockEditor } from "./HeroBlockEditor";
 import { RichTextBlockEditor } from "./RichTextBlockEditor";
 import { CtaBannerBlockEditor } from "./CtaBannerBlockEditor";
+import { EventGridBlockEditor } from "./EventGridBlockEditor";
+import { ReportListBlockEditor } from "./ReportListBlockEditor";
+import { TeamGridBlockEditor } from "./TeamGridBlockEditor";
+import { FaqBlockEditor } from "./FaqBlockEditor";
+import { StatsBarBlockEditor } from "./StatsBarBlockEditor";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -106,6 +111,16 @@ function BlockSpecificEditor({
       return <RichTextBlockEditor data={section.data} onChange={onChange} />;
     case "cta-banner":
       return <CtaBannerBlockEditor data={section.data} onChange={onChange} />;
+    case "event-grid":
+      return <EventGridBlockEditor data={section.data} onChange={onChange} />;
+    case "report-list":
+      return <ReportListBlockEditor data={section.data} onChange={onChange} />;
+    case "team-grid":
+      return <TeamGridBlockEditor data={section.data} onChange={onChange} />;
+    case "faq-accordion":
+      return <FaqBlockEditor data={section.data} onChange={onChange} />;
+    case "stats-bar":
+      return <StatsBarBlockEditor data={section.data} onChange={onChange} />;
     default:
       return (
         <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700 border border-amber-200">

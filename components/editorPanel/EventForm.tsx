@@ -30,15 +30,6 @@ const venueOptions = [
   "Toplum Merkezi",
 ];
 
-const cityOptions = [
-  "İstanbul",
-  "İzmir",
-  "Ankara",
-  "Online",
-  "Bursa",
-  "Antalya",
-];
-
 const monthOptions = [
   "Ocak",
   "Şubat",
@@ -79,6 +70,8 @@ export default function EventForm({
       capacity: initialData?.capacity ?? 0,
       isOnline: initialData?.isOnline ?? false,
       status: initialData?.status ?? "planned",
+      attachmentUrl: initialData?.attachmentUrl ?? "",
+      attachmentName: initialData?.attachmentName ?? "",
     }),
     [initialData]
   );
@@ -116,6 +109,8 @@ export default function EventForm({
         capacity: 0,
         isOnline: false,
         status: "planned",
+        attachmentUrl: "",
+        attachmentName: "",
       });
       setStartMonth("");
       setEndMonth("");
@@ -168,21 +163,13 @@ export default function EventForm({
             <label className="mb-2 block text-[14px] font-medium text-[#222]">
               Şehir
             </label>
-            <div className="relative">
-              <select
-                value={formData.city}
-                onChange={(e) => handleChange("city", e.target.value)}
-                className="h-[48px] w-full appearance-none rounded-[10px] border border-transparent bg-[#e3e3e3] px-4 outline-none focus:border-[#2f80ed]"
-              >
-                <option value="">Seçiniz</option>
-                {cityOptions.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2f80ed]" />
-            </div>
+            <input
+              type="text"
+              value={formData.city}
+              onChange={(e) => handleChange("city", e.target.value)}
+              placeholder="Şehir adını yazın (örn. İstanbul)"
+              className="h-[48px] w-full rounded-[10px] border border-transparent bg-[#e3e3e3] px-4 outline-none focus:border-[#2f80ed]"
+            />
           </div>
 
           <div>
@@ -377,6 +364,44 @@ export default function EventForm({
               placeholder="Örn. İstanbul Toplum Merkezi"
               className="h-[48px] w-full rounded-[10px] border border-transparent bg-[#e3e3e3] px-4 outline-none focus:border-[#2f80ed]"
             />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-[14px] font-medium text-[#222]">
+              PDF Dosyası
+            </label>
+            <input
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  handleChange("attachmentUrl", String(reader.result ?? ""));
+                  handleChange("attachmentName", file.name);
+                };
+                reader.readAsDataURL(file);
+              }}
+              className="block w-full text-[14px] text-[#333]"
+            />
+            {formData.attachmentUrl && (
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-white px-3 py-2 text-[13px] text-[#555]">
+                <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-teal-700 underline">
+                  {formData.attachmentName || "PDF dosyasını görüntüle"}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleChange("attachmentUrl", "");
+                    handleChange("attachmentName", "");
+                  }}
+                  className="text-red-600"
+                >
+                  Sil
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

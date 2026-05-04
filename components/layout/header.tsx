@@ -17,8 +17,14 @@ export function Header() {
     getNavConfig().then(setNavItems).catch(() => setNavItems(DEFAULT_NAV_ITEMS))
   }, [])
 
-  const visibleItems = navItems.filter((item) => item.isVisible && !item.isDonateButton)
-  const donateItem = navItems.find((item) => item.isDonateButton && item.isVisible)
+  // Hide draft pages from the public nav. Special routes don't carry a
+  // pageStatus so they pass through unchanged. Items still remain reachable
+  // via direct URL — only the menu link disappears.
+  const isPublic = (item: NavItem) =>
+    item.isVisible && (item.pageStatus ?? "published") !== "draft"
+
+  const visibleItems = navItems.filter((item) => isPublic(item) && !item.isDonateButton)
+  const donateItem = navItems.find((item) => item.isDonateButton && isPublic(item))
 
   return (
     <header className="w-full">

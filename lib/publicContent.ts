@@ -26,8 +26,15 @@ import {
   seedSettings,
   seedEvents,
 } from "@/lib/firebase/seedData";
+import { mergeEditablePageData } from "@/lib/pageContentConfig";
 
 // ── Types (kept here so existing imports don't break) ─────────────────────────
+
+export interface PublicBlogAttachment {
+  id: string;
+  name: string;
+  url: string;
+}
 
 export interface PublicBlogPost {
   id: string;
@@ -38,6 +45,12 @@ export interface PublicBlogPost {
   publishedAt: string;
   coverImage: string;
   bodyMarkdown: string;
+  /** @deprecated use attachments — kept for backward compat with single-PDF data */
+  attachmentUrl?: string;
+  /** @deprecated use attachments — kept for backward compat with single-PDF data */
+  attachmentName?: string;
+  /** Multiple file/document attachments displayed on the public blog detail page. */
+  attachments?: PublicBlogAttachment[];
   /** @deprecated use bodyMarkdown – kept for backward compat */
   content: string[];
 }
@@ -70,12 +83,15 @@ export interface MediaListItem {
   date: string;
   category: string;
   imageClass: string;
+  imageUrl?: string;
   readTime: string;
 }
 
 export interface MediaGalleryItem {
   id: number;
   title: string;
+  description?: string;
+  imageUrl?: string;
   colorClass: string;
 }
 
@@ -131,6 +147,7 @@ export interface ReportListItem {
   category: string;
   pages: number;
   format: string;
+  fileUrl?: string;
 }
 
 export interface ReportsPageData {
@@ -175,6 +192,31 @@ function firestoreTimestampToISO(ts: unknown): string {
 
 // ── Blogs ─────────────────────────────────────────────────────────────────────
 
+function attachmentsFromContentItem(item: unknown): PublicBlogAttachment[] {
+  const record = item as Record<string, unknown>;
+  const list = record?.attachments;
+  if (Array.isArray(list)) {
+    return list
+      .filter((entry): entry is Record<string, unknown> => Boolean(entry))
+      .map((entry, idx) => ({
+        id: String(entry.id ?? `att-${idx}`),
+        name: String(entry.name ?? "Ek dosya"),
+        url: String(entry.url ?? ""),
+      }))
+      .filter((entry) => Boolean(entry.url));
+  }
+  // Legacy single-attachment shape
+  const url = typeof record?.attachmentUrl === "string" ? record.attachmentUrl : "";
+  if (url) {
+    const name =
+      typeof record?.attachmentName === "string" && record.attachmentName
+        ? record.attachmentName
+        : "Ek dosya";
+    return [{ id: "legacy", name, url }];
+  }
+  return [];
+}
+
 export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
   try {
     const items = await getPublishedContentByType("post");
@@ -188,6 +230,9 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
         bodyMarkdown: item.bodyMarkdown ?? "",
+        attachmentUrl: (item as unknown as Record<string, string>).attachmentUrl ?? "",
+        attachmentName: (item as unknown as Record<string, string>).attachmentName ?? "",
+        attachments: attachmentsFromContentItem(item),
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
       }));
     }
@@ -207,6 +252,8 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
       publishedAt: b.publishedAt ?? new Date().toISOString().split("T")[0],
       coverImage: b.coverImageUrl ?? FALLBACK_COVER,
       bodyMarkdown: b.bodyMarkdown ?? "",
+      attachmentUrl: "",
+      attachmentName: "",
       content: b.bodyMarkdown ? b.bodyMarkdown.split("\n\n") : [],
     }));
 }
@@ -226,6 +273,9 @@ export async function getBlogBySlug(
         publishedAt: firestoreTimestampToISO(item.publishedAt).split("T")[0],
         coverImage: item.coverImageUrl ?? FALLBACK_COVER,
         bodyMarkdown: item.bodyMarkdown ?? "",
+        attachmentUrl: (item as unknown as Record<string, string>).attachmentUrl ?? "",
+        attachmentName: (item as unknown as Record<string, string>).attachmentName ?? "",
+        attachments: attachmentsFromContentItem(item),
         content: item.bodyMarkdown ? item.bodyMarkdown.split("\n\n") : [],
       };
     }
@@ -264,6 +314,8 @@ export interface PublicEvent {
   venue: string;
   eventType: string;
   capacity: number;
+  attachmentUrl?: string;
+  attachmentName?: string;
 }
 
 export async function getPublicEvents(): Promise<PublicEvent[]> {
@@ -283,6 +335,8 @@ export async function getPublicEvents(): Promise<PublicEvent[]> {
         venue: (e as unknown as Record<string, string>).venue ?? "",
         eventType: (e as unknown as Record<string, string>).eventType ?? "",
         capacity: e.capacity ?? 0,
+        attachmentUrl: (e as unknown as Record<string, string>).attachmentUrl ?? "",
+        attachmentName: (e as unknown as Record<string, string>).attachmentName ?? "",
       }));
     }
   } catch (err) {
@@ -304,6 +358,8 @@ export async function getPublicEvents(): Promise<PublicEvent[]> {
       venue: e.venue,
       eventType: e.eventType,
       capacity: e.capacity,
+      attachmentUrl: "",
+      attachmentName: "",
     }));
 }
 
@@ -388,6 +444,64 @@ export async function getSupportersForPublic(): Promise<PublicSupporter[]> {
   return [];
 }
 
+// ── Donation impact items ─────────────────────────────────────────────────────
+
+export interface PublicImpactItem {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const DEFAULT_IMPACT_ITEMS: PublicImpactItem[] = [
+  {
+    id: "default-medical",
+    icon: "pill",
+    title: "Tıbbi Erişim",
+    description: "Hastaların ihtiyaç duyduğu tedavi ve ilaçlara ulaşmasına katkı sağlar.",
+  },
+  {
+    id: "default-support",
+    icon: "heart-handshake",
+    title: "Hasta Desteği",
+    description: "Destek grupları ve danışmanlık hizmetlerini finanse eder.",
+  },
+  {
+    id: "default-awareness",
+    icon: "scan-search",
+    title: "Farkındalık",
+    description: "Toplumda erken tanı bilincini ve doğru bilgi erişimini güçlendirir.",
+  },
+];
+
+export async function getDonationImpactItems(): Promise<PublicImpactItem[]> {
+  try {
+    const item = await getContentBySlug("bagis");
+    const list = (item?.pageData as Record<string, unknown> | undefined)?.impactItems;
+    if (Array.isArray(list)) {
+      return list
+        .filter((entry): entry is Record<string, unknown> => Boolean(entry))
+        .map((entry, idx) => ({
+          id: String(entry.id ?? `imp-${idx}`),
+          icon: String(entry.icon ?? "sparkles"),
+          title: String(entry.title ?? ""),
+          description: String(entry.description ?? ""),
+        }))
+        .filter((entry) => entry.title);
+    }
+  } catch (err) {
+    console.error("[publicContent] getDonationImpactItems Firestore error:", err);
+  }
+  return DEFAULT_IMPACT_ITEMS;
+}
+
+export async function getDonationCampaignById(
+  id: string
+): Promise<DonationCampaign | null> {
+  const data = await getDonationPageData();
+  return data.campaigns.find((c) => c.id === id) ?? null;
+}
+
 // ── Donation page ─────────────────────────────────────────────────────────────
 
 export async function getDonationPageData(): Promise<DonationPageData> {
@@ -401,7 +515,7 @@ export async function getDonationPageData(): Promise<DonationPageData> {
         title: c.title,
         subtitle: c.subtitle ?? "",
         description: c.description ?? "",
-        imageUrl: c.imageUrl ?? FALLBACK_COVER,
+        imageUrl: c.imageUrl ?? (c as unknown as Record<string, string>).coverImageUrl ?? FALLBACK_COVER,
         currentAmount: c.raisedAmount ?? 0,
         targetAmount: c.goalAmount ?? 0,
       }));
@@ -437,11 +551,17 @@ export async function getDonationPageData(): Promise<DonationPageData> {
   // Primary IBAN for the quick-display section (first entry or seed)
   const ibanEntries = await getDonationIbanEntries();
   const primary = ibanEntries[0];
+  let pageContent = mergeEditablePageData("bagis");
+  try {
+    const item = await getContentBySlug("bagis");
+    pageContent = mergeEditablePageData("bagis", item?.pageData as Record<string, unknown> | null | undefined);
+  } catch {
+    // use defaults
+  }
 
   return {
-    title: "Myasthenia Gravis Topluluğunu Destekleyin",
-    subtitle:
-      "Yapacaginiz bagislar; farkindalik calismalarina ve MG ile yasayan hastalara destek olmamiza yardimci olur.",
+    title: pageContent.title,
+    subtitle: pageContent.subtitle,
     bankName: primary?.bankName ?? seedSettings.bankName ?? "",
     accountName: primary?.accountHolder ?? seedSettings.accountName ?? "",
     iban: primary?.iban ?? seedSettings.iban ?? "",
@@ -455,17 +575,36 @@ export async function getDonationPageData(): Promise<DonationPageData> {
 
 export async function getMediaPageData(): Promise<MediaPageData> {
   let galleryImages: MediaGalleryItem[] = [];
+  let updateItems: MediaListItem[] = [];
+  let pageContent = mergeEditablePageData("medya");
 
   try {
     const assets = await getPublicMediaAssets();
-    const galleryAssets = assets.filter((a) => a.pageKey === "media-gallery");
+    // Hide drafts on the public side
+    const publishedAssets = assets.filter(
+      (a) => ((a as unknown as Record<string, unknown>).status ?? "published") === "published"
+    );
+    const galleryAssets = publishedAssets.filter((a) => a.pageKey === "media-gallery");
     if (galleryAssets.length > 0) {
       galleryImages = galleryAssets.map((a, i) => ({
         id: i + 1,
         title: a.altText ?? a.originalFilename,
+        description: a.description ?? "",
+        imageUrl: (a as unknown as Record<string, string>).downloadUrl ?? "",
         colorClass: "bg-gradient-to-br from-teal-400 to-teal-600",
       }));
     }
+    const updateAssets = publishedAssets.filter((a) => a.pageKey === "media-updates");
+    updateItems = updateAssets.map((a, i) => ({
+      id: i + 1,
+      title: a.altText ?? a.originalFilename,
+      excerpt: a.description ?? "",
+      date: new Date(firestoreTimestampToISO(a.createdAt)).toLocaleDateString("tr-TR"),
+      category: a.tags?.[0] ?? "Duyuru",
+      imageClass: "bg-gradient-to-br from-teal-400 to-teal-600",
+      imageUrl: (a as unknown as Record<string, string>).downloadUrl ?? "",
+      readTime: "2 dk okuma",
+    }));
   } catch (err) {
     console.error("[publicContent] getMediaPageData Firestore error:", err);
   }
@@ -480,28 +619,33 @@ export async function getMediaPageData(): Promise<MediaPageData> {
       }));
   }
 
+  try {
+    const item = await getContentBySlug("medya");
+    pageContent = mergeEditablePageData("medya", item?.pageData as Record<string, unknown> | null | undefined);
+  } catch {
+    // use defaults
+  }
+
   return {
     hero: {
       breadcrumbCurrent: "Medya",
-      title: "Medya ve Haberler",
-      description:
-        "Myasthenia Gravis topluluğundan en güncel haberleri, etkinlikleri ve medya içeriklerini takip edin. Galeri, basın materyalleri ve duyurulara buradan ulaşın.",
+      title: pageContent.heroTitle,
+      description: pageContent.heroDescription,
     },
     featured: {
       sectionTitle: "Öne Çıkan Hikaye",
       badgeLabel: "Öne Çıkan",
       category: "Haber",
-      title: "MG Farkındalık Ayı 2025: Birlikte Daha Güçlüyüz",
-      description:
-        "Haziran ayı Myasthenia Gravis Farkındalık Ayı. Bu yıl şimdiye kadarki en kapsamlı kampanyamızı başlatıyoruz. Farkındalığı artırmak, hikayeleri paylaşmak ve daha güçlü bir topluluk oluşturmak için bize katılın.",
+      title: pageContent.featuredTitle,
+      description: pageContent.featuredDescription,
       date: "10 Mart 2025",
       readTime: "5 dk okuma",
       actionLabel: "Hikayeyi Oku",
       videoLabel: "Hikayemizi İzleyin",
     },
-    listSectionTitle: "Son Güncellemeler",
+    listSectionTitle: pageContent.listSectionTitle,
     categories: ["Tümü", "Haber", "Etkinlik", "Basın", "Duyuru"],
-    items: [
+    items: updateItems.length > 0 ? updateItems : [
       { id: 1, title: "İstanbul'da Yeni Tedavi Merkezi Açıldı", excerpt: "Sabancı Üniversitesi Hastanesi bünyesinde kapsamlı bakım sunan yeni bir MG tedavi merkezi hizmete girdi.", date: "8 Mart 2025", category: "Haber", imageClass: "bg-gradient-to-br from-blue-400 to-blue-600", readTime: "3 dk okuma" },
       { id: 2, title: "2025 Bahar Topluluk Buluşması", excerpt: "Hastaları, yakınlarını ve sağlık profesyonellerini bir araya getiren yıllık bahar buluşmamıza katılın.", date: "5 Mart 2025", category: "Etkinlik", imageClass: "bg-gradient-to-br from-green-400 to-green-600", readTime: "2 dk okuma" },
       { id: 3, title: "Avrupa MG Vakfı ile Ortaklık", excerpt: "Avrupa genelinde araştırma iş birliklerini genişletmek için yeni ortaklığımızı duyurmaktan mutluluk duyuyoruz.", date: "28 Şubat 2025", category: "Basın", imageClass: "bg-gradient-to-br from-purple-400 to-purple-600", readTime: "4 dk okuma" },
@@ -511,7 +655,7 @@ export async function getMediaPageData(): Promise<MediaPageData> {
     ],
     loadMoreLabel: "Daha Fazla",
     gallery: {
-      title: "Fotoğraf Galerisi",
+      title: pageContent.galleryTitle,
       viewAllLabel: "Tüm Fotoğrafları Gör",
       images: galleryImages.length > 0 ? galleryImages : [
         { id: 1, title: "MG Farkındalık Ayı Yürüyüşü 2024", colorClass: "bg-gradient-to-br from-teal-400 to-teal-600" },
@@ -531,8 +675,8 @@ export async function getMediaPageData(): Promise<MediaPageData> {
       pressButtonLabel: "Basın Kitini İndir",
       pressEmail: "press@mg.org.tr",
       pressPhone: "+90 000 000 00 00",
-      bannerTitle: "Paylaşmak istediğiniz bir hikaye mi var?",
-      bannerDescription: "Sizden haber almayı çok isteriz. MG yolculuğunuzu topluluğumuzla paylaşın.",
+      bannerTitle: pageContent.bannerTitle,
+      bannerDescription: pageContent.bannerDescription,
       bannerButtonLabel: "Bize Ulaşın",
       bannerButtonHref: "/contacts",
     },
@@ -548,6 +692,7 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
   let featuredDate = "";
   let featuredPages = 0;
   let featuredFormat = "PDF";
+  let pageContent = mergeEditablePageData("raporlar");
 
   try {
     const items = await getPublishedContentByType("policy");
@@ -568,6 +713,7 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
         category: item.categoryId ?? "Genel",
         pages: item.pages ?? 0,
         format: item.format ?? "PDF",
+        fileUrl: (item as unknown as Record<string, string>).coverImageUrl ?? "",
       }));
     }
   } catch (err) {
@@ -590,15 +736,22 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
       category: r.categoryId,
       pages: r.pages,
       format: r.format,
+      fileUrl: (r as unknown as Record<string, string>).coverImageUrl ?? "",
     }));
+  }
+
+  try {
+    const item = await getContentBySlug("raporlar");
+    pageContent = mergeEditablePageData("raporlar", item?.pageData as Record<string, unknown> | null | undefined);
+  } catch {
+    // use defaults
   }
 
   return {
     hero: {
       breadcrumbCurrent: "Raporlar",
-      title: "Raporlar ve Yayınlar",
-      description:
-        "Myasthenia Gravis hakkında kapsamlı araştırma raporlarına, tıbbi yayınlara ve indirilebilir kaynaklara erişin.",
+      title: pageContent.heroTitle,
+      description: pageContent.heroDescription,
     },
     featured: {
       sectionTitle: "Öne Çıkan Rapor",
@@ -613,12 +766,11 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
       readOnlineLabel: "Çevrim İçi Oku",
       coverCaption: featuredTitle,
     },
-    listSectionTitle: "Tüm Raporlar",
+    listSectionTitle: pageContent.listSectionTitle,
     categories: ["Tümü", "Yıllık Raporlar", "Araştırma", "Tıbbi Kılavuzlar", "Topluluk"],
     reports,
     searchPlaceholder: "Raporlarda ara...",
-    emptyStateText: "Kriterlerinize uygun rapor bulunamadı.",
+    emptyStateText: pageContent.emptyStateText,
     loadMoreLabel: "Daha Fazla Rapor",
   };
 }
-

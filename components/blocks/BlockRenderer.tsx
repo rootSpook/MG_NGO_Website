@@ -1,17 +1,12 @@
-import type { PageSection, BlockType } from "@/types/pageBuilder";
+import type { PageSection } from "@/types/pageBuilder";
 import { HeroBlock } from "./HeroBlock";
 import { RichTextBlock } from "./RichTextBlock";
 import { CtaBannerBlock } from "./CtaBannerBlock";
-
-// Placeholder for blocks implemented in later steps
-function ComingSoon({ type }: { type: BlockType }) {
-  if (process.env.NODE_ENV === "production") return null;
-  return (
-    <div className="my-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-8 text-center text-sm text-gray-400">
-      Block type <span className="font-mono font-semibold text-gray-600">"{type}"</span> is not yet rendered.
-    </div>
-  );
-}
+import { EventGridBlock } from "./EventGridBlock";
+import { ReportListBlock } from "./ReportListBlock";
+import { TeamGridBlock } from "./TeamGridBlock";
+import { FaqAccordionBlock } from "./FaqAccordionBlock";
+import { StatsBarBlock } from "./StatsBarBlock";
 
 function renderBlock(section: PageSection) {
   switch (section.type) {
@@ -22,11 +17,15 @@ function renderBlock(section: PageSection) {
     case "cta-banner":
       return <CtaBannerBlock key={section.id} data={section.data} />;
     case "event-grid":
+      return <EventGridBlock key={section.id} data={section.data} />;
     case "report-list":
+      return <ReportListBlock key={section.id} data={section.data} />;
     case "team-grid":
+      return <TeamGridBlock key={section.id} data={section.data} />;
     case "faq-accordion":
+      return <FaqAccordionBlock key={section.id} data={section.data} />;
     case "stats-bar":
-      return <ComingSoon key={section.id} type={section.type} />;
+      return <StatsBarBlock key={section.id} data={section.data} />;
     default:
       return null;
   }

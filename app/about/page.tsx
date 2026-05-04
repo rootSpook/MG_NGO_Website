@@ -10,6 +10,17 @@ export default async function AboutUsPage() {
       <Header />
 
       <main className="flex-1">
+        {/* Hero image (optional) */}
+        {aboutContent.heroImage && (
+          <section className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto pt-8">
+            <img
+              src={aboutContent.heroImage}
+              alt={aboutContent.title}
+              className="w-full rounded-2xl object-cover h-56 md:h-80 lg:h-96"
+            />
+          </section>
+        )}
+
         {/* About Us Section */}
         <section className="py-12 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
@@ -68,37 +79,70 @@ export default async function AboutUsPage() {
           </ul>
         </section>
 
+        {/* Content images gallery (optional) */}
+        {aboutContent.contentImages && aboutContent.contentImages.length > 0 && (
+          <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {aboutContent.contentImages.map((img) => (
+                <figure
+                  key={img.id}
+                  className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.caption || "Görsel"}
+                    className="h-48 w-full object-cover"
+                  />
+                  {img.caption && (
+                    <figcaption className="px-4 py-3 text-sm text-gray-600">
+                      {img.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Meet Our Team Section */}
         <section className="py-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">Ekibimiz</h2>
 
           <ul className="space-y-8">
-            {aboutContent.team.map((member) => (
-              <li key={member.name} className="flex gap-6 items-start">
-              <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg
-                    width="60"
-                    height="60"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="30" cy="22" r="12" fill="#9CA3AF" />
-                    <path
-                      d="M10 55C10 42 18 35 30 35C42 35 50 42 50 55"
-                      fill="#9CA3AF"
+            {aboutContent.team.map((member, idx) => (
+              <li key={member.name + idx} className="flex gap-6 items-start">
+                <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                  {member.photoUrl ? (
+                    <img
+                      src={member.photoUrl}
+                      alt={member.name}
+                      className="h-full w-full object-cover"
                     />
-                  </svg>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <svg
+                        width="60"
+                        height="60"
+                        viewBox="0 0 60 60"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle cx="30" cy="22" r="12" fill="#9CA3AF" />
+                        <path
+                          d="M10 55C10 42 18 35 30 35C42 35 50 42 50 55"
+                          fill="#9CA3AF"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900 mb-2">• {member.name}</p>
-                <p className="text-gray-700 leading-relaxed text-sm">
-                  {member.description}
-                </p>
-              </div>
-            </li>
+                <div>
+                  <p className="font-medium text-gray-900 mb-2">• {member.name}</p>
+                  <p className="text-gray-700 leading-relaxed text-sm">
+                    {member.description}
+                  </p>
+                </div>
+              </li>
             ))}
           </ul>
         </section>

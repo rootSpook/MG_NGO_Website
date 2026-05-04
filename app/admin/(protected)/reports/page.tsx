@@ -69,6 +69,32 @@ function ReportForm({
         <input className={cls} value={form.fileUrl} onChange={(e) => set("fileUrl", e.target.value)} placeholder="https://…" />
       </div>
 
+      <div>
+        <label className="mb-1 block text-xs font-medium text-gray-600">PDF Yükle</label>
+        <input
+          type="file"
+          accept="application/pdf,.pdf"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => set("fileUrl", String(reader.result ?? ""));
+            reader.readAsDataURL(file);
+          }}
+          className="block w-full text-sm text-gray-600"
+        />
+        {form.fileUrl && (
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs">
+            <a href={form.fileUrl} target="_blank" rel="noopener noreferrer" className="text-teal-700 underline">
+              PDF dosyasını görüntüle
+            </a>
+            <button type="button" onClick={() => set("fileUrl", "")} className="text-red-600">
+              Sil
+            </button>
+          </div>
+        )}
+      </div>
+
       <label className="flex items-center gap-2 text-sm text-gray-700">
         <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} className="h-4 w-4 rounded" />
         Öne çıkan rapor olarak işaretle

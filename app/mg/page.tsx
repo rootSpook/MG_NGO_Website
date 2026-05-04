@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MG_SECTIONS } from "@/lib/publicContent";
+import { getEditablePageContent } from "@/lib/publicPagesContent";
 
 export const metadata = {
   title: "Myasthenia Gravis Hakkında | MG Yaşam Derneği",
@@ -9,7 +10,9 @@ export const metadata = {
     "Myasthenia Gravis hakkında kapsamlı bilgiye ulaşın: hastalık nedir, belirtileri, tedavi seçenekleri, riskli ilaçlar ve günlük yaşam önerileri.",
 };
 
-export default function MGLandingPage() {
+export default async function MGLandingPage() {
+  const pageContent = await getEditablePageContent("mg");
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
@@ -18,11 +21,10 @@ export default function MGLandingPage() {
         <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
-              Myasthenia Gravis
+              {pageContent.heroTitle}
             </h1>
             <p className="mt-4 text-primary-foreground/90 md:text-lg">
-              Hastalık hakkında bilmeniz gereken her şey — belirtilerden
-              tedaviye, günlük yaşam ipuçlarına kadar.
+              {pageContent.heroDescription}
             </p>
           </div>
         </section>

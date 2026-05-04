@@ -3,19 +3,20 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Eye, EyeOff, Save, RotateCcw, GripVertical, LayoutList,
-  Plus, X, ArrowLeft, ArrowRight, Check,
+  Eye, EyeOff, Save, RotateCcw, GripVertical, LayoutList, Trash2,
+  Plus, X, ArrowLeft, ArrowRight, Check, ImagePlus,
   Newspaper, CalendarDays, ClipboardList, BookOpen, Layers,
 } from "lucide-react";
 import {
-  DEFAULT_NAV_ITEMS, getNavConfig, saveNavConfig, createNavItem,
+  DEFAULT_NAV_ITEMS, getNavConfig, saveNavConfig, createNavItem, deleteNavItem,
   type NavItem,
 } from "@/lib/firebase/navServices";
 import { savePageBlocks } from "@/lib/firebase/adminServices";
 import {
   seedSectionsForTemplate, TEMPLATE_LABELS,
-  type TemplateType,
+  type TemplateType, type PageSection, type HeroBlockData,
 } from "@/types/pageBuilder";
+import { ImageUploadField } from "@/components/admin/shared/ImageUploadField";
 
 // ── Turkish slugify ───────────────────────────────────────────────────────────
 
@@ -58,7 +59,11 @@ export default function MenuManagementPage() {
   const [wizardKey, setWizardKey] = useState("");
   const [wizardKeyEdited, setWizardKeyEdited] = useState(false);
   const [wizardTemplate, setWizardTemplate] = useState<TemplateType | null>(null);
+  const [wizardHeroImage, setWizardHeroImage] = useState("");
   const [wizardSaving, setWizardSaving] = useState(false);
+
+  // Delete confirmation state
+  const [pendingDeleteKey, setPendingDeleteKey] = useState<string | null>(null);
 
   useEffect(() => {
     getNavConfig()
@@ -110,7 +115,23 @@ export default function MenuManagementPage() {
     setWizardKey("");
     setWizardKeyEdited(false);
     setWizardTemplate(null);
+    setWizardHeroImage("");
     setWizardOpen(true);
+  }
+
+  async function handleDeletePage(key: string) {
+    try {
+      await deleteNavItem(key);
+      setItems((prev) =>
+        prev
+          .filter((item) => item.key !== key)
+          .map((item, idx) => ({ ...item, sortOrder: idx + 1 }))
+      );
+      setPendingDeleteKey(null);
+    } catch (err) {
+      console.error(err);
+      alert("Sayfa silinirken bir hata oluştu.");
+    }
   }
 
   function closeWizard() {
@@ -139,12 +160,37 @@ export default function MenuManagementPage() {
         pageType: "cms",
         templateType: wizardTemplate,
         pageSlug: wizardKey,
+        pageStatus: "draft",
       };
       await createNavItem(newItem);
-      await savePageBlocks(wizardKey, wizardLabel, {
-        templateType: wizardTemplate,
-        sections: seedSectionsForTemplate(wizardTemplate),
-      }, "draft");
+
+      // Seed sections — if the template starts with a hero block and the
+      // admin uploaded a hero image during the wizard, prefill it.
+      const seededSections = seedSectionsForTemplate(wizardTemplate);
+      const sectionsWithHero: PageSection[] = wizardHeroImage
+        ? seededSections.map((section) =>
+            section.type === "hero"
+              ? {
+                  ...section,
+                  data: {
+                    ...(section.data as unknown as HeroBlockData),
+                    imageUrl: wizardHeroImage,
+                    title: wizardLabel,
+                  } as unknown as Record<string, unknown>,
+                }
+              : section
+          )
+        : seededSections;
+
+      await savePageBlocks(
+        wizardKey,
+        wizardLabel,
+        {
+          templateType: wizardTemplate,
+          sections: sectionsWithHero,
+        },
+        "draft"
+      );
       // Refresh local items
       const updated = await getNavConfig();
       setItems(updated);
@@ -249,6 +295,11 @@ export default function MenuManagementPage() {
                   {item.pageType === "cms" && (
                     <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-700">CMS</span>
                   )}
+                  {item.pageStatus === "draft" && item.pageType === "cms" && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                      Taslak
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-gray-400">{item.href}</p>
               </div>
@@ -260,16 +311,13 @@ export default function MenuManagementPage() {
                 {item.isVisible ? "Görünür" : "Gizli"}
               </span>
 
-              {/* Manage content — for any item with a linked page */}
-              {item.pageSlug && (
-                <button
-                  onClick={() => router.push(`/admin/menu/${item.key}`)}
-                  className="flex items-center gap-1.5 rounded-lg border border-primary px-3 py-1.5 text-sm text-primary hover:bg-secondary/50"
-                >
-                  <LayoutList className="h-4 w-4" />
-                  İçeriği Yönet
-                </button>
-              )}
+              <button
+                onClick={() => router.push(`/admin/menu/${item.key}`)}
+                className="flex items-center gap-1.5 rounded-lg border border-primary px-3 py-1.5 text-sm text-primary hover:bg-secondary/50"
+              >
+                <LayoutList className="h-4 w-4" />
+                İçeriği Yönet
+              </button>
 
               {/* Visibility toggle */}
               <button
@@ -282,6 +330,36 @@ export default function MenuManagementPage() {
               >
                 {item.isVisible ? <><EyeOff className="h-4 w-4" />Gizle</> : <><Eye className="h-4 w-4" />Göster</>}
               </button>
+
+              {/* Delete (only available for CMS pages — built-in special routes
+                  cannot be deleted because they correspond to real app routes) */}
+              {item.pageType === "cms" && (
+                pendingDeleteKey === item.key ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-medium text-red-600">Silinsin mi?</span>
+                    <button
+                      onClick={() => handleDeletePage(item.key)}
+                      className="rounded-lg bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700"
+                    >
+                      Evet
+                    </button>
+                    <button
+                      onClick={() => setPendingDeleteKey(null)}
+                      className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 hover:bg-gray-50"
+                    >
+                      Hayır
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setPendingDeleteKey(item.key)}
+                    className="rounded-lg border border-red-200 p-1.5 text-red-500 hover:bg-red-50"
+                    title="Sayfayı sil"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )
+              )}
             </div>
           ))}
         </div>
@@ -294,6 +372,8 @@ export default function MenuManagementPage() {
           <li>Gizlenen öğeler URL ile hâlâ erişilebilir; yalnızca menüden kaldırılır.</li>
           <li>Sıralama değişiklikleri "Sıralamayı Kaydet" butonuyla uygulanır.</li>
           <li><strong>CMS</strong> rozeti, blok editörüyle yönetilen sayfaları gösterir.</li>
+          <li><strong>Taslak</strong> durumundaki CMS sayfaları public navigasyon menüsünden gizlenir; URL ile yine erişilebilirler.</li>
+          <li>CMS sayfaları çöp kutusuna alınmadan kalıcı olarak silinir; yalnızca CMS rozeti olan sayfalar silinebilir.</li>
         </ul>
       </div>
 
@@ -417,6 +497,25 @@ export default function MenuManagementPage() {
                     value={`${seedSectionsForTemplate(wizardTemplate).length} blok`}
                   />
                 </div>
+
+                {seedSectionsForTemplate(wizardTemplate).some((s) => s.type === "hero") && (
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <div className="mb-2 flex items-center gap-2 text-xs text-gray-500">
+                      <ImagePlus className="h-3.5 w-3.5" />
+                      <span className="font-semibold uppercase tracking-wide">
+                        Hero Arkaplan Görseli (opsiyonel)
+                      </span>
+                    </div>
+                    <ImageUploadField
+                      label=""
+                      value={wizardHeroImage}
+                      onChange={setWizardHeroImage}
+                      hint="Sayfa oluşturulurken hero bölümünün arkaplanına yerleştirilir. Sonradan da değiştirebilirsiniz."
+                      aspectClassName="aspect-[16/9]"
+                    />
+                  </div>
+                )}
+
                 <p className="text-xs text-gray-400">
                   Sayfa <strong>Taslak</strong> olarak oluşturulacak. İçeriği düzenleyip yayınlayabilirsiniz.
                 </p>

@@ -71,6 +71,10 @@ export async function getEditorBlogs(): Promise<BlogPost[]> {
       summary: data.excerpt ?? data.summary ?? "",
       bodyMarkdown: data.bodyMarkdown ?? "",
       coverImageUrl: data.coverImageUrl ?? "",
+      imageUrl: data.coverImageUrl ?? "",
+      attachmentUrl: data.attachmentUrl ?? "",
+      attachmentName: data.attachmentName ?? "",
+      attachments: Array.isArray(data.attachments) ? data.attachments : [],
     };
   });
 }
@@ -97,6 +101,10 @@ export async function createEditorBlog(blog: Omit<BlogPost, "id">): Promise<stri
     ogImageAssetRef: null,
     coverAssetRef: null,
     attachmentAssetRefs: [],
+    attachmentUrl: blog.attachmentUrl ?? "",
+    attachmentName: blog.attachmentName ?? "",
+    attachments: blog.attachments ?? [],
+    coverImageUrl: blog.coverImageUrl ?? "",
     seoTitle: null,
     seoDescription: null,
     canonicalUrl: null,
@@ -135,6 +143,9 @@ export async function updateEditorBlog(id: string, data: Partial<BlogPost>): Pro
   if (data.author !== undefined) update.authorName = data.author;
   if (data.bodyMarkdown !== undefined) update.bodyMarkdown = data.bodyMarkdown;
   if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl;
+  if (data.attachmentUrl !== undefined) update.attachmentUrl = data.attachmentUrl;
+  if (data.attachmentName !== undefined) update.attachmentName = data.attachmentName;
+  if (data.attachments !== undefined) update.attachments = data.attachments;
 
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), update);
 }
@@ -174,22 +185,26 @@ export async function getEditorEvents(): Promise<EventItem[]> {
     orderBy("startsAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      title: data.title ?? "",
-      date: tsToDateString(data.startsAt),
-      endDate: data.endsAt ? tsToDateString(data.endsAt) : undefined,
-      location: data.locationName ?? "",
-      city: data.city ?? "",
-      venue: data.venue ?? "",
-      type: data.eventType ?? "",
-      capacity: data.capacity ?? 0,
-      isOnline: data.isOnline ?? false,
-      status: firestoreToEventStatus(data.status),
-    };
-  });
+  return snap.docs
+    .filter((d) => !d.data().deletedAt)
+    .map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: data.title ?? "",
+        date: tsToDateString(data.startsAt),
+        endDate: data.endsAt ? tsToDateString(data.endsAt) : undefined,
+        location: data.locationName ?? "",
+        city: data.city ?? "",
+        venue: data.venue ?? "",
+        type: data.eventType ?? "",
+        capacity: data.capacity ?? 0,
+        isOnline: data.isOnline ?? false,
+        status: firestoreToEventStatus(data.status),
+        attachmentUrl: data.attachmentUrl ?? "",
+        attachmentName: data.attachmentName ?? "",
+      };
+    });
 }
 
 export async function createEditorEvent(event: Omit<EventItem, "id">): Promise<string> {
@@ -209,6 +224,8 @@ export async function createEditorEvent(event: Omit<EventItem, "id">): Promise<s
     venue: event.venue,
     eventType: event.type,
     capacity: event.capacity,
+    attachmentUrl: event.attachmentUrl ?? "",
+    attachmentName: event.attachmentName ?? "",
     coverAssetRef: null,
     createdBy: userId,
     updatedBy: userId,
@@ -238,6 +255,8 @@ export async function updateEditorEvent(id: string, data: Partial<EventItem>): P
   if (data.capacity !== undefined) update.capacity = data.capacity;
   if (data.isOnline !== undefined) update.isOnline = data.isOnline;
   if (data.status !== undefined) update.status = eventStatusToFirestore(data.status);
+  if (data.attachmentUrl !== undefined) update.attachmentUrl = data.attachmentUrl;
+  if (data.attachmentName !== undefined) update.attachmentName = data.attachmentName;
 
   await updateDoc(doc(db, COLLECTIONS.EVENTS, id), update);
 }
@@ -270,6 +289,7 @@ export async function getEditorMedia(): Promise<MediaItem[]> {
       featured: data.featured ?? false,
       imageUrl: data.downloadUrl ?? "",
       createdAt: tsToISOString(data.createdAt),
+      status: (data.status as MediaItem["status"]) ?? "published",
     };
   });
 }
@@ -293,12 +313,32 @@ export async function createEditorMedia(item: Omit<MediaItem, "id">): Promise<st
     tags: item.tags,
     featured: item.featured,
     pageKey: item.pageKey,
+    status: item.status ?? "published",
     uploadedBy: userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     deletedAt: null,
   });
   return ref.id;
+}
+
+export async function updateEditorMedia(
+  id: string,
+  data: Partial<MediaItem>
+): Promise<void> {
+  const update: DocumentData = { updatedAt: serverTimestamp() };
+  if (data.pageKey !== undefined) update.pageKey = data.pageKey;
+  if (data.title !== undefined) {
+    update.altText = data.title;
+    update.originalFilename = data.title;
+  }
+  if (data.description !== undefined) update.description = data.description;
+  if (data.tags !== undefined) update.tags = data.tags;
+  if (data.visibility !== undefined) update.visibility = data.visibility;
+  if (data.featured !== undefined) update.featured = data.featured;
+  if (data.imageUrl !== undefined) update.downloadUrl = data.imageUrl;
+  if (data.status !== undefined) update.status = data.status;
+  await updateDoc(doc(db, COLLECTIONS.MEDIA_ASSETS, id), update);
 }
 
 export async function deleteEditorMedia(id: string): Promise<void> {
@@ -316,18 +356,20 @@ export async function getEditorAnnouncements(): Promise<AnnouncementItem[]> {
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      title: data.title ?? "",
-      content: data.content ?? "",
-      audience: (data.audience as AnnouncementItem["audience"]) ?? "all",
-      publishedAt: tsToDateString(data.publishedAt),
-      status: (data.status as AnnouncementItem["status"]) ?? "draft",
-      pinned: data.pinned ?? false,
-    };
-  });
+  return snap.docs
+    .filter((d) => !d.data().deletedAt)
+    .map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: data.title ?? "",
+        content: data.content ?? "",
+        audience: (data.audience as AnnouncementItem["audience"]) ?? "all",
+        publishedAt: tsToDateString(data.publishedAt),
+        status: (data.status as AnnouncementItem["status"]) ?? "draft",
+        pinned: data.pinned ?? false,
+      };
+    });
 }
 
 export async function createEditorAnnouncement(
@@ -408,22 +450,26 @@ export async function getEditorCampaigns(): Promise<CampaignItem[]> {
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      title: data.title ?? "",
-      description: data.description ?? "",
-      goalAmount: data.goalAmount ?? 0,
-      currency: data.currency ?? "TRY",
-      raisedAmount: data.raisedAmount ?? 0,
-      status: (data.status as CampaignItem["status"]) ?? "draft",
-      startDate: tsToDateString(data.startDate),
-      endDate: tsToDateString(data.endDate),
-      coverImageUrl: data.coverImageUrl ?? "",
-      featured: data.featured ?? false,
-    };
-  });
+  return snap.docs
+    // Filter out soft-deleted campaigns client-side so we don't need a
+    // composite index for (deletedAt, createdAt).
+    .filter((d) => !d.data().deletedAt)
+    .map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: data.title ?? "",
+        description: data.description ?? "",
+        goalAmount: data.goalAmount ?? 0,
+        currency: data.currency ?? "TRY",
+        raisedAmount: data.raisedAmount ?? 0,
+        status: (data.status as CampaignItem["status"]) ?? "draft",
+        startDate: tsToDateString(data.startDate),
+        endDate: tsToDateString(data.endDate),
+        coverImageUrl: data.coverImageUrl ?? "",
+        featured: data.featured ?? false,
+      };
+    });
 }
 
 export async function createEditorCampaign(
@@ -445,6 +491,7 @@ export async function createEditorCampaign(
       ? Timestamp.fromDate(new Date(campaign.endDate))
       : null,
     coverImageUrl: campaign.coverImageUrl,
+    imageUrl: campaign.coverImageUrl,
     featured: campaign.featured,
     createdBy: userId,
     updatedBy: userId,
@@ -477,6 +524,7 @@ export async function updateEditorCampaign(
       ? Timestamp.fromDate(new Date(data.endDate))
       : null;
   if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl;
+  if (data.coverImageUrl !== undefined) update.imageUrl = data.coverImageUrl;
   if (data.featured !== undefined) update.featured = data.featured;
   await updateDoc(doc(db, COLLECTIONS.CAMPAIGNS, id), update);
 }
