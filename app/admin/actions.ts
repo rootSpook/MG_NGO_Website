@@ -10,3 +10,8 @@ export async function revalidatePageAction(slug: string): Promise<void> {
   revalidatePath(`/pages/${slug}`);
   revalidatePath("/");
 }
+
+export async function revalidatePublicPathAction(path: string): Promise<void> {
+  revalidatePath(path);
+  revalidatePath("/");
+}

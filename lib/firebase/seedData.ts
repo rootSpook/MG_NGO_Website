@@ -88,20 +88,27 @@ export const seedPages: Array<{
         ctaLabel: "Daha Fazla Bilgi",
         ctaHref: "/about",
       },
+      quickLinksTitle: "Kaynaklarımızı Keşfedin",
       quickLinks: [
         {
+          id: "ql-reports",
+          icon: "clipboard-list",
           title: "Raporlar ve Yayınlar",
           description:
             "Araştırma raporları, tıbbi kılavuzlar ve indirilebilir kaynaklara ulaşın.",
           href: "/reports",
         },
         {
+          id: "ql-media",
+          icon: "megaphone",
           title: "Medya ve Haberler",
           description:
             "Güncel haberleri, etkinlikleri ve topluluk hikayelerini takip edin.",
           href: "/media",
         },
         {
+          id: "ql-donate",
+          icon: "heart",
           title: "Amacımıza Destek Olun",
           description:
             "Bağışlarınız MG topluluğuna yönelik çalışmalarımızı sürdürmemizi sağlar.",

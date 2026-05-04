@@ -112,6 +112,29 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                 ))}
               </div>
             )}
+            {((blog.attachments && blog.attachments.length > 0) || blog.attachmentUrl) && (
+              <div className="mt-8 rounded-lg border border-teal-100 bg-teal-50 p-4">
+                <p className="text-sm font-semibold text-teal-800">Ek Dosyalar</p>
+                <ul className="mt-3 space-y-2">
+                  {(blog.attachments && blog.attachments.length > 0
+                    ? blog.attachments
+                    : [{ id: "legacy", name: blog.attachmentName || "Ek dosya", url: blog.attachmentUrl ?? "" }]
+                  ).map((entry) => (
+                    <li key={entry.id}>
+                      <a
+                        href={entry.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={entry.name || true}
+                        className="inline-flex items-center gap-2 rounded-md border border-teal-200 bg-white px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-100"
+                      >
+                        📎 {entry.name || "Dosya"}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </article>
         </section>
       </main>

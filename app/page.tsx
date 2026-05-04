@@ -2,9 +2,10 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, FileText, Newspaper, Heart } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { getHomePageData } from "@/lib/publicPagesContent"
 import { getSupportersForPublic } from "@/lib/publicContent"
+import { getImpactIcon } from "@/components/admin/shared/impactIcons"
 
 export default async function HomePage() {
   const [homeContent, supporters] = await Promise.all([
@@ -23,7 +24,7 @@ export default async function HomePage() {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             }} />
           </div>
-          
+
           <div className="relative max-w-6xl mx-auto px-6 text-center">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               {homeContent.hero.title}
@@ -83,54 +84,34 @@ export default async function HomePage() {
         <section className="py-16 bg-gray-50">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] text-center mb-12">
-              Kaynaklarımızı Keşfedin
+              {homeContent.quickLinksTitle || "Kaynaklarımızı Keşfedin"}
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Reports Card */}
-              <Link href={homeContent.quickLinks[0].href} className="group">
-                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
-                  <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-secondary/80 transition-colors">
-                    <FileText className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[var(--theme-title-text,var(--primary))] transition-colors">
-                    {homeContent.quickLinks[0].title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {homeContent.quickLinks[0].description}
-                  </p>
-                </div>
-              </Link>
-
-              {/* Media Card */}
-              <Link href={homeContent.quickLinks[1].href} className="group">
-                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
-                  <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-secondary/80 transition-colors">
-                    <Newspaper className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[var(--theme-title-text,var(--primary))] transition-colors">
-                    {homeContent.quickLinks[1].title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {homeContent.quickLinks[1].description}
-                  </p>
-                </div>
-              </Link>
-
-              {/* Donate Card */}
-              <Link href={homeContent.quickLinks[2].href} className="group">
-                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
-                  <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-secondary/80 transition-colors">
-                    <Heart className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[var(--theme-title-text,var(--primary))] transition-colors">
-                    {homeContent.quickLinks[2].title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {homeContent.quickLinks[2].description}
-                  </p>
-                </div>
-              </Link>
-            </div>
+            {homeContent.quickLinks.length === 0 ? (
+              <p className="text-center text-sm text-gray-400">
+                Henüz kısayol eklenmedi.
+              </p>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6">
+                {homeContent.quickLinks.map((link) => {
+                  const Icon = getImpactIcon(link.icon)
+                  return (
+                    <Link key={link.id} href={link.href} className="group">
+                      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow h-full">
+                        <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-secondary/80 transition-colors">
+                          <Icon className="w-7 h-7 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[var(--theme-title-text,var(--primary))] transition-colors">
+                          {link.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          {link.description}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </section>
         {/* Supporters Section — only rendered when data exists in Firestore */}

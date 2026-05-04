@@ -36,7 +36,6 @@ export default function ThemeSettingsPage() {
   const [theme, setTheme] = useState<ThemeColors>(DEFAULT_THEME);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [referenceImage, setReferenceImage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadTheme() {
@@ -105,25 +104,6 @@ export default function ThemeSettingsPage() {
           <p className="text-sm text-muted-foreground mt-1 mb-4">
             Web sitenizin renklerini buradan yönetebilirsiniz.
           </p>
-          
-          <div className="space-y-4 border-b pb-6">
-            <Label htmlFor="reference-image">Referans Görsel veya Logo</Label>
-            <Input
-              id="reference-image"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setReferenceImage(URL.createObjectURL(f));
-              }}
-            />
-            {referenceImage && (
-              <div className="mt-4 rounded-md overflow-hidden border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={referenceImage} alt="Reference Preview" className="w-full h-auto object-cover" />
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="space-y-5 flex-1 mt-2">

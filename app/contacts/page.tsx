@@ -1,18 +1,42 @@
-// TO-DO: there are still some static info like email and phone number
-// these need to be changed.
-
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { Mail, Phone, Home, Plus, Minus } from "lucide-react"
+import { Mail, Phone, Home, Plus, Minus, MapPin } from "lucide-react"
 import { contactPageTemplate } from "@/lib/publicPagesContent"
-import { submitContactMessage } from "@/lib/firebase/services"
+import { getContentBySlug, getSiteSettings, submitContactMessage } from "@/lib/firebase/services"
+import { mergeEditablePageData } from "@/lib/pageContentConfig"
 
-const pageContent = contactPageTemplate
+const initialEditableContent = mergeEditablePageData(
+  "iletisim",
+  contactPageTemplate as unknown as Record<string, unknown>
+)
+
+type ContactPageState = {
+  title: string
+  intro: string
+  locationTitle: string
+  locationIntro: string
+  faqTitle: string
+  email: string
+  phone: string
+  location: string
+  faq: typeof contactPageTemplate.faq
+}
 
 export default function ContactUsPage() {
+  const [pageContent, setPageContent] = useState<ContactPageState>({
+    title: initialEditableContent.title,
+    intro: initialEditableContent.intro,
+    locationTitle: initialEditableContent.locationTitle,
+    locationIntro: initialEditableContent.locationIntro,
+    faqTitle: initialEditableContent.faqTitle,
+    email: contactPageTemplate.email,
+    phone: contactPageTemplate.phone,
+    location: contactPageTemplate.location,
+    faq: contactPageTemplate.faq,
+  })
   const [openFaq, setOpenFaq] = useState<number>(0)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -22,9 +46,60 @@ export default function ContactUsPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMsg, setErrorMsg] = useState("")
 
+  useEffect(() => {
+    async function loadPageContent() {
+      try {
+        const [item, settings] = await Promise.all([
+          getContentBySlug("iletisim"),
+          getSiteSettings(),
+        ])
+        const editable = mergeEditablePageData(
+          "iletisim",
+          item?.pageData as Record<string, unknown> | null | undefined
+        )
+        const structured = item?.pageData as Partial<typeof contactPageTemplate> & {
+          contactEmail?: string
+          contactPhone?: string
+          addressText?: string
+        } | undefined
+        setPageContent({
+          title: editable.title,
+          intro: editable.intro,
+          locationTitle: editable.locationTitle,
+          locationIntro: editable.locationIntro,
+          faqTitle: editable.faqTitle,
+          // Prefer admin-edited values from pageData, fall back to settings, then seed
+          email:
+            structured?.contactEmail ||
+            settings?.contactEmail ||
+            contactPageTemplate.email,
+          phone:
+            structured?.contactPhone ||
+            settings?.contactPhone ||
+            contactPageTemplate.phone,
+          location:
+            structured?.addressText ||
+            settings?.addressText ||
+            contactPageTemplate.location,
+          faq: structured?.faq ?? contactPageTemplate.faq,
+        })
+      } catch {
+        setPageContent((prev) => prev)
+      }
+    }
+
+    loadPageContent()
+  }, [])
+
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? -1 : index)
   }
+
+  // Generate a Google Maps embed URL based on the editable address.
+  const mapEmbedUrl = useMemo(() => {
+    const query = encodeURIComponent(pageContent.location || "İstanbul, Türkiye")
+    return `https://www.google.com/maps?q=${query}&output=embed`
+  }, [pageContent.location])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -72,11 +147,15 @@ export default function ContactUsPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-gray-700">
                   <Mail className="w-5 h-5" />
-                  <span>{pageContent.email}</span>
+                  <a href={`mailto:${pageContent.email}`} className="hover:text-teal-600">
+                    {pageContent.email}
+                  </a>
                 </div>
                 <div className="flex items-center gap-3 text-gray-700">
                   <Phone className="w-5 h-5" />
-                  <span>{pageContent.phone}</span>
+                  <a href={`tel:${pageContent.phone.replace(/\s+/g, "")}`} className="hover:text-teal-600">
+                    {pageContent.phone}
+                  </a>
                 </div>
               </div>
             </div>
@@ -174,40 +253,30 @@ export default function ContactUsPage() {
         {/* Map & Location Section */}
         <section className="py-8 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
-            {/* Map Placeholder */}
+            {/* Map embed — refreshes when the admin updates the address */}
             <div className="w-full lg:w-1/2">
-              <div className="bg-gray-200 rounded-lg overflow-hidden aspect-[4/3]">
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-                  <svg viewBox="0 0 400 300" className="w-full h-full">
-                    <rect fill="#e8e8e8" width="400" height="300" />
-                    <path d="M0 150 L400 150" stroke="#fff" strokeWidth="8" />
-                    <path d="M200 0 L200 300" stroke="#fff" strokeWidth="6" />
-                    <path d="M50 50 L350 250" stroke="#fff" strokeWidth="4" />
-                    <path d="M100 0 L100 300" stroke="#fff" strokeWidth="3" />
-                    <path d="M300 0 L300 300" stroke="#fff" strokeWidth="3" />
-                    <path d="M0 80 L400 80" stroke="#fff" strokeWidth="3" />
-                    <path d="M0 220 L400 220" stroke="#fff" strokeWidth="3" />
-                    <circle cx="200" cy="150" r="12" fill="#ef4444" />
-                    <circle cx="200" cy="150" r="6" fill="#fff" />
-                    <text x="60" y="40" fontSize="10" fill="#666">Sanayi</text>
-                    <text x="300" y="40" fontSize="10" fill="#666">Harem İstanbul</text>
-                    <text x="320" y="100" fontSize="10" fill="#666">İSTANBUL</text>
-                    <text x="150" y="180" fontSize="10" fill="#666">Sabanci Üniversitesi</text>
-                    <text x="100" y="220" fontSize="10" fill="#666">DİZAYN ANTREPO</text>
-                    <text x="50" y="260" fontSize="10" fill="#666">Tuzla Belediyesi</text>
-                    <text x="300" y="260" fontSize="10" fill="#666">Kirazlı</text>
-                    <text x="180" y="290" fontSize="10" fill="#666">Çayırova</text>
-                  </svg>
+              <div className="bg-gray-200 rounded-lg overflow-hidden aspect-[4/3] relative">
+                <iframe
+                  key={pageContent.location}
+                  title="Konum haritası"
+                  src={mapEmbedUrl}
+                  className="absolute inset-0 h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+                <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 rounded-md bg-white/85 px-3 py-1.5 text-xs text-gray-700 backdrop-blur">
+                  <MapPin className="h-3.5 w-3.5 text-teal-600" />
+                  <span className="truncate">{pageContent.location}</span>
                 </div>
               </div>
             </div>
 
             {/* Location Info */}
             <div className="w-full lg:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">Konumumuz</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-title-text,var(--primary))] mb-4">{pageContent.locationTitle}</h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                Derneğimiz, MG topluluğunu etkinlikler, kaynaklar ve destek programlarıyla bir araya getirir.
-                Bu merkezden yürüttüğümüz çalışmalarla farkındalığı artırmayı ve dayanışmayı güçlendirmeyi hedefliyoruz.
+                {pageContent.locationIntro}
               </p>
 
               <div className="flex items-start gap-3 text-gray-700">
@@ -221,7 +290,7 @@ export default function ContactUsPage() {
         {/* FAQ Section */}
         <section className="py-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <p className="text-primary font-medium mb-1">SSS</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">Sık Sorulan Sorular</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--theme-title-text,var(--primary))] mb-6">{pageContent.faqTitle}</h2>
 
           <div className="space-y-3">
             {pageContent.faq.map((item, index) => (
@@ -247,6 +316,11 @@ export default function ContactUsPage() {
                 )}
               </div>
             ))}
+            {pageContent.faq.length === 0 && (
+              <p className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-8 text-center text-sm text-gray-400">
+                Henüz SSS eklenmedi.
+              </p>
+            )}
           </div>
         </section>
       </main>

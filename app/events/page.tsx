@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getPublicEvents, PublicEvent } from "@/lib/publicContent";
+import { getEditablePageContent } from "@/lib/publicPagesContent";
 import { MapPin, Monitor, Calendar, Users } from "lucide-react";
 
 export const metadata = {
@@ -73,6 +74,16 @@ function EventCard({ event }: { event: PublicEvent }) {
         </div>
 
         <div className="mt-auto pt-4">
+          {event.attachmentUrl && (
+            <a
+              href={event.attachmentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-3 inline-block text-sm font-medium text-teal-700 underline"
+            >
+              {event.attachmentName || "PDF dosyasını görüntüle"}
+            </a>
+          )}
           {isPast ? (
             <span className="inline-block rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-500">
               Tamamlandı
@@ -92,7 +103,10 @@ function EventCard({ event }: { event: PublicEvent }) {
 }
 
 export default async function EventsPage() {
-  const events = await getPublicEvents();
+  const [events, pageContent] = await Promise.all([
+    getPublicEvents(),
+    getEditablePageContent("etkinlikler"),
+  ]);
 
   const now = new Date();
   const upcoming = events.filter((e) => new Date(e.startsAt) >= now);
@@ -106,10 +120,10 @@ export default async function EventsPage() {
         <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-5xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
-              Etkinlikler
+              {pageContent.heroTitle}
             </h1>
             <p className="mt-4 text-primary-foreground/90 md:text-lg">
-              Toplantılar, webinarlar ve destek grubu buluşmalarımıza katılın.
+              {pageContent.heroDescription}
             </p>
           </div>
         </section>
@@ -118,7 +132,7 @@ export default async function EventsPage() {
           {upcoming.length > 0 ? (
             <>
               <h2 className="mb-6 text-2xl font-bold text-[var(--theme-title-text,var(--primary))]">
-                Yaklaşan Etkinlikler
+                {pageContent.upcomingTitle}
               </h2>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {upcoming.map((event) => (
@@ -128,14 +142,14 @@ export default async function EventsPage() {
             </>
           ) : (
             <div className="rounded-xl bg-white p-10 text-center text-gray-500 shadow-sm">
-              Şu anda planlanmış etkinlik bulunmuyor.
+              {pageContent.emptyText}
             </div>
           )}
 
           {past.length > 0 && (
             <div className="mt-14">
               <h2 className="mb-6 text-2xl font-bold text-gray-600">
-                Geçmiş Etkinlikler
+                {pageContent.pastTitle}
               </h2>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {past.map((event) => (
