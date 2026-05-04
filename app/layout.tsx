@@ -40,8 +40,9 @@ export default async function RootLayout({
   const settings = await getSiteSettings();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body 
+        suppressHydrationWarning
         className="font-sans antialiased"
         style={{
           ...(settings?.theme ? {
