@@ -82,12 +82,20 @@ export async function getPublishedEvents(): Promise<(Event & { id: string })[]> 
 // ── Categories & Tags ─────────────────────────────────────────────────────────
 
 export async function getCategories(): Promise<(Category & { id: string })[]> {
-  const snap = await getDocs(collection(db, COLLECTIONS.CATEGORIES));
+  const q = query(
+    collection(db, COLLECTIONS.CATEGORIES),
+    where("deletedAt", "==", null)
+  );
+  const snap = await getDocs(q);
   return snap.docs.map((d) => fromDoc<Category>(d));
 }
 
 export async function getTags(): Promise<(Tag & { id: string })[]> {
-  const snap = await getDocs(collection(db, COLLECTIONS.TAGS));
+  const q = query(
+    collection(db, COLLECTIONS.TAGS),
+    where("deletedAt", "==", null)
+  );
+  const snap = await getDocs(q);
   return snap.docs.map((d) => fromDoc<Tag>(d));
 }
 
@@ -109,16 +117,11 @@ export async function getPublicMediaAssets(): Promise<(MediaAsset & { id: string
 export async function getActiveCampaigns(): Promise<(Campaign & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.CAMPAIGNS),
-    where("status", "==", CAMPAIGN_STATUS.ACTIVE)
+    where("status", "==", CAMPAIGN_STATUS.ACTIVE),
+    where("deletedAt", "==", null)
   );
   const snap = await getDocs(q);
-  return (
-    snap.docs
-      // Hide soft-deleted campaigns — filter client-side to avoid the
-      // composite index Firestore would otherwise require.
-      .filter((d) => !d.data().deletedAt)
-      .map((d) => fromDoc<Campaign>(d))
-  );
+  return snap.docs.map((d) => fromDoc<Campaign>(d));
 }
 
 // ── IBAN entries (public read) ────────────────────────────────────────────────

@@ -488,42 +488,45 @@ export async function upsertAdminPage(
 }
 
 // ── Site settings ─────────────────────────────────────────────────────────────
+// Field names align with lib/firebase/types.ts SiteSettings so that admin edits
+// are immediately visible to the public layout and content functions.
 
-export interface SiteSettings {
-  siteName: string;
+export interface AdminSiteSettings {
+  ngoName: string;
   tagline: string;
   contactEmail: string;
   contactPhone: string;
-  address: string;
+  addressText: string;
   socialFacebook: string;
   socialTwitter: string;
   socialInstagram: string;
   socialLinkedin: string;
   socialYoutube: string;
-  metaDescription: string;
+  defaultSeoDescription: string;
 }
 
-export async function getSiteSettings(): Promise<Partial<SiteSettings>> {
+export async function getAdminSiteSettings(): Promise<Partial<AdminSiteSettings>> {
   const snap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.SITE_SETTINGS));
   if (!snap.exists()) return {};
   const data = snap.data();
   return {
-    siteName: data.siteName ?? "",
+    // Support both old field names (siteName/address) and new canonical names
+    ngoName: data.ngoName ?? data.siteName ?? "",
     tagline: data.tagline ?? "",
     contactEmail: data.contactEmail ?? "",
     contactPhone: data.contactPhone ?? "",
-    address: data.address ?? "",
+    addressText: data.addressText ?? data.address ?? "",
     socialFacebook: data.socialFacebook ?? "",
     socialTwitter: data.socialTwitter ?? "",
     socialInstagram: data.socialInstagram ?? "",
     socialLinkedin: data.socialLinkedin ?? "",
     socialYoutube: data.socialYoutube ?? "",
-    metaDescription: data.metaDescription ?? "",
+    defaultSeoDescription: data.defaultSeoDescription ?? data.metaDescription ?? "",
   };
 }
 
-export async function updateSiteSettings(
-  data: Partial<SiteSettings>
+export async function updateAdminSiteSettings(
+  data: Partial<AdminSiteSettings>
 ): Promise<void> {
   const uid = auth.currentUser?.uid ?? null;
   await setDoc(

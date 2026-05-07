@@ -77,6 +77,10 @@ export interface MediaItem {
   createdAt: string;
   /** Draft / Published flag — defaults to "published" for backwards compat */
   status?: MediaStatus;
+  /** MIME type of the uploaded file, e.g. "image/jpeg" or "application/pdf" */
+  mimeType?: string;
+  /** File size in bytes */
+  byteSize?: number;
 }
 
 export type AnnouncementStatus = "published" | "draft";

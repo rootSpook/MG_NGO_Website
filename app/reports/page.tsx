@@ -16,7 +16,7 @@ export default async function ReportsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <ReportsHero data={reportsData.hero} />
         <FeaturedReport data={reportsData.featured} />
         <ReportsGrid

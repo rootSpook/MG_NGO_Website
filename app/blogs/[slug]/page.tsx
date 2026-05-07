@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { getBlogBySlug, getPublishedBlogs } from "@/lib/publicContent";
 import { marked } from "marked";
+import DOMPurify from "isomorphic-dompurify";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -19,9 +20,14 @@ function formatDateTR(dateStr: string) {
 function parseMarkdown(md: string): string {
   if (!md) return "";
   try {
-    return marked.parse(md, { async: false }) as string;
+    const raw = marked.parse(md, { async: false }) as string;
+    return DOMPurify.sanitize(raw, {
+      USE_PROFILES: { html: true },
+      // Allow safe inline styles for formatted content but block JS handlers
+      FORBID_ATTR: ["onerror", "onload", "onclick", "onmouseover"],
+    });
   } catch {
-    return md;
+    return "";
   }
 }
 
@@ -62,7 +68,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Cover image with title overlay */}
         <section className="mx-auto max-w-6xl px-4 pb-0 pt-6 md:px-6 md:pt-8">
           <div className="relative overflow-hidden rounded-md">

@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Mail, User, Phone, MapPin } from "lucide-react";
 import { submitVolunteerApplication } from "@/lib/firebase/services";
+import { volunteerSchema, volunteerFormToInput } from "@/lib/validation/forms";
 
 export default function VolunteerPage() {
   const [fullName, setFullName] = useState("");
@@ -22,16 +23,15 @@ export default function VolunteerPage() {
       setErrorMsg("Lütfen KVKK Aydınlatma Metni'ni okuyup onaylayın.");
       return;
     }
+    const parsed = volunteerSchema.safeParse({ fullName, email, phone, city, motivation });
+    if (!parsed.success) {
+      setErrorMsg(parsed.error.errors[0].message);
+      return;
+    }
     setStatus("loading");
     setErrorMsg("");
     try {
-      await submitVolunteerApplication({
-        fullName,
-        email,
-        phone: phone || undefined,
-        city: city || undefined,
-        motivation,
-      });
+      await submitVolunteerApplication(volunteerFormToInput(parsed.data));
       setStatus("success");
       setFullName("");
       setEmail("");
@@ -51,7 +51,7 @@ export default function VolunteerPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold text-white md:text-5xl">
@@ -114,11 +114,14 @@ export default function VolunteerPage() {
               ) : (
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <label htmlFor="vol-name" className="sr-only">Ad Soyad</label>
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                     <input
+                      id="vol-name"
                       type="text"
                       placeholder="Ad Soyad"
                       required
+                      maxLength={100}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -126,11 +129,14 @@ export default function VolunteerPage() {
                   </div>
 
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <label htmlFor="vol-email" className="sr-only">E-posta Adresiniz</label>
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                     <input
+                      id="vol-email"
                       type="email"
                       placeholder="E-posta Adresiniz"
                       required
+                      maxLength={254}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -138,10 +144,13 @@ export default function VolunteerPage() {
                   </div>
 
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <label htmlFor="vol-phone" className="sr-only">Telefon Numarası</label>
+                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                     <input
+                      id="vol-phone"
                       type="tel"
                       placeholder="Telefon Numarası"
+                      maxLength={20}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -149,24 +158,32 @@ export default function VolunteerPage() {
                   </div>
 
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <label htmlFor="vol-city" className="sr-only">Şehir</label>
+                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                     <input
+                      id="vol-city"
                       type="text"
                       placeholder="Şehir"
+                      maxLength={100}
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       className="w-full rounded-lg bg-gray-200 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
-                  <textarea
-                    placeholder="Neden gönüllü olmak istiyorsunuz?"
-                    required
-                    rows={4}
-                    value={motivation}
-                    onChange={(e) => setMotivation(e.target.value)}
-                    className="w-full resize-none rounded-lg bg-gray-200 px-4 py-3 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div>
+                    <label htmlFor="vol-motivation" className="sr-only">Motivasyon</label>
+                    <textarea
+                      id="vol-motivation"
+                      placeholder="Neden gönüllü olmak istiyorsunuz?"
+                      required
+                      rows={4}
+                      maxLength={2000}
+                      value={motivation}
+                      onChange={(e) => setMotivation(e.target.value)}
+                      className="w-full resize-none rounded-lg bg-gray-200 px-4 py-3 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
 
                   {errorMsg && (
                     <p className="text-sm text-red-600">{errorMsg}</p>
@@ -180,7 +197,17 @@ export default function VolunteerPage() {
                         onChange={(e) => setAgreed(e.target.checked)}
                         className="h-4 w-4 rounded border-gray-300"
                       />
-                      KVKK Aydınlatma Metni&apos;ni okudum ve onaylıyorum.
+                      <span>
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-gray-800"
+                        >
+                          KVKK Aydınlatma Metni
+                        </a>
+                        &apos;ni okudum ve onaylıyorum.
+                      </span>
                     </label>
 
                     <button

@@ -53,7 +53,7 @@ export interface SiteSettings {
     background?: string;
     foreground?: string;
     fontFamily?: string | null;
-    [key: string]: any;
+    [key: string]: string | number | null | undefined;
   } | null;
   defaultSeoTitle: string;
   defaultSeoDescription: string;

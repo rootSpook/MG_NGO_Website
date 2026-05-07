@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import { revalidatePublicPathAction } from "@/app/admin/actions";
 import LivePreview from "./LivePreview";
 
 export interface ThemeColors {
@@ -70,14 +71,15 @@ export default function ThemeSettingsPage() {
       
       try {
         await updateDoc(docRef, { theme });
-      } catch (e: any) {
-        if (e.code === "not-found") {
+      } catch (e: unknown) {
+        if ((e as { code?: string }).code === "not-found") {
           await setDoc(docRef, { theme });
         } else {
           throw e;
         }
       }
 
+      await revalidatePublicPathAction("/");
       alert("Theme saved successfully!");
     } catch (err) {
       console.error("Failed to save theme:", err);

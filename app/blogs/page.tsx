@@ -28,7 +28,7 @@ export default async function BlogsPage() {
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
           <h1 className="mb-6 text-3xl font-bold text-[var(--theme-title-text,var(--primary))] md:text-4xl">
             {pageContent.title}
@@ -47,11 +47,13 @@ export default async function BlogsPage() {
                     href={`/blogs/${blog.slug}`}
                     className="overflow-hidden rounded-md bg-gray-200"
                   >
-                    <img
-                      src={blog.coverImage}
-                      alt={blog.title}
-                      className="h-[180px] w-full object-cover transition-transform duration-300 hover:scale-[1.03]"
-                    />
+                    {blog.coverImage && (
+                      <img
+                        src={blog.coverImage}
+                        alt={blog.title}
+                        className="h-[180px] w-full object-cover transition-transform duration-300 hover:scale-[1.03]"
+                      />
+                    )}
                   </Link>
 
                   <div>

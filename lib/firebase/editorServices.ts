@@ -22,31 +22,53 @@ import type {
   CampaignItem,
   CategoryItem,
   TagItem,
-  StaffMember,
 } from "@/types/editorPanel";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function tsToDateString(ts: Timestamp | null | undefined): string {
+export function tsToDateString(ts: Timestamp | null | undefined): string {
   if (!ts) return new Date().toISOString().split("T")[0];
   return ts.toDate().toISOString().split("T")[0];
 }
 
-function tsToISOString(ts: Timestamp | null | undefined): string {
+export function tsToISOString(ts: Timestamp | null | undefined): string {
   if (!ts) return new Date().toISOString();
   return ts.toDate().toISOString();
 }
 
-function slugify(text: string): string {
+const TURKISH_MAP: Record<string, string> = {
+  ç: "c", Ç: "c",
+  ğ: "g", Ğ: "g",
+  ı: "i", İ: "i",
+  ö: "o", Ö: "o",
+  ş: "s", Ş: "s",
+  ü: "u", Ü: "u",
+};
+
+export function slugify(text: string): string {
   return text
+    .split("")
+    .map((c) => TURKISH_MAP[c] ?? c)
+    .join("")
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
     .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
     .slice(0, 80);
 }
 
 function uid(): string | null {
   return auth.currentUser?.uid ?? null;
+}
+
+export function attachmentsFromContentItem(data: Record<string, unknown>): import("@/types/editorPanel").BlogAttachment[] {
+  const raw = data.attachments;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (a): a is import("@/types/editorPanel").BlogAttachment =>
+      !!a && typeof a === "object" && typeof (a as { url?: unknown }).url === "string"
+  );
 }
 
 // ── Blog Posts (contentItems with type="post") ────────────────────────────────
@@ -74,7 +96,7 @@ export async function getEditorBlogs(): Promise<BlogPost[]> {
       imageUrl: data.coverImageUrl ?? "",
       attachmentUrl: data.attachmentUrl ?? "",
       attachmentName: data.attachmentName ?? "",
-      attachments: Array.isArray(data.attachments) ? data.attachments : [],
+      attachments: attachmentsFromContentItem(data),
     };
   });
 }
@@ -182,11 +204,11 @@ function eventStatusToFirestore(s: EventItem["status"]): string {
 export async function getEditorEvents(): Promise<EventItem[]> {
   const q = query(
     collection(db, COLLECTIONS.EVENTS),
+    where("deletedAt", "==", null),
     orderBy("startsAt", "desc")
   );
   const snap = await getDocs(q);
   return snap.docs
-    .filter((d) => !d.data().deletedAt)
     .map((d) => {
       const data = d.data();
       return {
@@ -296,12 +318,18 @@ export async function getEditorMedia(): Promise<MediaItem[]> {
 
 export async function createEditorMedia(item: Omit<MediaItem, "id">): Promise<string> {
   const userId = uid();
+  const mimeType = item.mimeType ?? "application/octet-stream";
+  const kind = mimeType.startsWith("image/")
+    ? "image"
+    : mimeType === "application/pdf"
+    ? "document"
+    : "other";
   const ref = await addDoc(collection(db, COLLECTIONS.MEDIA_ASSETS), {
-    kind: "image",
+    kind,
     visibility: item.visibility,
     originalFilename: item.title,
-    mimeType: "image/jpeg",
-    byteSize: 0,
+    mimeType,
+    byteSize: item.byteSize ?? 0,
     checksumSha256: null,
     storageBucket: "",
     storagePath: "",
@@ -353,11 +381,11 @@ export async function deleteEditorMedia(id: string): Promise<void> {
 export async function getEditorAnnouncements(): Promise<AnnouncementItem[]> {
   const q = query(
     collection(db, COLLECTIONS.ANNOUNCEMENTS),
+    where("deletedAt", "==", null),
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
   return snap.docs
-    .filter((d) => !d.data().deletedAt)
     .map((d) => {
       const data = d.data();
       return {
@@ -447,13 +475,11 @@ export async function markNotificationRead(id: string): Promise<void> {
 export async function getEditorCampaigns(): Promise<CampaignItem[]> {
   const q = query(
     collection(db, COLLECTIONS.CAMPAIGNS),
+    where("deletedAt", "==", null),
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
   return snap.docs
-    // Filter out soft-deleted campaigns client-side so we don't need a
-    // composite index for (deletedAt, createdAt).
-    .filter((d) => !d.data().deletedAt)
     .map((d) => {
       const data = d.data();
       return {
@@ -464,8 +490,8 @@ export async function getEditorCampaigns(): Promise<CampaignItem[]> {
         currency: data.currency ?? "TRY",
         raisedAmount: data.raisedAmount ?? 0,
         status: (data.status as CampaignItem["status"]) ?? "draft",
-        startDate: tsToDateString(data.startDate),
-        endDate: tsToDateString(data.endDate),
+        startDate: tsToDateString(data.startsAt),
+        endDate: tsToDateString(data.endsAt),
         coverImageUrl: data.coverImageUrl ?? "",
         featured: data.featured ?? false,
       };
@@ -484,10 +510,10 @@ export async function createEditorCampaign(
     currency: campaign.currency,
     raisedAmount: 0,
     status: campaign.status,
-    startDate: campaign.startDate
+    startsAt: campaign.startDate
       ? Timestamp.fromDate(new Date(campaign.startDate))
       : null,
-    endDate: campaign.endDate
+    endsAt: campaign.endDate
       ? Timestamp.fromDate(new Date(campaign.endDate))
       : null,
     coverImageUrl: campaign.coverImageUrl,
@@ -516,11 +542,11 @@ export async function updateEditorCampaign(
   if (data.currency !== undefined) update.currency = data.currency;
   if (data.status !== undefined) update.status = data.status;
   if (data.startDate !== undefined)
-    update.startDate = data.startDate
+    update.startsAt = data.startDate
       ? Timestamp.fromDate(new Date(data.startDate))
       : null;
   if (data.endDate !== undefined)
-    update.endDate = data.endDate
+    update.endsAt = data.endDate
       ? Timestamp.fromDate(new Date(data.endDate))
       : null;
   if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl;
@@ -543,9 +569,14 @@ export async function getEditorCategories(type?: string): Promise<CategoryItem[]
     ? query(
         collection(db, COLLECTIONS.CATEGORIES),
         where("type", "==", type),
+        where("deletedAt", "==", null),
         orderBy("sortOrder", "asc")
       )
-    : query(collection(db, COLLECTIONS.CATEGORIES), orderBy("sortOrder", "asc"));
+    : query(
+        collection(db, COLLECTIONS.CATEGORIES),
+        where("deletedAt", "==", null),
+        orderBy("sortOrder", "asc")
+      );
   const snap = await getDocs(q);
   return snap.docs.map((d) => {
     const data = d.data();
@@ -572,6 +603,7 @@ export async function createEditorCategory(
     updatedBy: userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    deletedAt: null,
   });
   return ref.id;
 }
@@ -589,16 +621,23 @@ export async function updateEditorCategory(
 }
 
 export async function deleteEditorCategory(id: string): Promise<void> {
-  const { deleteDoc } = await import("firebase/firestore");
-  await deleteDoc(doc(db, COLLECTIONS.CATEGORIES, id));
+  await updateDoc(doc(db, COLLECTIONS.CATEGORIES, id), {
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: uid(),
+  });
 }
 
 // ── Tags ──────────────────────────────────────────────────────────────────────
 
 export async function getEditorTags(type?: string): Promise<TagItem[]> {
   const q = type
-    ? query(collection(db, COLLECTIONS.TAGS), where("type", "==", type))
-    : query(collection(db, COLLECTIONS.TAGS));
+    ? query(
+        collection(db, COLLECTIONS.TAGS),
+        where("type", "==", type),
+        where("deletedAt", "==", null)
+      )
+    : query(collection(db, COLLECTIONS.TAGS), where("deletedAt", "==", null));
   const snap = await getDocs(q);
   return snap.docs.map((d) => {
     const data = d.data();
@@ -621,6 +660,7 @@ export async function createEditorTag(tag: Omit<TagItem, "id">): Promise<string>
     updatedBy: userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    deletedAt: null,
   });
   return ref.id;
 }
@@ -637,36 +677,10 @@ export async function updateEditorTag(
 }
 
 export async function deleteEditorTag(id: string): Promise<void> {
-  const { deleteDoc } = await import("firebase/firestore");
-  await deleteDoc(doc(db, COLLECTIONS.TAGS, id));
-}
-
-// ── Staff Members ─────────────────────────────────────────────────────────────
-
-export async function getStaffMembers(): Promise<StaffMember[]> {
-  const snap = await getDocs(collection(db, COLLECTIONS.STAFF));
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      displayName: data.displayName ?? "",
-      email: data.email ?? "",
-      role: (data.role as StaffMember["role"]) ?? "editor",
-      photoUrl: data.photoUrl ?? "",
-      isActive: data.isActive ?? true,
-      createdAt: tsToISOString(data.createdAt),
-    };
+  await updateDoc(doc(db, COLLECTIONS.TAGS, id), {
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    updatedBy: uid(),
   });
 }
 
-export async function updateStaffMember(
-  id: string,
-  data: Partial<Omit<StaffMember, "id" | "createdAt">>
-): Promise<void> {
-  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
-  if (data.displayName !== undefined) update.displayName = data.displayName;
-  if (data.role !== undefined) update.role = data.role;
-  if (data.photoUrl !== undefined) update.photoUrl = data.photoUrl;
-  if (data.isActive !== undefined) update.isActive = data.isActive;
-  await updateDoc(doc(db, COLLECTIONS.STAFF, id), update);
-}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { unstable_cache } from 'next/cache'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
@@ -6,13 +7,21 @@ import { getSiteSettings } from '@/lib/firebase/services'
 import { ThemeListener } from '@/components/theme/ThemeListener'
 import './globals.css'
 
+// Cache site settings for 5 minutes — they change rarely and don't need
+// per-request freshness. The admin theme page calls revalidatePath('/') after
+// saving to bust this cache immediately when settings are updated.
+const getCachedSiteSettings = unstable_cache(
+  getSiteSettings,
+  ['site-settings'],
+  { revalidate: 300 }
+)
+
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'Myasthenia Gravis Yaşam Derneği',
-  description: 'Supporting the Myasthenia Gravis community through awareness, education, and resources.',
-  generator: 'v0.app',
+  description: 'Myasthenia Gravis hastalarına ve yakınlarına destek, farkındalık ve bilgi kaynağı sunan resmi dernek sitesi.',
   icons: {
     icon: [
       {
@@ -37,10 +46,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const settings = await getSiteSettings();
+  const settings = await getCachedSiteSettings();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="tr" suppressHydrationWarning>
       <body 
         suppressHydrationWarning
         className="font-sans antialiased"
@@ -54,6 +63,12 @@ export default async function RootLayout({
           } as React.CSSProperties : {})
         }}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        >
+          İçeriğe geç
+        </a>
         <ThemeListener />
         <Providers>
           {children}

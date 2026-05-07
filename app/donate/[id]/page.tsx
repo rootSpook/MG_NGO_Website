@@ -47,7 +47,7 @@ export default async function CampaignDonationPage({ params }: CampaignDonationP
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-10">
           {/* Breadcrumb */}
           <nav className="mb-5 text-sm text-gray-500">

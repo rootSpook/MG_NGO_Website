@@ -10,8 +10,12 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || !role)) {
+    if (loading) return;
+    if (!user) {
       router.replace("/admin/login");
+    } else if (role !== "admin") {
+      // Authenticated but not an admin — redirect to editor panel
+      router.replace("/editorPanel/dashboard");
     }
   }, [user, role, loading, router]);
 
@@ -23,7 +27,7 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || !role) return null;
+  if (!user || role !== "admin") return null;
 
   return <>{children}</>;
 }

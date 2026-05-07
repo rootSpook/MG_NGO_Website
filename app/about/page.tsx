@@ -2,6 +2,8 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { getAboutPageData } from "@/lib/publicPagesContent"
 
+export const dynamic = "force-dynamic";
+
 export default async function AboutUsPage() {
   const aboutContent = await getAboutPageData()
 
@@ -9,7 +11,7 @@ export default async function AboutUsPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Hero image (optional) */}
         {aboutContent.heroImage && (
           <section className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto pt-8">

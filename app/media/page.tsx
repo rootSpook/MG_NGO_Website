@@ -18,7 +18,7 @@ export default async function MediaPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <MediaHero data={mediaData.hero} />
         <FeaturedMedia data={mediaData.featured} />
         <MediaGrid

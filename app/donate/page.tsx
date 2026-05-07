@@ -32,7 +32,7 @@ export default async function DonatePage() {
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="mx-auto max-w-6xl px-4 pb-10 pt-8 md:px-6 md:pt-10">
           <div className="grid items-start gap-8 md:grid-cols-[1fr_320px]">
             <div>

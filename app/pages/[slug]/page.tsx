@@ -62,7 +62,7 @@ export default async function CmsPage({ params }: CmsPageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <BlockRenderer sections={blockData.sections} />
       </main>
       <Footer />

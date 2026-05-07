@@ -532,7 +532,7 @@ export default function MenuItemContentPage() {
             </div>
 
             {previewMode && (
-              <LiveRoutePreview src={previewSrc} href={previewHref} />
+              <LiveRoutePreview src={previewSrc} href={previewHref} dirty={dirty} />
             )}
           </div>
         )}
@@ -684,7 +684,7 @@ export default function MenuItemContentPage() {
 
             {/* Right: preview (only when previewMode is on) */}
             {previewMode && (
-              <LiveRoutePreview src={previewSrc} href={previewHref} />
+              <LiveRoutePreview src={previewSrc} href={previewHref} dirty={dirty} />
             )}
           </div>
 
@@ -715,7 +715,7 @@ function Breadcrumb({ label, onBack }: { label: string; onBack: () => void }) {
   );
 }
 
-function LiveRoutePreview({ src, href }: { src: string; href: string }) {
+function LiveRoutePreview({ src, href, dirty }: { src: string; href: string; dirty?: boolean }) {
   return (
     <div
       className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white"
@@ -734,11 +734,17 @@ function LiveRoutePreview({ src, href }: { src: string; href: string }) {
           Yeni sekmede aç
         </a>
       </div>
+      {dirty && (
+        <div className="flex items-center gap-2 border-b border-amber-100 bg-amber-50 px-4 py-2 text-xs text-amber-700">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+          Kaydedilmemiş değişiklikler var — önizleme son kaydedilen içeriği gösterir.
+        </div>
+      )}
       <iframe
         key={src}
         src={src}
         title={`${href} önizleme`}
-        className="h-[calc(100%-36px)] w-full bg-white"
+        className={`w-full bg-white ${dirty ? "h-[calc(100%-64px)]" : "h-[calc(100%-36px)]"}`}
       />
     </div>
   );

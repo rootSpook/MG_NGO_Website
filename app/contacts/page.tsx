@@ -7,6 +7,7 @@ import { Mail, Phone, Home, Plus, Minus, MapPin } from "lucide-react"
 import { contactPageTemplate } from "@/lib/publicPagesContent"
 import { getContentBySlug, getSiteSettings, submitContactMessage } from "@/lib/firebase/services"
 import { mergeEditablePageData } from "@/lib/pageContentConfig"
+import { contactSchema, contactFormToInput } from "@/lib/validation/forms"
 
 const initialEditableContent = mergeEditablePageData(
   "iletisim",
@@ -107,16 +108,15 @@ export default function ContactUsPage() {
       setErrorMsg("Lütfen KVKK Aydınlatma Metni'ni okuyup onaylayın.")
       return
     }
+    const parsed = contactSchema.safeParse({ name, email, phone, message })
+    if (!parsed.success) {
+      setErrorMsg(parsed.error.errors[0].message)
+      return
+    }
     setStatus("loading")
     setErrorMsg("")
     try {
-      await submitContactMessage({
-        senderName: name,
-        senderEmail: email,
-        senderPhone: phone || undefined,
-        subject: "Web Sitesi İletişim Formu",
-        messageBody: message,
-      })
+      await submitContactMessage(contactFormToInput(parsed.data))
       setStatus("success")
       setName("")
       setEmail("")
@@ -133,7 +133,7 @@ export default function ContactUsPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* Contact Section */}
         <section className="py-12 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
@@ -182,43 +182,61 @@ export default function ContactUsPage() {
                   </div>
                 ) : (
                   <form className="space-y-4" onSubmit={handleSubmit}>
-                    <input
-                      type="text"
-                      placeholder="Ad Soyad"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <div>
+                      <label htmlFor="contact-name" className="sr-only">Ad Soyad</label>
+                      <input
+                        id="contact-name"
+                        type="text"
+                        placeholder="Ad Soyad"
+                        required
+                        maxLength={100}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
 
                     <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <label htmlFor="contact-email" className="sr-only">E-posta Adresiniz</label>
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" aria-hidden="true" />
                       <input
+                        id="contact-email"
                         type="email"
                         placeholder="E-posta Adresiniz"
                         required
+                        maxLength={254}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
 
-                    <input
-                      type="tel"
-                      placeholder="Telefon Numarası"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <div>
+                      <label htmlFor="contact-phone" className="sr-only">Telefon Numarası</label>
+                      <input
+                        id="contact-phone"
+                        type="tel"
+                        placeholder="Telefon Numarası"
+                        maxLength={20}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
 
-                    <textarea
-                      placeholder="Size nasıl yardımcı olabiliriz?"
-                      required
-                      rows={4}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                    />
+                    <div>
+                      <label htmlFor="contact-message" className="sr-only">Mesajınız</label>
+                      <textarea
+                        id="contact-message"
+                        placeholder="Size nasıl yardımcı olabiliriz?"
+                        required
+                        rows={4}
+                        maxLength={2000}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-200 rounded-lg text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                      />
+                    </div>
 
                     {errorMsg && (
                       <p className="text-sm text-red-600">{errorMsg}</p>
@@ -232,7 +250,17 @@ export default function ContactUsPage() {
                           onChange={(e) => setAgreed(e.target.checked)}
                           className="w-4 h-4 rounded border-gray-300"
                         />
-                        <span>KVKK Aydınlatma Metni'ni okudum ve onaylıyorum.</span>
+                        <span>
+                          <a
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-gray-800"
+                          >
+                            KVKK Aydınlatma Metni
+                          </a>
+                          {"’"}ni okudum ve onaylıyorum.
+                        </span>
                       </label>
 
                       <button
@@ -300,17 +328,19 @@ export default function ContactUsPage() {
               >
                 <button
                   onClick={() => toggleFaq(index)}
+                  aria-expanded={openFaq === index}
+                  aria-controls={`faq-answer-${index}`}
                   className="w-full px-6 py-4 flex items-center justify-between text-left"
                 >
                   <span className="font-medium text-gray-900">{item.question}</span>
                   {openFaq === index ? (
-                    <Minus className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                    <Minus className="w-5 h-5 text-gray-600 flex-shrink-0" aria-hidden="true" />
                   ) : (
-                    <Plus className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                    <Plus className="w-5 h-5 text-gray-600 flex-shrink-0" aria-hidden="true" />
                   )}
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-4">
+                  <div id={`faq-answer-${index}`} className="px-6 pb-4">
                     <p className="text-gray-600 text-sm">{item.answer}</p>
                   </div>
                 )}

@@ -39,7 +39,7 @@ export default async function MGDetailPage({ params }: MGDetailPageProps) {
     <div className="min-h-screen flex flex-col bg-[#f4f4f4]">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <div className="mx-auto max-w-4xl px-4 py-10 md:px-6">
           <nav className="mb-6 text-sm text-gray-500">
             <Link href="/mg" className="hover:text-primary">

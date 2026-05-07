@@ -13,7 +13,7 @@ export default function LegalPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="bg-primary py-12 px-4 md:px-6">
           <div className="mx-auto max-w-4xl">
             <h1 className="text-3xl font-bold text-white md:text-5xl">

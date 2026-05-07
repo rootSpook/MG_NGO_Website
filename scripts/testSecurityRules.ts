@@ -150,6 +150,16 @@ async function main() {
     await setDoc(doc(db, "auditLogs", "test-log"), {
       action: "test",
     });
+
+    await setDoc(doc(db, "volunteerApplications", "seed-app"), {
+      fullName: "Seed", email: "s@s.com", motivation: "test", status: "new",
+    });
+
+    await setDoc(doc(db, "notifications", "admin-notification"), {
+      staffId: ADMIN_UID,
+      title: "Admin only notification",
+      isRead: false,
+    });
   });
 
   const unauthed = testEnv.unauthenticatedContext();
@@ -185,6 +195,10 @@ async function main() {
       senderEmail: "visitor@example.com",
       subject: "Hello",
       messageBody: "Test message",
+      status: "new",
+      handledBy: null,
+      handledAt: null,
+      deletedAt: null,
     })
   );
 
@@ -223,6 +237,43 @@ async function main() {
       subject: "Hello",
       messageBody: "Test message",
       status: "resolved", // forbidden field
+    })
+  );
+
+  await test("CANNOT read volunteerApplications", "fail", () =>
+    getDoc(doc(unauthed.firestore(), "volunteerApplications", "seed-app"))
+  );
+
+  await test("CANNOT submit volunteerApplication with forbidden status field", "fail", () =>
+    addDoc(collection(unauthed.firestore(), "volunteerApplications"), {
+      fullName: "Hacker",
+      email: "h@h.com",
+      motivation: "test",
+      status: "resolved", // forbidden — public can only set status:"new"
+    })
+  );
+
+  await test("CANNOT write to events", "fail", () =>
+    addDoc(collection(unauthed.firestore(), "events"), {
+      title: "Fake event", status: "published",
+    })
+  );
+
+  await test("CANNOT write to mediaAssets", "fail", () =>
+    addDoc(collection(unauthed.firestore(), "mediaAssets"), {
+      visibility: "public", deletedAt: null,
+    })
+  );
+
+  await test("CANNOT write to categories", "fail", () =>
+    addDoc(collection(unauthed.firestore(), "categories"), {
+      name: "Hack", slug: "hack",
+    })
+  );
+
+  await test("CANNOT write to tags", "fail", () =>
+    addDoc(collection(unauthed.firestore(), "tags"), {
+      name: "HackTag", slug: "hack-tag",
     })
   );
 
@@ -287,6 +338,28 @@ async function main() {
       title: "Sneaky Post",
       createdBy: ADMIN_UID, // not editor's own uid
       updatedBy: ADMIN_UID,
+    })
+  );
+
+  await test("CANNOT write to donations", "fail", () =>
+    setDoc(doc(editor.firestore(), "donations", "new-donation"), {
+      amount: 50, currency: "TRY",
+    })
+  );
+
+  // auditLogs: editors CAN create entries (intentional audit trail),
+  // but they CANNOT read them (admin-only read per rules L220).
+  await test("CANNOT read auditLogs", "fail", () =>
+    getDoc(doc(editor.firestore(), "auditLogs", "test-log"))
+  );
+
+  await test("CANNOT read another user's notification", "fail", () =>
+    getDoc(doc(editor.firestore(), "notifications", "admin-notification"))
+  );
+
+  await test("CANNOT escalate own staff role to admin", "fail", () =>
+    updateDoc(doc(editor.firestore(), "staff", EDITOR_UID), {
+      role: "admin",
     })
   );
 
