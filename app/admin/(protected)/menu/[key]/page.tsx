@@ -422,7 +422,7 @@ export default function MenuItemContentPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {specialConfig.fields.map((field) => (
+                  {specialConfig.fields.filter((field) => field.name !== "showCampaigns").map((field) => (
                     <label key={field.name} className="block">
                       <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
                         {field.label}
@@ -456,7 +456,63 @@ export default function MenuItemContentPage() {
               {navItem.key === "medya" && <InlineMediaManager />}
               {navItem.key === "bagis" && (
                 <>
-                  <InlineCampaignManager />
+                  {/* ── Campaigns section toggle ─────────────────────────── */}
+                  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                          Kampanya Bölümü
+                        </p>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Devre dışıyken kampanyalar olsa bile public sitede bu bölüm
+                          gösterilmez. Kampanyanız yoksa veya geçici olarak kaldırmak
+                          istiyorsanız kapatın.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        onClick={() => {
+                          const next = specialDraft.showCampaigns !== "false" ? "false" : "true";
+                          setSpecialDraft((prev) => ({ ...prev, showCampaigns: next }));
+                          markDirty();
+                        }}
+                        aria-checked={specialDraft.showCampaigns !== "false"}
+                        className="flex shrink-0 flex-col items-center gap-1"
+                      >
+                        {/* pill track */}
+                        <span
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            specialDraft.showCampaigns !== "false" ? "bg-primary" : "bg-gray-300"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                              specialDraft.showCampaigns !== "false" ? "translate-x-6" : "translate-x-1"
+                            }`}
+                          />
+                        </span>
+                        {/* status label below the pill */}
+                        <span
+                          className={`text-xs font-semibold leading-none ${
+                            specialDraft.showCampaigns !== "false" ? "text-primary" : "text-gray-400"
+                          }`}
+                        >
+                          {specialDraft.showCampaigns !== "false" ? "Etkin" : "Devre Dışı"}
+                        </span>
+                      </button>
+                    </div>
+                    {specialDraft.showCampaigns === "false" && (
+                      <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                        Kampanya bölümü kapalı — kaydedildiğinde public sitede bu bölüm kaldırılır. Kampanyalar silinmez.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ── Campaign list — dimmed when disabled ─────────────── */}
+                  <div className={specialDraft.showCampaigns === "false" ? "pointer-events-none opacity-40" : ""}>
+                    <InlineCampaignManager />
+                  </div>
                   <InlineImpactManager
                     items={
                       (currentSpecialPageData?.impactItems as ImpactItemEntry[] | undefined) ?? []

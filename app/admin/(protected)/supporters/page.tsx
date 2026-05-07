@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check, ExternalLink } from "lucide-react";
+import { ImageUploadWithUrl } from "@/components/admin/shared/ImageUploadWithUrl";
 import {
   Supporter,
   getSupporters,
@@ -53,15 +54,13 @@ function SupporterForm({
         </div>
       </div>
 
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600">Logo URL</label>
-        <input
-          className={cls}
-          value={form.logoUrl}
-          onChange={(e) => set("logoUrl", e.target.value)}
-          placeholder="https://…"
-        />
-      </div>
+      <ImageUploadWithUrl
+        label="Logo"
+        value={form.logoUrl}
+        onChange={(url) => set("logoUrl", url)}
+        placeholder="https://…"
+        previewClassName="h-12 w-24 object-contain"
+      />
 
       <div>
         <label className="mb-1 block text-xs font-medium text-gray-600">Web Sitesi</label>
@@ -150,7 +149,7 @@ export default function SupportersPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Destekçiler</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Siteде gösterilecek sponsor ve destekçi kuruluşlar.
+            Sitedе gösterilecek sponsor ve destekçi kuruluşlar.
           </p>
         </div>
         {!adding && (

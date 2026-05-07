@@ -74,6 +74,7 @@ export interface DonationPageData {
   swiftCode: string;
   monthlyMessage: string;
   campaigns: DonationCampaign[];
+  showCampaigns: boolean;
 }
 
 export interface MediaListItem {
@@ -559,6 +560,8 @@ export async function getDonationPageData(): Promise<DonationPageData> {
     // use defaults
   }
 
+  const showCampaigns = pageContent.showCampaigns !== "false";
+
   return {
     title: pageContent.title,
     subtitle: pageContent.subtitle,
@@ -568,6 +571,7 @@ export async function getDonationPageData(): Promise<DonationPageData> {
     swiftCode: seedSettings.swiftCode ?? "",
     monthlyMessage,
     campaigns,
+    showCampaigns,
   };
 }
 

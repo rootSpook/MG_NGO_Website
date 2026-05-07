@@ -734,3 +734,22 @@ export async function upsertPageContent(
     });
   }
 }
+
+// ── Staff photo management ────────────────────────────────────────────────────
+
+export async function updateStaffPhotoURL(uid: string, photoURL: string): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.STAFF, uid), {
+    photoURL,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function getStaffMember(uid: string): Promise<{ photoURL?: string; displayName?: string; email?: string } | null> {
+  try {
+    const snap = await getDoc(doc(db, COLLECTIONS.STAFF, uid));
+    if (!snap.exists()) return null;
+    return snap.data() as { photoURL?: string; displayName?: string; email?: string };
+  } catch {
+    return null;
+  }
+}

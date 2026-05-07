@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, ExternalLink } from "lucide-react";
 import { upsertPageContent } from "@/lib/firebase/adminServices";
 import { getContentBySlug } from "@/lib/firebase/services";
+import { FileUploadWithUrl } from "@/components/admin/shared/FileUploadWithUrl";
 
 const SLUG = "tuzuk";
 
@@ -86,30 +86,13 @@ export default function BylawsPage() {
           />
         </div>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">PDF Dosya URL</label>
-          <input
-            className={cls}
-            value={fileUrl}
-            onChange={(e) => setFileUrl(e.target.value)}
-            placeholder="https://… (Firebase Storage veya harici link)"
-          />
-        </div>
-
-        {fileUrl && (
-          <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-            <FileText className="h-5 w-5 text-primary" />
-            <span className="flex-1 truncate text-sm text-gray-700">{fileUrl}</span>
-            <a
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-primary hover:underline"
-            >
-              <ExternalLink className="h-4 w-4" /> Görüntüle
-            </a>
-          </div>
-        )}
+        <FileUploadWithUrl
+          label="PDF Dosyası"
+          value={fileUrl}
+          onChange={setFileUrl}
+          accept="application/pdf"
+          placeholder="https://… (Firebase Storage veya harici link)"
+        />
       </div>
     </div>
   );

@@ -44,20 +44,17 @@ export default function EditorDashboardPage() {
 
   return (
     <EditorShell onSearchChange={setSearchTerm}>
-      <section className="mx-auto max-w-[1100px]">
-        <h1 className="mb-6 text-[56px] font-bold uppercase leading-none text-black">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900">
           Dashboard
         </h1>
 
-        <section className="rounded-[22px] bg-[#e5e5e5] p-6 shadow-md">
-          <h2 className="mb-5 text-[22px] font-semibold text-black">Quick Stats</h2>
-          <DashboardStats />
-        </section>
+        <DashboardStats />
 
         <LatestBlogPosts blogPosts={filteredBlogs} />
         <UpcomingEvents events={filteredEvents} />
         <QuickActions />
-      </section>
+      </div>
     </EditorShell>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/firebase/AuthContext";
 import {
   LayoutDashboard,
@@ -18,7 +18,17 @@ import {
   X,
   NavigationIcon,
   Palette,
+  Bell,
+  UserCircle2,
+  CalendarDays,
+  ChartNoAxesColumn,
 } from "lucide-react";
+
+const EXTRA_PAGE_LABELS: Record<string, string> = {
+  "/admin/my-details": "Bilgilerim",
+  "/admin/calendar": "Takvim",
+  "/admin/performance-review": "Performans Değerlendirmesi",
+};
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -37,6 +47,30 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [staffPhoto, setStaffPhoto] = useState<string | null>(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    setStaffPhoto(localUrl);
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -82,11 +116,37 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </nav>
 
         <div className="border-t border-gray-200 px-2 py-4">
-          {!collapsed && (
-            <p className="mb-2 truncate px-3 text-xs text-gray-400">
-              {user?.email}
-            </p>
-          )}
+          <div className={`flex ${collapsed ? "justify-center" : "items-center gap-3 px-3 mb-3"}`}>
+            <label
+              htmlFor="admin-photo-upload"
+              className="relative cursor-pointer"
+              title="Fotoğrafı değiştir"
+            >
+              {staffPhoto ? (
+                <img
+                  src={staffPhoto}
+                  alt="Profil"
+                  className="h-9 w-9 rounded-full object-cover ring-2 ring-primary/20"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {user?.email?.[0]?.toUpperCase() ?? "A"}
+                </div>
+              )}
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] text-white">✎</span>
+            </label>
+            <input
+              id="admin-photo-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+              ref={fileInputRef}
+            />
+            {!collapsed && (
+              <p className="truncate text-xs text-gray-500">{user?.email}</p>
+            )}
+          </div>
           <button
             onClick={logout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
@@ -98,14 +158,64 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center border-b border-gray-200 bg-white px-6">
+        <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
           <span className="text-sm font-semibold text-gray-700">
-            {navItems.find((i) =>
-              i.href === "/admin"
-                ? pathname === "/admin"
-                : pathname === i.href || pathname.startsWith(i.href + "/")
-            )?.label ?? "Admin Panel"}
+            {EXTRA_PAGE_LABELS[pathname] ??
+              navItems.find((i) =>
+                i.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname === i.href || pathname.startsWith(i.href + "/")
+              )?.label ??
+              "Admin Panel"}
           </span>
+
+          <div ref={profileRef} className="relative flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+              aria-label="Bildirimler"
+            >
+              <Bell className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              type="button"
+            >
+              <UserCircle2 className="h-5 w-5 text-gray-400" />
+              <span className="max-w-[120px] truncate">{user?.email ?? "Admin"}</span>
+            </button>
+
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 top-12 z-50 w-[220px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                <Link
+                  href="/admin/my-details"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <UserCircle2 className="h-4 w-4 text-gray-400" />
+                  <span>Bilgilerim</span>
+                </Link>
+                <Link
+                  href="/admin/calendar"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <CalendarDays className="h-4 w-4 text-gray-400" />
+                  <span>Takvim</span>
+                </Link>
+                <Link
+                  href="/admin/performance-review"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <ChartNoAxesColumn className="h-4 w-4 text-gray-400" />
+                  <span>Performans Değerlendirmesi</span>
+                </Link>
+              </div>
+            )}
+          </div>
         </header>
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>

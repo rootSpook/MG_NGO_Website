@@ -600,6 +600,23 @@ function EditPageView({
                         <p className="mt-2 text-sm text-neutral-500">Bu başlık editör düzeni içindir, sayfada görünmek zorunda değildir.</p>
                       </div>
 
+                      {page.key === "bagis" && selectedSection.id === "campaigns" && (
+                        <div className="mt-5">
+                          <label className="mb-2 block text-[18px] font-semibold">Kampanya Bölümünü Göster</label>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => updateSelectedSection((s) => ({ ...s, content: s.content === "disabled" ? "enabled" : "disabled" }))}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${selectedSection.content === "disabled" ? "bg-gray-300" : "bg-[#25B35B]"}`}
+                            >
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedSection.content === "disabled" ? "translate-x-1" : "translate-x-6"}`} />
+                            </button>
+                            <span className="text-[16px] text-neutral-700">{selectedSection.content === "disabled" ? "Gizli" : "Görünür"}</span>
+                          </div>
+                          <p className="mt-2 text-sm text-neutral-500">Bu toggle kapalıyken kampanya bölümü public sitede görünmez.</p>
+                        </div>
+                      )}
+
                       <div className="mt-5">
                         <label className="mb-2 block text-[18px] font-semibold">Sayfa İçeriği</label>
                         <div className="rounded-t-2xl bg-[#D3D3D6] px-4 py-3">

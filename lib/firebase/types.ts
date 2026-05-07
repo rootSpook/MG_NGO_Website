@@ -74,6 +74,7 @@ export interface StaffMember {
   displayName: string;
   isActive: boolean;
   lastLoginAt: Timestamp | null;
+  photoURL?: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
