@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
 import { getSiteSettings } from '@/lib/firebase/services'
+import { getNavConfig } from '@/lib/firebase/navServices'
+import { NavProvider } from '@/components/layout/NavProvider'
 import { ThemeListener } from '@/components/theme/ThemeListener'
 import './globals.css'
 
@@ -14,6 +16,15 @@ const getCachedSiteSettings = unstable_cache(
   getSiteSettings,
   ['site-settings'],
   { revalidate: 300 }
+)
+
+// Cache nav config for 60 seconds. The admin menu page calls
+// revalidateNavAction() after every save, which calls revalidatePath("/","layout")
+// to bust this cache immediately so changes propagate on the next request.
+const getCachedNavConfig = unstable_cache(
+  getNavConfig,
+  ['nav-config'],
+  { revalidate: 60 }
 )
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -46,7 +57,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const settings = await getCachedSiteSettings();
+  const [settings, navItems] = await Promise.all([
+    getCachedSiteSettings(),
+    getCachedNavConfig(),
+  ]);
 
   return (
     <html lang="tr" suppressHydrationWarning>
@@ -71,7 +85,9 @@ export default async function RootLayout({
         </a>
         <ThemeListener />
         <Providers>
-          {children}
+          <NavProvider initialItems={navItems}>
+            {children}
+          </NavProvider>
         </Providers>
         <Analytics />
       </body>

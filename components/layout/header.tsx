@@ -3,23 +3,25 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
-import { useEffect, useState } from "react"
-import { DEFAULT_NAV_ITEMS, getNavConfig, type NavItem } from "@/lib/firebase/navServices"
+import { useState } from "react"
+import { useNav } from "@/components/layout/NavProvider"
+import type { NavItem } from "@/lib/firebase/navServices"
 
 /**
- * Renders the public site header with dynamic navigation links and mobile menu support.
+ * Renders the public site header with dynamic navigation links.
+ *
+ * Navigation data is provided by NavProvider (in the root layout), which
+ * server-fetches the live Firestore config on every request and caches it for
+ * 60 s.  The provider also re-validates client-side after hydration, so
+ * in-session admin changes propagate without a full reload.
+ *
+ * This component no longer manages its own nav state or Firestore fetches —
+ * eliminating the DEFAULT_NAV_ITEMS flash that occurred on every mount.
  */
 export function Header() {
+  const navItems = useNav()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [navItems, setNavItems] = useState<NavItem[]>(DEFAULT_NAV_ITEMS)
 
-  useEffect(() => {
-    getNavConfig().then(setNavItems).catch(() => setNavItems(DEFAULT_NAV_ITEMS))
-  }, [])
-
-  // Hide draft pages from the public nav. Special routes don't carry a
-  // pageStatus so they pass through unchanged. Items still remain reachable
-  // via direct URL — only the menu link disappears.
   const isPublic = (item: NavItem) =>
     item.isVisible && (item.pageStatus ?? "published") !== "draft"
 
@@ -100,7 +102,7 @@ export function Header() {
                 <Link
                   key={link.key}
                   href={link.href}
-                  className="text-white text-sm transition-colors hover:text-[var(--theme-primary-hover,#1e40af)]"
+                  className="text-white text-sm transition-colors hover:text-(--theme-primary-hover,#1e40af)"
                 >
                   {link.label}
                 </Link>

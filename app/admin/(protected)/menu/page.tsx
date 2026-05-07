@@ -12,6 +12,7 @@ import {
   type NavItem,
 } from "@/lib/firebase/navServices";
 import { savePageBlocks } from "@/lib/firebase/adminServices";
+import { revalidateNavAction } from "@/app/admin/actions";
 import {
   seedSectionsForTemplate, TEMPLATE_LABELS,
   type TemplateType, type PageSection, type HeroBlockData,
@@ -98,6 +99,9 @@ export default function MenuManagementPage() {
     setSaving(true);
     try {
       await saveNavConfig(items);
+      // Bust the server-side nav cache so the next page request picks up the
+      // updated config instead of the stale cached version.
+      await revalidateNavAction();
       setSaved(true);
     } catch (err) {
       console.error(err);
@@ -219,21 +223,23 @@ export default function MenuManagementPage() {
         <div className="flex gap-2 flex-wrap shrink-0">
           <button
             onClick={openWizard}
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
+            disabled={loading}
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
             Yeni Sayfa Ekle
           </button>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            disabled={loading || saving}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
           >
             <RotateCcw className="h-4 w-4" />
             Varsayılan
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={loading || saving}
             className="flex items-center gap-1.5 rounded-lg border border-primary bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-secondary/50 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
@@ -322,7 +328,8 @@ export default function MenuManagementPage() {
               {/* Visibility toggle */}
               <button
                 onClick={() => toggleVisibility(item.key)}
-                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                disabled={saving}
+                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors disabled:opacity-60 ${
                   item.isVisible
                     ? "border-red-200 text-red-600 hover:bg-red-50"
                     : "border-green-200 text-green-600 hover:bg-green-50"
