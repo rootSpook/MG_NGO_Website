@@ -128,22 +128,22 @@ export default function CalendarPage() {
 
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <section className="rounded-[24px] bg-[#d9d9d9] p-6 shadow-md">
+      <div className="space-y-6">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-[52px] font-bold text-black">Takvim</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Takvim</h1>
 
               <div className="mt-4 space-y-4">
                 <div>
-                  <label className="mb-2 block text-[14px] font-medium text-[#222]">
+                  <label className="mb-2 block text-sm font-medium text-gray-900">
                     Şube
                   </label>
                   <div className="relative w-[220px]">
                     <select
                       value={selectedBranch}
                       onChange={(e) => setSelectedBranch(e.target.value)}
-                      className="h-[46px] w-full appearance-none rounded-[10px] bg-[#efefef] px-4 pr-10 outline-none"
+                      className="h-10 w-full appearance-none rounded-lg border border-gray-300 px-3 pr-10 text-sm outline-none focus:border-primary"
                     >
                       {branchOptions.map((branch) => (
                         <option key={branch} value={branch}>
@@ -151,36 +151,36 @@ export default function CalendarPage() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2f80ed]" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-[14px] font-medium text-[#222]">
+                  <p className="mb-2 text-sm font-medium text-gray-900">
                     Tarih seç
                   </p>
 
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setSelectedYear((prev) => prev - 1)}
-                      className="rounded-[10px] bg-[#efefef] p-3 hover:bg-[#e7e7e7]"
+                      className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
                     >
-                      <ChevronLeft className="h-4 w-4 text-[#2f80ed]" />
+                      <ChevronLeft className="h-4 w-4 text-gray-600" />
                     </button>
 
-                    <div className="flex min-w-[120px] items-center justify-center rounded-[10px] bg-[#efefef] px-4 py-3 text-[16px] font-medium text-[#222]">
+                    <div className="flex min-w-[120px] items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-900">
                       {selectedYear}
                     </div>
 
                     <button
                       onClick={() => setSelectedYear((prev) => prev + 1)}
-                      className="rounded-[10px] bg-[#efefef] p-3 hover:bg-[#e7e7e7]"
+                      className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
                     >
-                      <ChevronRight className="h-4 w-4 text-[#2f80ed]" />
+                      <ChevronRight className="h-4 w-4 text-gray-600" />
                     </button>
 
-                    <div className="rounded-[10px] bg-[#efefef] p-3">
-                      <CalendarDays className="h-5 w-5 text-[#2f80ed]" />
+                    <div className="rounded-lg border border-gray-200 p-2">
+                      <CalendarDays className="h-4 w-4 text-gray-600" />
                     </div>
                   </div>
                 </div>
@@ -190,18 +190,18 @@ export default function CalendarPage() {
             <div className="flex flex-col items-start gap-4 lg:items-end">
               <Link
                 href="/editorPanel/events/new"
-                className="rounded-[12px] bg-[#27ae60] px-10 py-4 text-[18px] font-semibold text-white transition hover:opacity-90"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
               >
                 Etkinlik Ekle
               </Link>
 
-              <div className="overflow-hidden rounded-[18px] border-2 border-[#2f80ed] bg-white">
+              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
                 <div className="grid grid-cols-2">
-                  <div className="min-w-[120px] border-r border-[#2f80ed] px-8 py-5 text-center">
-                    <div className="text-[28px] font-bold text-black">
+                  <div className="min-w-[120px] border-r border-gray-200 px-8 py-5 text-center">
+                    <div className="text-2xl font-bold text-gray-900">
                       {yearSummary.workingDays}
                     </div>
-                    <div className="mt-2 text-[14px] leading-5 text-[#222]">
+                    <div className="mt-2 text-sm leading-5 text-gray-600">
                       çalışma
                       <br />
                       günleri
@@ -209,10 +209,10 @@ export default function CalendarPage() {
                   </div>
 
                   <div className="min-w-[120px] px-8 py-5 text-center">
-                    <div className="text-[28px] font-bold text-[#ff5b5b]">
+                    <div className="text-2xl font-bold text-red-500">
                       {yearSummary.nonWorkingDays}
                     </div>
-                    <div className="mt-2 text-[14px] leading-5 text-[#ff5b5b]">
+                    <div className="mt-2 text-sm leading-5 text-red-500">
                       çalışma dışı
                       <br />
                       günler
@@ -223,7 +223,9 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          </section>
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {monthNames.map((monthName, monthIndex) => {
               const monthCells = buildMonthGrid(selectedYear, monthIndex);
               const summary = getWorkingSummaryForMonth(selectedYear, monthIndex);
@@ -241,8 +243,7 @@ export default function CalendarPage() {
                 />
               );
             })}
-          </div>
-        </section>
+        </div>
       </div>
     </EditorShell>
   );
@@ -274,12 +275,12 @@ function MonthCard({
   const todayKey = formatDateKey(today);
 
   return (
-    <div>
-      <h3 className="mb-4 text-center text-[18px] font-semibold text-[#222]">
+    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <h3 className="mb-4 text-center text-base font-semibold text-gray-900">
         {monthName}
       </h3>
 
-      <div className="grid grid-cols-7 gap-y-2 text-center text-[13px] text-[#8a8a8a]">
+      <div className="grid grid-cols-7 gap-y-2 text-center text-xs text-gray-600">
         {weekDays.map((day) => (
           <div key={day} className="pb-2">
             {day}
@@ -305,21 +306,21 @@ function MonthCard({
             >
               <div className="group relative flex h-8 w-8 items-center justify-center">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] transition ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition ${
                     isToday
-                      ? "bg-[#2f80ed] text-white"
+                      ? "bg-primary text-white"
                       : hasEvent
-                      ? "cursor-pointer bg-[#cfe3ff] text-[#1d5fcc] ring-2 ring-[#2f80ed]"
+                      ? "cursor-pointer bg-blue-100 text-primary ring-2 ring-primary"
                       : weekend
-                      ? "text-[#ff6a6a]"
-                      : "text-[#222]"
+                      ? "text-red-500"
+                      : "text-gray-900"
                   }`}
                 >
                   {day}
                 </div>
 
                 {hasEvent && (
-                  <div className="pointer-events-none absolute bottom-10 left-1/2 z-50 hidden min-w-[180px] -translate-x-1/2 rounded-[10px] bg-black px-3 py-2 text-center text-[12px] text-white shadow-lg group-hover:block">
+                  <div className="pointer-events-none absolute bottom-10 left-1/2 z-50 hidden min-w-[180px] -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-center text-xs text-white shadow-lg group-hover:block">
                     {dayEvents.map((event) => (
                       <div key={event.id}>{event.title}</div>
                     ))}
@@ -331,16 +332,16 @@ function MonthCard({
         })}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-[12px] bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b px-4 py-2 text-[14px] text-[#333]">
+      <div className="mt-4 overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 text-sm text-gray-700">
           <span>Çalışma günleri:</span>
           <span>{summary.workingDays}</span>
         </div>
-        <div className="flex items-center justify-between px-4 py-2 text-[14px] text-[#ff6a6a]">
+        <div className="flex items-center justify-between px-4 py-2 text-sm text-red-600">
           <span>Çalışma dışı günler:</span>
           <span>{summary.nonWorkingDays}</span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

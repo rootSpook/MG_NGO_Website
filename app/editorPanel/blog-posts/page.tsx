@@ -69,38 +69,38 @@ export default function BlogPostsPage() {
 
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <div className="mb-8 flex items-start justify-between gap-6">
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-6">
           <div>
-            <h1 className="text-[52px] font-bold text-black">Blog Yazıları</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Blog Yazıları</h1>
 
             <div className="relative mt-5 w-[320px]">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2f80ed]" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Blog yazılarında ara"
-                className="h-[46px] w-full rounded-[12px] bg-[#efefef] pl-11 pr-4 text-[15px] outline-none"
+                className="h-10 w-full rounded-lg border border-gray-300 pl-11 pr-3 text-sm outline-none focus:border-primary"
               />
             </div>
           </div>
 
           <Link
             href="/editorPanel/blog-posts/new"
-            className="mt-8 rounded-full border-2 border-[#2f80ed] px-6 py-3 text-[18px] font-medium text-[#2f80ed] transition hover:bg-[#eef5ff]"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
             + Blog Yazısı Ekle
           </Link>
         </div>
 
-        <section className="rounded-[24px] bg-[#e8e8e8] p-5 shadow-md">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
-            <div className="rounded-[18px] bg-[#f1f1f1] p-5">
-              <h3 className="mb-4 text-[18px] font-semibold text-black">Filtrele</h3>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 className="mb-4 text-base font-semibold text-gray-800">Filtrele</h3>
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="mb-2 text-[14px] font-medium text-[#222]">Durum</h4>
+                  <h4 className="mb-2 text-sm font-medium text-gray-900">Durum</h4>
                   <div className="space-y-2">
                     {statusOptions.map((status) => {
                       const count = blogs.filter((blog) => blog.status === status).length;
@@ -108,7 +108,7 @@ export default function BlogPostsPage() {
                       return (
                         <label
                           key={status}
-                          className="flex items-center gap-2 text-[14px] text-[#444]"
+                          className="flex items-center gap-2 text-sm text-gray-700"
                         >
                           <input
                             type="checkbox"
@@ -120,7 +120,7 @@ export default function BlogPostsPage() {
                                 setSelectedStatuses
                               )
                             }
-                            className="h-4 w-4 accent-[#2f80ed]"
+                            className="h-4 w-4 accent-primary"
                           />
                           <span>
                             {status === "published" ? "Yayınlandı" : "Taslak"} ({count})
@@ -132,7 +132,7 @@ export default function BlogPostsPage() {
                 </div>
 
                 <div>
-                  <h4 className="mb-2 text-[14px] font-medium text-[#222]">Kategori</h4>
+                  <h4 className="mb-2 text-sm font-medium text-gray-900">Kategori</h4>
                   <div className="space-y-2">
                     {categoryOptions.map((category) => {
                       const count = blogs.filter(
@@ -142,7 +142,7 @@ export default function BlogPostsPage() {
                       return (
                         <label
                           key={category}
-                          className="flex items-center gap-2 text-[14px] text-[#444]"
+                          className="flex items-center gap-2 text-sm text-gray-700"
                         >
                           <input
                             type="checkbox"
@@ -154,7 +154,7 @@ export default function BlogPostsPage() {
                                 setSelectedCategories
                               )
                             }
-                            className="h-4 w-4 accent-[#2f80ed]"
+                            className="h-4 w-4 accent-primary"
                           />
                           <span>
                             {category} ({count})
@@ -168,20 +168,20 @@ export default function BlogPostsPage() {
 
               <button
                 onClick={clearFilters}
-                className="mt-6 w-full rounded-full border border-[#4d4d4d] bg-white py-2 text-[15px] font-medium text-[#333]"
+                className="mt-6 w-full rounded-lg border border-gray-200 bg-white py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
               >
                 Temizle
               </button>
             </div>
 
             <div>
-              <div className="mb-3 flex justify-end text-[15px] text-[#5a5a5a]">
+              <div className="mb-3 flex justify-end text-sm text-gray-600">
                 Bulundu: {filteredBlogs.length}
               </div>
 
-              <div className="overflow-x-auto rounded-[14px]">
+              <div className="overflow-x-auto rounded-lg">
                 <table className="min-w-full">
-                  <thead className="bg-[#d6d6da] text-left text-[13px] text-[#2f2f2f]">
+                  <thead className="bg-gray-100 text-left text-xs font-medium text-gray-700">
                     <tr>
                       <th className="px-4 py-3">Başlık</th>
                       <th className="px-4 py-3">Kategori</th>
@@ -198,7 +198,7 @@ export default function BlogPostsPage() {
                     {filteredBlogs.map((blog, index) => (
                       <tr
                         key={blog.id}
-                        className={index % 2 === 0 ? "bg-[#efefef]" : "bg-[#dcdcdc]"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                       >
                         <td className="px-4 py-4">{blog.title}</td>
                         <td className="px-4 py-4">{blog.category}</td>
@@ -210,12 +210,12 @@ export default function BlogPostsPage() {
                         <td className="px-4 py-4">{blog.id}</td>
                         <td className="px-4 py-4">
                           <Link href={`/editorPanel/blog-posts/${blog.id}/edit`}>
-                            <Pencil className="h-5 w-5 text-[#2f80ed]" />
+                            <Pencil className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                           </Link>
                         </td>
                         <td className="px-4 py-4">
                           <button onClick={() => deleteBlog(blog.id)}>
-                            <Trash2 className="h-5 w-5 text-[#2f80ed]" />
+                            <Trash2 className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                           </button>
                         </td>
                       </tr>

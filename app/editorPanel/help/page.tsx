@@ -83,14 +83,14 @@ const faqItems = [
 export default function HelpPage() {
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <div className="mb-8 flex items-center gap-3">
-          <HelpCircle className="h-9 w-9 text-[#2f80ed]" />
-          <h1 className="text-[52px] font-bold text-black">Yardım</h1>
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <HelpCircle className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-gray-900">Yardım</h1>
         </div>
 
-        <section className="rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-          <h2 className="mb-5 text-[24px] font-semibold text-black">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-gray-800">
             Hızlı Erişim
           </h2>
 
@@ -102,16 +102,16 @@ export default function HelpPage() {
                 <Link
                   key={card.title}
                   href={card.href}
-                  className="rounded-[18px] bg-white p-5 shadow-sm transition hover:translate-y-[-2px]"
+                  className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:border-primary hover:bg-blue-50"
                 >
                   <div className="mb-3 flex items-center gap-3">
-                    <Icon className="h-5 w-5 text-[#2f80ed]" />
-                    <h3 className="text-[18px] font-semibold text-black">
+                    <Icon className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-gray-900">
                       {card.title}
                     </h3>
                   </div>
 
-                  <p className="text-[15px] leading-6 text-[#444]">
+                  <p className="text-sm leading-6 text-gray-700">
                     {card.description}
                   </p>
                 </Link>
@@ -120,8 +120,8 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-          <h2 className="mb-5 text-[24px] font-semibold text-black">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-gray-800">
             Sık Sorulan Sorular
           </h2>
 
@@ -129,12 +129,12 @@ export default function HelpPage() {
             {faqItems.map((item) => (
               <div
                 key={item.question}
-                className="rounded-[16px] bg-white p-5 shadow-sm"
+                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
               >
-                <h3 className="text-[17px] font-semibold text-black">
+                <h3 className="font-semibold text-gray-900">
                   {item.question}
                 </h3>
-                <p className="mt-2 text-[15px] leading-6 text-[#444]">
+                <p className="mt-2 text-sm leading-6 text-gray-700">
                   {item.answer}
                 </p>
               </div>

@@ -96,35 +96,35 @@ export default function EventsPage() {
 
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <div className="mb-8 flex items-start justify-between gap-6">
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-6">
           <div>
-            <h1 className="text-[52px] font-bold text-black">Etkinlikler</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Etkinlikler</h1>
 
             <div className="mt-5">
-              <p className="mb-2 text-[14px] text-[#333]">Tarih seç</p>
+              <p className="mb-2 text-sm text-gray-600">Tarih seç</p>
 
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSelectedYear((prev) => prev - 1)}
-                  className="rounded-[10px] bg-[#efefef] p-3 hover:bg-[#e3e3e3]"
+                  className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
                 >
-                  <ChevronLeft className="h-4 w-4 text-[#2f80ed]" />
+                  <ChevronLeft className="h-4 w-4 text-gray-600" />
                 </button>
 
-                <div className="flex min-w-[120px] items-center justify-center rounded-[10px] bg-[#efefef] px-4 py-3 text-[16px] font-medium text-[#222]">
+                <div className="flex min-w-[120px] items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-900">
                   {selectedYear}
                 </div>
 
                 <button
                   onClick={() => setSelectedYear((prev) => prev + 1)}
-                  className="rounded-[10px] bg-[#efefef] p-3 hover:bg-[#e3e3e3]"
+                  className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
                 >
-                  <ChevronRight className="h-4 w-4 text-[#2f80ed]" />
+                  <ChevronRight className="h-4 w-4 text-gray-600" />
                 </button>
 
-                <div className="rounded-[10px] bg-[#efefef] p-3">
-                  <CalendarDays className="h-5 w-5 text-[#2f80ed]" />
+                <div className="rounded-lg border border-gray-200 p-2">
+                  <CalendarDays className="h-4 w-4 text-gray-600" />
                 </div>
               </div>
             </div>
@@ -132,18 +132,18 @@ export default function EventsPage() {
 
           <Link
             href="/editorPanel/events/new"
-            className="mt-8 rounded-full border-2 border-[#2f80ed] px-6 py-3 text-[18px] font-medium text-[#2f80ed] transition hover:bg-[#eef5ff]"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
             + Etkinlik Ekle
           </Link>
         </div>
 
-        <section className="rounded-[24px] bg-[#e8e8e8] p-5 shadow-md">
-          <h2 className="mb-4 text-[18px] font-semibold text-black">Planned Events</h2>
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-base font-semibold text-gray-800">Planned Events</h2>
 
-          <div className="overflow-x-auto rounded-[14px]">
-            <table className="min-w-full overflow-hidden rounded-[14px]">
-              <thead className="bg-[#d6d6da] text-left text-[13px] text-[#2f2f2f]">
+          <div className="overflow-x-auto rounded-lg">
+            <table className="min-w-full overflow-hidden rounded-lg">
+              <thead className="bg-gray-100 text-left text-xs font-medium text-gray-700">
                 <tr>
                   <th className="px-4 py-3">Durum</th>
                   <th className="px-4 py-3">Tarih</th>
@@ -161,7 +161,7 @@ export default function EventsPage() {
                 {plannedEvents.map((event, index) => (
                   <tr
                     key={event.id}
-                    className={index % 2 === 0 ? "bg-[#efefef]" : "bg-[#dcdcdc]"}
+                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
                     <td className="px-4 py-4">
                       <span className="inline-block h-4 w-4 rounded-full bg-[#27ae60]" />
@@ -178,19 +178,19 @@ export default function EventsPage() {
                     <td className="px-4 py-4">{event.type}</td>
                     <td className="px-4 py-4">
                       <Link href={`/editorPanel/events/${event.id}/edit`}>
-                        <Pencil className="h-5 w-5 text-[#2f80ed]" />
+                        <Pencil className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                       </Link>
                     </td>
                     <td className="px-4 py-4">
                       <button onClick={() => deleteEvent(event.id)}>
-                        <Trash2 className="h-5 w-5 text-[#2f80ed]" />
+                        <Trash2 className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
 
-              <tfoot className="bg-[#efefef] font-medium text-[#222]">
+              <tfoot className="bg-gray-50 font-medium text-gray-900">
                 <tr>
                   <td className="px-4 py-3"></td>
                   <td className="px-4 py-3">Toplam</td>
@@ -211,10 +211,10 @@ export default function EventsPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[24px] bg-[#e8e8e8] p-5 shadow-md">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
-            <div className="rounded-[18px] bg-[#f1f1f1] p-5">
-              <h3 className="mb-4 text-[18px] font-semibold text-black">Filtrele</h3>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 className="mb-4 text-base font-semibold text-gray-800">Filtrele</h3>
 
               <div className="space-y-5">
                 <FilterGroup
@@ -261,20 +261,20 @@ export default function EventsPage() {
 
               <button
                 onClick={clearFilters}
-                className="mt-6 w-full rounded-full border border-[#4d4d4d] bg-white py-2 text-[15px] font-medium text-[#333]"
+                className="mt-6 w-full rounded-lg border border-gray-200 bg-white py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
               >
                 Temizle
               </button>
             </div>
 
             <div>
-              <div className="mb-3 flex justify-end text-[15px] text-[#5a5a5a]">
+              <div className="mb-3 flex justify-end text-sm text-gray-600">
                 Bulundu: {filteredEvents.length}
               </div>
 
-              <div className="overflow-x-auto rounded-[14px]">
+              <div className="overflow-x-auto rounded-lg">
                 <table className="min-w-full">
-                  <thead className="bg-[#d6d6da] text-left text-[13px] text-[#2f2f2f]">
+                  <thead className="bg-gray-100 text-left text-xs font-medium text-gray-700">
                     <tr>
                       <th className="px-4 py-3">Etkinlik Adı</th>
                       <th className="px-4 py-3">Lokasyon</th>
@@ -290,7 +290,7 @@ export default function EventsPage() {
                     {filteredEvents.map((event, index) => (
                       <tr
                         key={event.id}
-                        className={index % 2 === 0 ? "bg-[#efefef]" : "bg-[#dcdcdc]"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                       >
                         <td className="px-4 py-4">{event.title}</td>
                         <td className="px-4 py-4">{event.city}</td>
@@ -331,19 +331,19 @@ function FilterGroup({
 }: FilterGroupProps) {
   return (
     <div>
-      <h4 className="mb-2 text-[14px] font-medium text-[#222]">{title}</h4>
+      <h4 className="mb-2 text-sm font-medium text-gray-900">{title}</h4>
 
       <div className="space-y-2">
         {options.map((option) => {
           const count = getCount(allEvents, option);
 
           return (
-            <label key={option} className="flex items-center gap-2 text-[14px] text-[#444]">
+            <label key={option} className="flex items-center gap-2 text-sm text-gray-700">
               <input
                 type="checkbox"
                 checked={selected.includes(option)}
                 onChange={() => onToggle(option)}
-                className="h-4 w-4 accent-[#2f80ed]"
+                className="h-4 w-4 accent-primary"
               />
               <span>
                 {option} ({count})

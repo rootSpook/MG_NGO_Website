@@ -121,12 +121,12 @@ export default function MediaPage() {
 
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <h1 className="mb-8 text-[52px] font-bold text-black">Medya Yükleme</h1>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900">Medya Yükleme</h1>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.9fr]">
-          <section>
-            <h2 className="mb-4 text-[22px] font-semibold text-black">Sayfa Seçimi</h2>
+          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-4 text-base font-semibold text-gray-800">Sayfa Seçimi</h2>
 
             <div className="space-y-3">
               {pageOptions.map((page) => {
@@ -136,14 +136,14 @@ export default function MediaPage() {
                   <button
                     key={page.key}
                     onClick={() => setSelectedPageKey(page.key)}
-                    className={`flex w-full items-center justify-between rounded-[16px] px-5 py-4 text-left shadow-sm transition ${
+                    className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition ${
                       isActive
-                        ? "bg-[#dfe8f5] text-[#2f80ed]"
-                        : "bg-[#e8e8e8] text-[#222] hover:bg-[#e2e2e2]"
+                        ? "bg-blue-50 text-primary"
+                        : "bg-white text-gray-900 hover:bg-gray-50"
                     }`}
                   >
-                    <span className="text-[18px] font-medium">{page.label}</span>
-                    <ChevronRight className="h-5 w-5" />
+                    <span className="text-sm font-medium">{page.label}</span>
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 );
               })}
@@ -153,17 +153,17 @@ export default function MediaPage() {
           <section
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="flex min-h-[250px] flex-col items-center justify-center rounded-[24px] bg-[#dfe8f5] p-8 text-center shadow-sm"
+            className="flex min-h-[250px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center shadow-sm"
           >
-            <Upload className="mb-4 h-10 w-10 text-[#7a7a7a]" />
-            <p className="text-[24px] font-semibold text-black">
+            <Upload className="mb-4 h-10 w-10 text-gray-400" />
+            <p className="text-lg font-semibold text-gray-900">
               Dosyaları buraya sürükleyip bırakın
             </p>
-            <p className="my-4 text-[18px] text-[#333]">veya</p>
+            <p className="my-4 text-sm text-gray-600">veya</p>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-full bg-[#27ae60] px-6 py-3 text-[16px] font-semibold text-white"
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
             >
               + Dosya Seçin
             </button>
@@ -179,26 +179,26 @@ export default function MediaPage() {
           </section>
         </div>
 
-        <div className="mt-10 border-t border-[#d7d7d7] pt-8">
-          <h2 className="mb-4 text-[22px] font-semibold text-black">Medya Detayları</h2>
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-base font-semibold text-gray-800">Medya Detayları</h2>
 
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.9fr]">
             <section>
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-[15px] font-medium text-black">
+                  <label className="mb-2 block text-sm font-medium text-gray-900">
                     Başlık
                   </label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ana Sayfa Slider 1"
-                    className="h-[48px] w-full rounded-[12px] bg-[#e8e8e8] px-4 outline-none"
+                    className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[15px] font-medium text-black">
+                  <label className="mb-2 block text-sm font-medium text-gray-900">
                     Açıklama
                   </label>
                   <textarea
@@ -206,25 +206,25 @@ export default function MediaPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Opsiyonel açıklama"
                     rows={3}
-                    className="w-full rounded-[12px] bg-[#e8e8e8] px-4 py-3 outline-none"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[15px] font-medium text-black">
+                  <label className="mb-2 block text-sm font-medium text-gray-900">
                     Etiketler
                   </label>
 
-                  <div className="rounded-[12px] bg-[#e8e8e8] px-3 py-3">
+                  <div className="rounded-lg border border-gray-300 px-3 py-3">
                     <div className="mb-3 flex flex-wrap gap-2">
                       {tags.map((tag) => (
                         <span
                           key={tag}
-                          className="flex items-center gap-2 rounded-full bg-[#d6d6d6] px-3 py-1 text-[13px] text-[#222]"
+                          className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-900"
                         >
                           {tag}
                           <button onClick={() => removeTag(tag)} type="button">
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-3 w-3" />
                           </button>
                         </span>
                       ))}
@@ -235,13 +235,13 @@ export default function MediaPage() {
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         placeholder="+ Etiket Ekle"
-                        className="h-[42px] flex-1 rounded-[10px] bg-[#f3f3f3] px-4 outline-none"
+                        className="h-10 flex-1 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-primary"
                       />
 
                       <button
                         type="button"
                         onClick={addTag}
-                        className="rounded-[10px] bg-[#d6d6d6] px-4 py-2 text-[14px] text-[#444]"
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
                       >
                         Ekle
                       </button>
@@ -250,29 +250,29 @@ export default function MediaPage() {
                 </div>
 
                 <div>
-                  <label className="mb-3 block text-[15px] font-medium text-black">
+                  <label className="mb-3 block text-sm font-medium text-gray-900">
                     Görünürlük
                   </label>
 
                   <div className="flex gap-8">
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 text-sm">
                       <input
                         type="radio"
                         name="visibility"
                         checked={visibility === "public"}
                         onChange={() => setVisibility("public")}
-                        className="h-4 w-4 accent-[#2f80ed]"
+                        className="h-4 w-4 accent-primary"
                       />
                       <span>Herkese Açık</span>
                     </label>
 
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 text-sm">
                       <input
                         type="radio"
                         name="visibility"
                         checked={visibility === "private"}
                         onChange={() => setVisibility("private")}
-                        className="h-4 w-4 accent-[#2f80ed]"
+                        className="h-4 w-4 accent-primary"
                       />
                       <span>Özel</span>
                     </label>
@@ -280,18 +280,18 @@ export default function MediaPage() {
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-2 text-[15px] text-black">
+                  <label className="flex items-center gap-2 text-sm text-gray-900">
                     <input
                       type="checkbox"
                       checked={featured}
                       onChange={(e) => setFeatured(e.target.checked)}
-                      className="h-4 w-4 accent-[#2f80ed]"
+                      className="h-4 w-4 accent-primary"
                     />
                     <span>Öne Çıkar</span>
                   </label>
                 </div>
 
-                <div className="pt-6 text-[14px] text-[#555]">
+                <div className="pt-6 text-sm text-gray-600">
                   {pendingImages.length} dosya yüklemeye hazır.
                 </div>
               </div>
@@ -302,20 +302,20 @@ export default function MediaPage() {
                 {selectedPageMedia.map((item) => (
                   <div
                     key={item.id}
-                    className="relative overflow-hidden rounded-[16px] bg-[#e8e8e8] shadow-sm"
+                    className="relative overflow-hidden rounded-lg bg-gray-200 shadow-sm"
                   >
                     <button
                       onClick={() => deleteMedia(item.id)}
                       className="absolute right-2 top-2 z-10 rounded-full bg-white/90 p-1 shadow"
                       type="button"
                     >
-                      <X className="h-4 w-4 text-[#222]" />
+                      <X className="h-4 w-4 text-gray-900" />
                     </button>
 
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="h-[140px] w-full object-cover"
+                      className="h-28 w-full object-cover"
                     />
                   </div>
                 ))}
@@ -323,20 +323,20 @@ export default function MediaPage() {
                 {pendingImages.map((item) => (
                   <div
                     key={item.id}
-                    className="relative overflow-hidden rounded-[16px] bg-[#e8e8e8] shadow-sm"
+                    className="relative overflow-hidden rounded-lg bg-gray-200 shadow-sm"
                   >
                     <button
                       onClick={() => removePendingImage(item.id)}
                       className="absolute right-2 top-2 z-10 rounded-full bg-white/90 p-1 shadow"
                       type="button"
                     >
-                      <X className="h-4 w-4 text-[#222]" />
+                      <X className="h-4 w-4 text-gray-900" />
                     </button>
 
                     <img
                       src={item.previewUrl}
                       alt={item.fileName}
-                      className="h-[140px] w-full object-cover"
+                      className="h-28 w-full object-cover"
                     />
                   </div>
                 ))}
@@ -344,10 +344,10 @@ export default function MediaPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex h-[140px] flex-col items-center justify-center rounded-[16px] bg-[#dfe8f5] text-center shadow-sm"
+                  className="flex h-28 flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-center shadow-sm hover:bg-gray-100"
                 >
-                  <ImagePlus className="mb-2 h-8 w-8 text-[#7a7a7a]" />
-                  <span className="text-[20px] font-semibold text-[#222]">Ekle</span>
+                  <ImagePlus className="mb-2 h-6 w-6 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-900">Ekle</span>
                 </button>
               </div>
 
@@ -355,7 +355,7 @@ export default function MediaPage() {
                 <button
                   type="button"
                   onClick={resetDraft}
-                  className="rounded-full border border-[#4c4c4c] bg-white px-8 py-3 text-[15px] font-medium text-[#333]"
+                  className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                 >
                   Sil
                 </button>
@@ -363,14 +363,14 @@ export default function MediaPage() {
                 <button
                   type="button"
                   onClick={handleAddMedia}
-                  className="rounded-full bg-[#27ae60] px-8 py-3 text-[15px] font-semibold text-white"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
                 >
                   Ekle
                 </button>
               </div>
             </section>
           </div>
-        </div>
+        </section>
       </div>
     </EditorShell>
   );

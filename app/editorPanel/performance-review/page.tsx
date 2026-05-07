@@ -52,16 +52,16 @@ export default function PerformanceReviewPage() {
 
   return (
     <EditorShell>
-      <div className="mx-auto max-w-[1180px]">
-        <div className="mb-8 flex items-center gap-3">
-          <BarChart3 className="h-10 w-10 text-[#2f80ed]" />
-          <h1 className="text-[52px] font-bold text-black">
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-gray-900">
             Performans Değerlendirmesi
           </h1>
         </div>
 
-        <section className="rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-          <h2 className="mb-5 text-[24px] font-semibold text-black">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-gray-800">
             Genel Performans Özeti
           </h2>
 
@@ -73,8 +73,8 @@ export default function PerformanceReviewPage() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-          <h2 className="mb-5 text-[24px] font-semibold text-black">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-5 text-base font-semibold text-gray-800">
             İçerik Aktivitesi
           </h2>
 
@@ -82,21 +82,21 @@ export default function PerformanceReviewPage() {
             {activityItems.map((item) => (
               <div
                 key={item.label}
-                className="rounded-[18px] bg-white p-5 shadow-sm"
+                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
               >
                 <div className="mb-3 flex items-center gap-2">
                   {item.icon}
-                  <span className="text-[15px] text-[#666]">{item.label}</span>
+                  <span className="text-sm text-gray-600">{item.label}</span>
                 </div>
-                <div className="text-[32px] font-bold text-black">{item.value}</div>
+                <div className="text-2xl font-bold text-gray-900">{item.value}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-7 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-            <h2 className="mb-5 text-[24px] font-semibold text-black">
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-5 text-base font-semibold text-gray-800">
               Güçlü Yönler
             </h2>
 
@@ -108,8 +108,8 @@ export default function PerformanceReviewPage() {
             </div>
           </div>
 
-          <div className="rounded-[24px] bg-[#e8e8e8] p-6 shadow-md">
-            <h2 className="mb-5 text-[24px] font-semibold text-black">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-5 text-base font-semibold text-gray-800">
               Geliştirilebilecek Alanlar
             </h2>
 
@@ -128,27 +128,27 @@ export default function PerformanceReviewPage() {
 
 function StatCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-[18px] bg-white p-5 shadow-sm">
-      <p className="text-[15px] text-[#666]">{title}</p>
-      <div className="mt-3 text-[30px] font-bold text-black">{value}</div>
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <p className="text-sm text-gray-600">{title}</p>
+      <div className="mt-3 text-2xl font-bold text-gray-900">{value}</div>
     </div>
   );
 }
 
 function ReviewItem({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-[16px] bg-white p-4 shadow-sm">
-      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#27ae60]" />
-      <p className="text-[15px] leading-6 text-[#444]">{text}</p>
+    <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+      <p className="text-sm leading-6 text-gray-700">{text}</p>
     </div>
   );
 }
 
 function SuggestionItem({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-[16px] bg-white p-4 shadow-sm">
-      <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#f2994a]" />
-      <p className="text-[15px] leading-6 text-[#444]">{text}</p>
+    <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+      <p className="text-sm leading-6 text-gray-700">{text}</p>
     </div>
   );
 }

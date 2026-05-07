@@ -23,17 +23,17 @@ export default function DashboardStats() {
       {
         title: "Toplam Blog Yazısı",
         value: totalPublishedBlogs,
-        className: "bg-[#dbe7f5]",
+        className: "bg-blue-50",
       },
       {
         title: "Yaklaşan Etkinlikler",
         value: totalUpcomingEvents,
-        className: "bg-[#d8edcf]",
+        className: "bg-green-50",
       },
       {
         title: "Taslak Gönderiler",
         value: totalDraftBlogs,
-        className: "bg-[#e9dbc4]",
+        className: "bg-amber-50",
       },
     ];
   }, [blogs, events]);
@@ -43,10 +43,10 @@ export default function DashboardStats() {
       {stats.map((item) => (
         <div
           key={item.title}
-          className={`${item.className} rounded-[20px] px-8 py-7 shadow-md`}
+          className={`${item.className} rounded-xl p-5 shadow-sm`}
         >
-          <div className="text-[42px] font-bold text-black">{item.value}</div>
-          <div className="mt-3 text-[16px] text-[#242424]">{item.title}</div>
+          <div className="mt-2 text-3xl font-bold text-gray-900">{item.value}</div>
+          <div className="text-sm font-medium text-gray-600">{item.title}</div>
         </div>
       ))}
     </div>

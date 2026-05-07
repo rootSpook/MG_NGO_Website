@@ -2,28 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import {
-  Menu,
-  Search,
-  UserCircle2,
-  CalendarDays,
-  ChartNoAxesColumn,
-} from "lucide-react";
-import NotificationDropdown from "./NotificationDropdown";
+import { UserCircle2, CalendarDays, ChartNoAxesColumn, Bell } from "lucide-react";
+import { useAuth } from "@/lib/firebase/AuthContext";
 
 interface EditorTopbarProps {
-  onToggleSidebar: () => void;
+  pageLabel: string;
   searchTerm: string;
   setSearchTerm: (value: string) => void;
 }
 
 export default function EditorTopbar({
-  onToggleSidebar,
+  pageLabel,
   searchTerm,
   setSearchTerm,
 }: EditorTopbarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -34,67 +29,56 @@ export default function EditorTopbar({
         setIsProfileMenuOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <header className="flex items-center justify-between px-6 py-5">
-      <div className="flex items-center gap-4">
+    <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
+      <span className="text-sm font-semibold text-gray-700">{pageLabel}</span>
+
+      <div ref={profileRef} className="relative flex items-center gap-3">
         <button
-          onClick={onToggleSidebar}
-          className="rounded-lg p-2 transition hover:bg-[#ececec]"
           type="button"
+          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+          aria-label="Bildirimler"
         >
-          <Menu className="h-5 w-5 text-[#333]" />
+          <Bell className="h-5 w-5" />
         </button>
 
-        <div className="flex w-[320px] items-center gap-2 rounded-full px-2 py-2">
-          <Search className="h-4 w-4 text-[#2f80ed]" />
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Hızlı arama"
-            className="w-full bg-transparent text-[14px] outline-none placeholder:text-[#9b9b9b]"
-          />
-        </div>
-      </div>
-
-      <div ref={profileRef} className="relative flex items-center gap-4">
         <button
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-          className="text-[16px] font-semibold text-[#202020]"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
           type="button"
         >
-          Editor 1
+          <UserCircle2 className="h-5 w-5 text-gray-400" />
+          <span className="max-w-[120px] truncate">{user?.email ?? "Editör"}</span>
         </button>
 
-        <NotificationDropdown />
-
         {isProfileMenuOpen && (
-          <div className="absolute right-10 top-12 z-50 w-[250px] rounded-[22px] bg-white p-3 shadow-xl">
+          <div className="absolute right-0 top-12 z-50 w-[220px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
             <Link
               href="/editorPanel/my-details"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-[#f3f3f3]"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <UserCircle2 className="h-5 w-5 text-[#7c7c7c]" />
+              <UserCircle2 className="h-4 w-4 text-gray-400" />
               <span>Bilgilerim</span>
             </Link>
-
             <Link
               href="/editorPanel/calendar"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-[#f3f3f3]"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <CalendarDays className="h-5 w-5 text-[#7c7c7c]" />
+              <CalendarDays className="h-4 w-4 text-gray-400" />
               <span>Takvim</span>
             </Link>
-
             <Link
               href="/editorPanel/performance-review"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-[#f3f3f3]"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <ChartNoAxesColumn className="h-5 w-5 text-[#7c7c7c]" />
+              <ChartNoAxesColumn className="h-4 w-4 text-gray-400" />
               <span>Performans Değerlendirmesi</span>
             </Link>
           </div>

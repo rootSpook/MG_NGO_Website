@@ -5,6 +5,7 @@ import { getDonationPageData, getDonationIbanEntries, getDonationImpactItems } f
 import { getEditablePageContent } from "@/lib/publicPagesContent";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { getImpactIcon } from "@/components/admin/shared/impactIcons";
+import { GeneralDonationWidget } from "@/components/donate/GeneralDonationWidget";
 
 export const metadata = {
   title: "Bagis Yap | Myasthenia Gravis Yasam Dernegi",
@@ -84,102 +85,80 @@ export default async function DonatePage() {
               </div>
             </div>
 
-            <aside className="rounded-xl bg-[#e5e5e5] p-4 shadow-sm">
-              <div className="grid grid-cols-3 gap-2">
-                {[100, 200, 500].map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    className="rounded-md bg-[#d9d9d9] px-3 py-2 text-sm font-medium text-gray-700"
-                  >
-                    {amount} TL
-                  </button>
-                ))}
-              </div>
-
-              <input
-                type="number"
-                placeholder="Farkli Tutar Gir"
-                className="mt-3 h-10 w-full rounded-md bg-[#d9d9d9] px-3 text-sm outline-none"
-              />
-
-              <p className="mt-3 text-xs text-gray-600">{donateData.monthlyMessage}</p>
-              <button
-                type="button"
-                className="mt-3 h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary"
-              >
-                Bagis Yap
-              </button>
+            <aside>
+              <GeneralDonationWidget monthlyMessage={donateData.monthlyMessage} />
             </aside>
           </div>
         </section>
 
-        <section className="bg-primary py-12">
-          <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <h2 className="mb-7 text-3xl font-bold text-white md:text-5xl">
-              {pageContent.campaignsTitle}
-            </h2>
+        {donateData.showCampaigns && donateData.campaigns.length > 0 && (
+          <section className="bg-primary py-12">
+            <div className="mx-auto max-w-6xl px-4 md:px-6">
+              <h2 className="mb-7 text-3xl font-bold text-white md:text-5xl">
+                {pageContent.campaignsTitle}
+              </h2>
 
-            <div className="grid gap-5 md:grid-cols-3">
-              {donateData.campaigns.map((campaign) => {
-                const progress = Math.min(
-                  100,
-                  (campaign.currentAmount / campaign.targetAmount) * 100
-                );
+              <div className="grid gap-5 md:grid-cols-3">
+                {donateData.campaigns.map((campaign) => {
+                  const progress = Math.min(
+                    100,
+                    (campaign.currentAmount / campaign.targetAmount) * 100
+                  );
 
-                return (
-                  <article
-                    key={campaign.id}
-                    className="overflow-hidden rounded-lg bg-white shadow-sm"
-                  >
-                    {campaign.imageUrl ? (
-                      <img
-                        src={campaign.imageUrl}
-                        alt={campaign.title}
-                        className="h-44 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-44 w-full items-center justify-center bg-gradient-to-br from-teal-400 to-teal-600 text-white">
-                        <span className="text-xs font-medium uppercase tracking-wide">
-                          Görsel yok
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                        {campaign.subtitle}
-                      </p>
-                      <h3 className="mt-1 text-xl font-semibold text-gray-900">
-                        {campaign.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-gray-600">{campaign.description}</p>
-
-                      <div className="mt-4 h-2 w-full rounded-full bg-gray-200">
-                        <div
-                          className="h-2 rounded-full bg-primary"
-                          style={{ width: `${progress}%` }}
+                  return (
+                    <article
+                      key={campaign.id}
+                      className="overflow-hidden rounded-lg bg-white shadow-sm"
+                    >
+                      {campaign.imageUrl ? (
+                        <img
+                          src={campaign.imageUrl}
+                          alt={campaign.title}
+                          className="h-44 w-full object-cover"
                         />
-                      </div>
+                      ) : (
+                        <div className="flex h-44 w-full items-center justify-center bg-gradient-to-br from-teal-400 to-teal-600 text-white">
+                          <span className="text-xs font-medium uppercase tracking-wide">
+                            Görsel yok
+                          </span>
+                        </div>
+                      )}
 
-                      <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
-                        <span>{formatCurrency(campaign.currentAmount)}</span>
-                        <span>Hedef: {formatCurrency(campaign.targetAmount)}</span>
-                      </div>
+                      <div className="p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                          {campaign.subtitle}
+                        </p>
+                        <h3 className="mt-1 text-xl font-semibold text-gray-900">
+                          {campaign.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">{campaign.description}</p>
 
-                      <Link
-                        href={`/donate/${campaign.id}`}
-                        className="mt-4 flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary/90"
-                      >
-                        Bağış Yap
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
+                        <div className="mt-4 h-2 w-full rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-primary"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                          <span>{formatCurrency(campaign.currentAmount)}</span>
+                          <span>Hedef: {formatCurrency(campaign.targetAmount)}</span>
+                        </div>
+
+                        <Link
+                          href={`/donate/${campaign.id}`}
+                          className="mt-4 flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary/90"
+                        >
+                          Bağış Yap
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="mx-auto max-w-6xl px-4 py-12 md:px-6">
           <h2 className="mb-8 text-3xl font-bold text-[var(--theme-title-text,var(--primary))] md:text-5xl">{pageContent.impactTitle}</h2>

@@ -153,6 +153,7 @@ export const EDITABLE_PAGE_CONFIGS: Record<EditablePageKey, EditablePageConfig> 
       { name: "bankTransferDescription", label: "Banka Havalesi Açıklaması", type: "textarea" },
       { name: "campaignsTitle", label: "Kampanyalar Başlığı" },
       { name: "impactTitle", label: "Etki Bölümü Başlığı" },
+      { name: "showCampaigns", label: "Kampanya Bölümünü Göster (true/false)" },
     ],
     defaults: {
       title: "Myasthenia Gravis Topluluğunu Destekleyin",
@@ -163,6 +164,7 @@ export const EDITABLE_PAGE_CONFIGS: Record<EditablePageKey, EditablePageConfig> 
         "Bağışlarınız dernek faaliyetleri, hasta destek programları ve farkındalık çalışmaları için kullanılır.",
       campaignsTitle: "Aktif Kampanyalar",
       impactTitle: "Etkiniz",
+      showCampaigns: "true",
     },
   },
 };

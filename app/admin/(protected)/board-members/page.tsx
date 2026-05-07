@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react";
+import { ImageUploadWithUrl } from "@/components/admin/shared/ImageUploadWithUrl";
 import {
   BoardMember,
   getBoardMembers,
@@ -59,11 +60,14 @@ function MemberForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">Fotoğraf URL</label>
-          <input className={cls} value={form.photoUrl} onChange={(e) => set("photoUrl", e.target.value)} placeholder="https://…" />
-        </div>
+      <div className="grid grid-cols-2 gap-3 items-end">
+        <ImageUploadWithUrl
+          label="Fotoğraf"
+          value={form.photoUrl}
+          onChange={(url) => set("photoUrl", url)}
+          placeholder="https://…"
+          previewClassName="h-12 w-12 rounded-full object-cover"
+        />
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">Sıralama</label>
           <input
