@@ -104,6 +104,27 @@ describe("submitContactMessage", () => {
     const payload = addDocMock.mock.calls[0][1];
     expect(typeof payload.userAgent).toBe("string");
   });
+
+  // Edge cases
+  it("defaults userAgent to null if navigator is unavailable", async () => {
+    // Save original navigator
+    const originalNavigator = globalThis.navigator;
+    
+    // @ts-expect-error Mocking missing navigator
+    delete globalThis.navigator;
+    
+    await submitContactMessage(input);
+    const payload = addDocMock.mock.calls[0][1];
+    expect(payload.userAgent).toBeNull();
+
+    // Restore original navigator
+    globalThis.navigator = originalNavigator;
+  });
+
+  it("propagates unhandled rejections from addDoc", async () => {
+    addDocMock.mockRejectedValueOnce(new Error("Firestore connection dropped"));
+    await expect(submitContactMessage(input)).rejects.toThrow("Firestore connection dropped");
+  });
 });
 
 // ── submitVolunteerApplication ────────────────────────────────────────────────
@@ -153,5 +174,11 @@ describe("submitVolunteerApplication", () => {
     await submitVolunteerApplication(input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.createdAt).toEqual({ __sentinel: "server" });
+  });
+
+  // Edge cases
+  it("propagates unhandled rejections from addDoc in submitVolunteerApplication", async () => {
+    addDocMock.mockRejectedValueOnce(new Error("Permission Denied"));
+    await expect(submitVolunteerApplication(input)).rejects.toThrow("Permission Denied");
   });
 });

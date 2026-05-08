@@ -36,6 +36,11 @@ describe("contactFormToInput", () => {
       "+90 555 000 00 00"
     );
   });
+
+  // Edge cases
+  it("converts a phone with only whitespace to undefined", () => {
+    expect(contactFormToInput({ ...values, phone: "    " }).senderPhone).toBeUndefined();
+  });
 });
 
 // ── volunteerFormToInput ──────────────────────────────────────────────────────
@@ -75,5 +80,12 @@ describe("volunteerFormToInput", () => {
     expect(volunteerFormToInput({ ...values, phone: "+90 555 111 22 33" }).phone).toBe(
       "+90 555 111 22 33"
     );
+  });
+
+  // Edge cases
+  it("converts city and phone containing only whitespace to undefined", () => {
+    const input = volunteerFormToInput({ ...values, city: "   ", phone: "   " });
+    expect(input.city).toBeUndefined();
+    expect(input.phone).toBeUndefined();
   });
 });

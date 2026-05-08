@@ -49,4 +49,19 @@ describe("slugify", () => {
   it("keeps digits in output", () => {
     expect(slugify("Plan 2025")).toBe("plan-2025");
   });
+
+  // Edge cases
+  it("removes emojis and cyrillic characters", () => {
+    expect(slugify("Hello 🌍 Привет")).toBe("hello");
+  });
+
+  it("handles newlines and tabs as separators", () => {
+    expect(slugify("a\nb\tc")).toBe("a-b-c");
+  });
+
+  it("does not leave a trailing hyphen if stripped exactly at a hyphen or due to truncation", () => {
+    // Depending on the exact slugify implementation, it either trims trailing hyphens after truncation or truncates right on it
+    const input = "a".repeat(79) + "-b";
+    expect(slugify(input).endsWith("-")).toBe(false);
+  });
 });

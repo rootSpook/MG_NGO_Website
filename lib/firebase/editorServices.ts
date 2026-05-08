@@ -55,7 +55,8 @@ export function slugify(text: string): string {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
-    .slice(0, 80);
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, "");
 }
 
 function uid(): string | null {

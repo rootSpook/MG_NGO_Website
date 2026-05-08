@@ -138,6 +138,60 @@ describe("blog CRUD flow", () => {
     );
   });
 
+  it("editor CAN edit another editor's blog IF they stamp their own uid in updatedBy", async () => {
+    let docId: string;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const ref = await ctx.firestore().collection("contentItems").add(draftPayload("another-editor-uid"));
+      docId = ref.id;
+    });
+    const editorDb = env.authenticatedContext(EDITOR_UID).firestore();
+    
+    // Fails if they forget to update updatedBy or spoof it
+    await assertFails(
+      updateDoc(doc(editorDb, "contentItems", docId!), {
+        title: "New Title",
+      })
+    );
+
+    // Succeeds if they explicitly set updatedBy to themselves
+    await assertSucceeds(
+      updateDoc(doc(editorDb, "contentItems", docId!), {
+        title: "New Title",
+        updatedBy: EDITOR_UID,
+      })
+    );
+  });
+
+  it("admin can create and update blogs without strict uid ownership", async () => {
+    const adminDb = env.authenticatedContext(ADMIN_UID).firestore();
+    
+    const ref = await assertSucceeds(
+      addDoc(collection(adminDb, "contentItems"), draftPayload("some-other-uid"))
+    );
+
+    await assertSucceeds(
+      updateDoc(doc(adminDb, "contentItems", ref.id), {
+        title: "Admin Edit",
+      })
+    );
+  });
+
+  it("editor cannot hard delete a blog", async () => {
+    let docId: string;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const ref = await ctx.firestore().collection("contentItems").add(draftPayload(EDITOR_UID));
+      docId = ref.id;
+    });
+    const editorDb = env.authenticatedContext(EDITOR_UID).firestore();
+    const { deleteDoc } = await import("firebase/firestore");
+    await assertFails(deleteDoc(doc(editorDb, "contentItems", docId!)));
+  });
+
+  it("unauthenticated visitors cannot create blogs", async () => {
+    const unauthDb = env.unauthenticatedContext().firestore();
+    await assertFails(addDoc(collection(unauthDb, "contentItems"), draftPayload("random-uid")));
+  });
+
   it("editor soft-deletes a blog; public no longer sees it in published query", async () => {
     let docId: string;
     await env.withSecurityRulesDisabled(async (ctx) => {

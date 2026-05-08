@@ -92,4 +92,39 @@ describe("contactMessage flow", () => {
       })
     );
   });
+
+  it("unauthenticated visitor cannot update a message", async () => {
+    let docId: string;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const ref = await ctx.firestore().collection("contactMessages").add(validPayload);
+      docId = ref.id;
+    });
+    const db = env.unauthenticatedContext().firestore();
+    await assertFails(
+      updateDoc(doc(db, "contactMessages", docId!), {
+        status: "inProgress",
+      })
+    );
+  });
+
+  it("editor cannot update immutable fields (messageBody, senderEmail)", async () => {
+    let docId: string;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const ref = await ctx.firestore().collection("contactMessages").add(validPayload);
+      docId = ref.id;
+    });
+    const editorDb = env.authenticatedContext(EDITOR_UID).firestore();
+    await assertFails(
+      updateDoc(doc(editorDb, "contactMessages", docId!), {
+        messageBody: "I modified caller's original message!",
+      })
+    );
+  });
+
+  it("unauthenticated visitor fails if sending unallowed keys", async () => {
+    const db = env.unauthenticatedContext().firestore();
+    await assertFails(
+      addDoc(collection(db, "contactMessages"), { ...validPayload, unexpectedKey: "hacker" })
+    );
+  });
 });
