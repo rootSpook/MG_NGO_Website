@@ -689,12 +689,18 @@ export async function upsertPageContent(
 ): Promise<void> {
   const uid = auth.currentUser?.uid ?? null;
   const snap = await getDocs(
-    query(collection(db, COLLECTIONS.CONTENT_ITEMS), where("slug", "==", slug))
+    query(
+      collection(db, COLLECTIONS.CONTENT_ITEMS),
+      where("slug", "==", slug),
+      where("type", "==", "page"),
+      where("deletedAt", "==", null)
+    )
   );
 
   if (!snap.empty) {
     await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, snap.docs[0].id), {
       pageData,
+      status: "published",
       updatedAt: serverTimestamp(),
       updatedBy: uid,
     });
