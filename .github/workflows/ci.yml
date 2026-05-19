@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · Test · Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Java is required by the Firebase Firestore emulator used in test:rules
+      - name: Setup Java (for Firebase emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Inject env vars needed for the build step ───────────────────────────
+      # Unit tests and lint do not need real Firebase credentials; the build
+      # step needs NEXT_PUBLIC_* values so Next.js can compile without warnings.
+      # Use development project values here — this job is a quality gate only,
+      # not a production deployment.
+      - name: Create .env for build
+        run: |
+          cat > .env.local << 'EOF'
+          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.DEV_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.DEV_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.DEV_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.DEV_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.DEV_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.DEV_FIREBASE_APP_ID }}
+          FIREBASE_ADMIN_PROJECT_ID=${{ secrets.DEV_FIREBASE_ADMIN_PROJECT_ID }}
+          FIREBASE_ADMIN_CLIENT_EMAIL=${{ secrets.DEV_FIREBASE_ADMIN_CLIENT_EMAIL }}
+          FIREBASE_ADMIN_PRIVATE_KEY=${{ secrets.DEV_FIREBASE_ADMIN_PRIVATE_KEY }}
+          EOF
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      # Security rules tests run against the local Firebase emulator.
+      # firebase-tools is already a devDependency so npx picks it up from
+      # node_modules/.bin without a global install.
+      - name: Security rules tests
+        run: npm run test:rules
+
+      - name: Build
+        run: npm run build
