@@ -15,8 +15,6 @@
 
 import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
 import {
   seedSettings,
   seedCategories,
@@ -34,15 +32,21 @@ import {
 
 function getAdminDb() {
   if (!getApps().length) {
-    const keyPath = join(process.cwd(), "serviceAccountKey.json");
-    if (!existsSync(keyPath)) {
+    const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+    // Vercel stores the private key with literal \n; replace them with real newlines.
+    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+    if (!projectId || !clientEmail || !privateKey) {
       console.warn(
-        "[autoSeed] serviceAccountKey.json not found — skipping seed."
+        "[autoSeed] FIREBASE_ADMIN_* env vars not set — skipping seed."
       );
       return null;
     }
-    const serviceAccount = JSON.parse(readFileSync(keyPath, "utf-8"));
-    initializeApp({ credential: cert(serviceAccount) });
+
+    initializeApp({
+      credential: cert({ projectId, clientEmail, privateKey }),
+    });
   }
   return getFirestore();
 }
