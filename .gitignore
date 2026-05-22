@@ -24,3 +24,7 @@ docs/PROGRESS.md
 # Firebase Admin SDK service account key — use env vars instead (see .env.example)
 serviceAccountKey.json
 *-service-account*.json
+
+
+coverage/
+firestore-debug.log

@@ -19,6 +19,12 @@ export default defineConfig({
       include: [
         "lib/firebase/services.ts",
         "lib/firebase/editorServices.ts",
+        "lib/firebase/adminServices.ts",
+        "lib/firebase/navServices.ts",
+        "lib/firebase/storageUtils.ts",
+        "lib/firebase/clientApp.ts",
+        "lib/firebase/getDefaultDb.ts",
+        "lib/tenant/masterDb.ts",
         "lib/validation/**/*.ts",
       ],
     },

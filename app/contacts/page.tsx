@@ -5,7 +5,7 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Mail, Phone, Home, Plus, Minus, MapPin } from "lucide-react"
 import { contactPageTemplate } from "@/lib/publicPagesContent"
-import { getContentBySlug, getSiteSettings, submitContactMessage } from "@/lib/firebase/services"
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices"
 import { mergeEditablePageData } from "@/lib/pageContentConfig"
 import { contactSchema, contactFormToInput } from "@/lib/validation/forms"
 
@@ -27,6 +27,7 @@ type ContactPageState = {
 }
 
 export default function ContactUsPage() {
+  const { getContentBySlug, getSiteSettings, submitContactMessage } = useTenantServices()
   const [pageContent, setPageContent] = useState<ContactPageState>({
     title: initialEditableContent.title,
     intro: initialEditableContent.intro,

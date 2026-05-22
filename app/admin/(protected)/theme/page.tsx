@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { db } from "@/lib/firebase/config";
+import { useTenantFirebase } from "@/lib/firebase/TenantFirebaseContext";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 import LivePreview from "./LivePreview";
@@ -34,6 +34,7 @@ const COLOR_LABELS: Record<keyof ThemeColors, string> = {
 };
 
 export default function ThemeSettingsPage() {
+  const { db } = useTenantFirebase();
   const [theme, setTheme] = useState<ThemeColors>(DEFAULT_THEME);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);

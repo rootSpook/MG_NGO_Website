@@ -2,13 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check, Star } from "lucide-react";
-import {
-  AdminReport,
-  getAdminReports,
-  createAdminReport,
-  updateAdminReport,
-  deleteAdminReport,
-} from "@/lib/firebase/adminServices";
+import type { AdminReport } from "@/lib/firebase/adminServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
 const emptyReport: Omit<AdminReport, "id"> = {
   title: "",
@@ -117,6 +112,7 @@ function ReportForm({
 }
 
 export default function AdminReportsPage() {
+  const { getAdminReports, createAdminReport, updateAdminReport, deleteAdminReport } = useTenantServices();
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);

@@ -35,23 +35,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # ── Inject env vars needed for the build step ───────────────────────────
-      # Unit tests and lint do not need real Firebase credentials; the build
-      # step needs NEXT_PUBLIC_* values so Next.js can compile without warnings.
-      # Use development project values here — this job is a quality gate only,
-      # not a production deployment.
+      # ── Build-time environment ───────────────────────────────────────────────
+      # No NEXT_PUBLIC_FIREBASE_* variables are needed here. Firebase is
+      # initialised at runtime per-tenant via TenantFirebaseProvider; no
+      # credentials are baked into the JS bundle at build time.
+      #
+      # The only value we inject is NEXT_PUBLIC_SITE_URL so that any absolute
+      # URL helpers that reference the canonical origin work in the build.
+      # All other server-only secrets (FIREBASE_MASTER_*) are injected at
+      # deploy time via hosting-platform environment variables — never in CI.
       - name: Create .env for build
         run: |
           cat > .env.local << 'EOF'
-          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.DEV_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.DEV_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.DEV_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.DEV_FIREBASE_STORAGE_BUCKET }}
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.DEV_FIREBASE_MESSAGING_SENDER_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.DEV_FIREBASE_APP_ID }}
-          FIREBASE_ADMIN_PROJECT_ID=${{ secrets.DEV_FIREBASE_ADMIN_PROJECT_ID }}
-          FIREBASE_ADMIN_CLIENT_EMAIL=${{ secrets.DEV_FIREBASE_ADMIN_CLIENT_EMAIL }}
-          FIREBASE_ADMIN_PRIVATE_KEY=${{ secrets.DEV_FIREBASE_ADMIN_PRIVATE_KEY }}
+          NEXT_PUBLIC_SITE_URL=http://localhost:3000
           EOF
 
       - name: Lint
@@ -63,8 +59,9 @@ jobs:
       # Security rules tests run against the local Firebase emulator.
       # firebase-tools is already a devDependency so npx picks it up from
       # node_modules/.bin without a global install.
+      # emulators:exec starts the emulator, runs the command, then shuts it down.
       - name: Security rules tests
-        run: npm run test:rules
+        run: npx firebase emulators:exec --only firestore "npm run test:rules"
 
       - name: Build
         run: npm run build

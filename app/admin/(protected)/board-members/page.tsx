@@ -3,13 +3,8 @@
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react";
 import { ImageUploadWithUrl } from "@/components/admin/shared/ImageUploadWithUrl";
-import {
-  BoardMember,
-  getBoardMembers,
-  createBoardMember,
-  updateBoardMember,
-  deleteBoardMember,
-} from "@/lib/firebase/adminServices";
+import type { BoardMember } from "@/lib/firebase/adminServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
 const emptyMember: Omit<BoardMember, "id"> = {
   name: "",
@@ -96,6 +91,7 @@ function MemberForm({
 }
 
 export default function BoardMembersPage() {
+  const { getBoardMembers, createBoardMember, updateBoardMember, deleteBoardMember } = useTenantServices();
   const [members, setMembers] = useState<BoardMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);

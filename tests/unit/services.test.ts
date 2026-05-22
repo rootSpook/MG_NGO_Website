@@ -21,6 +21,11 @@ vi.mock("firebase/firestore", () => ({
 }));
 
 import { submitContactMessage, submitVolunteerApplication } from "@/lib/firebase/services";
+import type { Firestore } from "firebase/firestore";
+
+// Minimal stub — service functions only use it as a pass-through to collection()
+// which is already mocked above.
+const mockDb = {} as Firestore;
 
 beforeEach(() => {
   addDocMock.mockReset();
@@ -40,7 +45,7 @@ describe("submitContactMessage", () => {
   };
 
   it("writes to contactMessages collection", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     expect(collectionMock).toHaveBeenCalledWith(
       expect.anything(),
       "contactMessages"
@@ -48,31 +53,31 @@ describe("submitContactMessage", () => {
   });
 
   it("returns the new doc id", async () => {
-    const id = await submitContactMessage(input);
+    const id = await submitContactMessage(mockDb, input);
     expect(id).toBe("doc-123");
   });
 
   it("sets status to 'new'", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.status).toBe("new");
   });
 
   it("sets handledBy and handledAt to null", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.handledBy).toBeNull();
     expect(payload.handledAt).toBeNull();
   });
 
   it("sets deletedAt to null", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.deletedAt).toBeNull();
   });
 
   it("passes senderName, senderEmail, subject, messageBody through", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.senderName).toBe("Ali Veli");
     expect(payload.senderEmail).toBe("ali@example.com");
@@ -81,26 +86,26 @@ describe("submitContactMessage", () => {
   });
 
   it("defaults senderPhone to null when omitted", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.senderPhone).toBeNull();
   });
 
   it("keeps senderPhone string when provided", async () => {
-    await submitContactMessage({ ...input, senderPhone: "+90 555 000 00 00" });
+    await submitContactMessage(mockDb, { ...input, senderPhone: "+90 555 000 00 00" });
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.senderPhone).toBe("+90 555 000 00 00");
   });
 
   it("uses serverTimestamp for createdAt and updatedAt", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.createdAt).toEqual({ __sentinel: "server" });
     expect(payload.updatedAt).toEqual({ __sentinel: "server" });
   });
 
   it("sets userAgent from navigator (happy-dom provides one)", async () => {
-    await submitContactMessage(input);
+    await submitContactMessage(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(typeof payload.userAgent).toBe("string");
   });
@@ -116,7 +121,7 @@ describe("submitVolunteerApplication", () => {
   };
 
   it("writes to volunteerApplications collection", async () => {
-    await submitVolunteerApplication(input);
+    await submitVolunteerApplication(mockDb, input);
     expect(collectionMock).toHaveBeenCalledWith(
       expect.anything(),
       "volunteerApplications"
@@ -124,25 +129,25 @@ describe("submitVolunteerApplication", () => {
   });
 
   it("returns the new doc id", async () => {
-    const id = await submitVolunteerApplication(input);
+    const id = await submitVolunteerApplication(mockDb, input);
     expect(id).toBe("doc-123");
   });
 
   it("sets status to 'new'", async () => {
-    await submitVolunteerApplication(input);
+    await submitVolunteerApplication(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.status).toBe("new");
   });
 
   it("defaults phone and city to null when omitted", async () => {
-    await submitVolunteerApplication(input);
+    await submitVolunteerApplication(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.phone).toBeNull();
     expect(payload.city).toBeNull();
   });
 
   it("passes fullName, email, motivation through", async () => {
-    await submitVolunteerApplication(input);
+    await submitVolunteerApplication(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.fullName).toBe("Ayşe Kaya");
     expect(payload.email).toBe("ayse@example.com");
@@ -150,7 +155,7 @@ describe("submitVolunteerApplication", () => {
   });
 
   it("uses serverTimestamp for createdAt", async () => {
-    await submitVolunteerApplication(input);
+    await submitVolunteerApplication(mockDb, input);
     const payload = addDocMock.mock.calls[0][1];
     expect(payload.createdAt).toEqual({ __sentinel: "server" });
   });

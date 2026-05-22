@@ -3,13 +3,8 @@
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check, ExternalLink } from "lucide-react";
 import { ImageUploadWithUrl } from "@/components/admin/shared/ImageUploadWithUrl";
-import {
-  Supporter,
-  getSupporters,
-  createSupporter,
-  updateSupporter,
-  deleteSupporter,
-} from "@/lib/firebase/adminServices";
+import type { Supporter } from "@/lib/firebase/adminServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
 const emptySupporter: Omit<Supporter, "id"> = {
   name: "",
@@ -92,6 +87,7 @@ function SupporterForm({
 }
 
 export default function SupportersPage() {
+  const { getSupporters, createSupporter, updateSupporter, deleteSupporter } = useTenantServices();
   const [supporters, setSupporters] = useState<Supporter[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);

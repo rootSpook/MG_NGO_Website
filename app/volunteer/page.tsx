@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Mail, User, Phone, MapPin } from "lucide-react";
-import { submitVolunteerApplication } from "@/lib/firebase/services";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 import { volunteerSchema, volunteerFormToInput } from "@/lib/validation/forms";
 
 export default function VolunteerPage() {
+  const { submitVolunteerApplication } = useTenantServices();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
