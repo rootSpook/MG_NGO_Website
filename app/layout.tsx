@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { unstable_cache } from 'next/cache'
-import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
 import { getTenantByDomain } from '@/lib/tenant/masterDb'
@@ -12,8 +11,6 @@ import { NavProvider } from '@/components/layout/NavProvider'
 import { ThemeListener } from '@/components/theme/ThemeListener'
 import './globals.css'
 
-Geist({ subsets: ["latin"] });
-Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'NGO Platform',
