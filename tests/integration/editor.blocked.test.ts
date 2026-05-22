@@ -14,7 +14,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
-  env = await newEnv();
+  env = await newEnv("editor-blocked");
 });
 afterAll(async () => {
   await env.cleanup();

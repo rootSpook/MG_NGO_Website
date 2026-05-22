@@ -25,6 +25,5 @@ docs/PROGRESS.md
 serviceAccountKey.json
 *-service-account*.json
 
-
-coverage/
 firestore-debug.log
+coverage/
