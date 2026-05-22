@@ -99,7 +99,6 @@ export function EditorPanelProvider({ children }: { children: ReactNode }) {
       }
     }
     loadAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEditorBlogs, getEditorEvents, getEditorMedia, getEditorAnnouncements, getEditorNotifications]);
 
   // ── Events ────────────────────────────────────────────────────────────────
@@ -253,6 +252,7 @@ export function EditorPanelProvider({ children }: { children: ReactNode }) {
       getAnnouncementById,
       markNotificationAsRead,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [blogs, events, notifications, media, announcements, loading]
   );
 

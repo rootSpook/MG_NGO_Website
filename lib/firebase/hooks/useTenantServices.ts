@@ -100,16 +100,16 @@ export function useTenantServices() {
     getAdminPageBySlug:          (slug: string) => adminSvc.getAdminPageBySlug({ db, auth }, slug),
     getAdminPageDataBySlug:      (slug: string) => adminSvc.getAdminPageDataBySlug({ db, auth }, slug),
     getAdminPages:               () => adminSvc.getAdminPages({ db, auth }),
-    upsertAdminPage:             (...args: Parameters<typeof adminSvc.upsertAdminPage> extends [infer _, ...infer R] ? R : never) =>
+    upsertAdminPage:             (...args: Parameters<typeof adminSvc.upsertAdminPage> extends [unknown, ...infer R] ? R : never) =>
                                    adminSvc.upsertAdminPage({ db, auth }, ...args),
     getAdminSiteSettings:        () => adminSvc.getAdminSiteSettings({ db, auth }),
     updateAdminSiteSettings:     (d: Parameters<typeof adminSvc.updateAdminSiteSettings>[1]) =>
                                    adminSvc.updateAdminSiteSettings({ db, auth }, d),
     getContactMessages:          () => adminSvc.getContactMessages({ db, auth }),
-    updateContactMessageStatus:  (...args: Parameters<typeof adminSvc.updateContactMessageStatus> extends [infer _, ...infer R] ? R : never) =>
+    updateContactMessageStatus:  (...args: Parameters<typeof adminSvc.updateContactMessageStatus> extends [unknown, ...infer R] ? R : never) =>
                                    adminSvc.updateContactMessageStatus({ db, auth }, ...args),
     getPageBlocks:               (slug: string) => adminSvc.getPageBlocks({ db, auth }, slug),
-    savePageBlocks:              (...args: Parameters<typeof adminSvc.savePageBlocks> extends [infer _, ...infer R] ? R : never) =>
+    savePageBlocks:              (...args: Parameters<typeof adminSvc.savePageBlocks> extends [unknown, ...infer R] ? R : never) =>
                                    adminSvc.savePageBlocks({ db, auth }, ...args),
     upsertPageContent:           (slug: string, data: Parameters<typeof adminSvc.upsertPageContent>[2]) =>
                                    adminSvc.upsertPageContent({ db, auth }, slug, data),
