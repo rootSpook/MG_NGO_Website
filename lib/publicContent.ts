@@ -16,6 +16,7 @@ import {
   type PublicIbanEntry,
   type PublicSupporter,
 } from "@/lib/firebase/services";
+import { getDefaultDb, isDbAvailable } from "@/lib/firebase/getDefaultDb";
 
 export type { PublicIbanEntry, PublicSupporter };
 import {
@@ -219,8 +220,23 @@ function attachmentsFromContentItem(item: unknown): PublicBlogAttachment[] {
 }
 
 export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
+  if (!isDbAvailable()) return seedBlogPosts
+    .filter((b) => b.status === "published")
+    .map((b) => ({
+      id: b.id,
+      slug: b.slug,
+      title: b.title,
+      excerpt: b.excerpt,
+      author: b.authorName ?? "",
+      publishedAt: b.publishedAt ?? new Date().toISOString().split("T")[0],
+      coverImage: b.coverImageUrl ?? FALLBACK_COVER,
+      bodyMarkdown: b.bodyMarkdown ?? "",
+      attachmentUrl: "",
+      attachmentName: "",
+      content: b.bodyMarkdown ? b.bodyMarkdown.split("\n\n") : [],
+    }));
   try {
-    const items = await getPublishedContentByType("post");
+    const items = await getPublishedContentByType(getDefaultDb(), "post");
     if (items.length > 0) {
       return items.map((item) => ({
         id: item.id,
@@ -262,8 +278,20 @@ export async function getPublishedBlogs(): Promise<PublicBlogPost[]> {
 export async function getBlogBySlug(
   slug: string
 ): Promise<PublicBlogPost | null> {
+  if (!isDbAvailable()) {
+    const found = seedBlogPosts.find((b) => b.slug === slug);
+    if (!found) return null;
+    return {
+      id: found.id, slug: found.slug, title: found.title, excerpt: found.excerpt,
+      author: found.authorName ?? "",
+      publishedAt: found.publishedAt ?? new Date().toISOString().split("T")[0],
+      coverImage: found.coverImageUrl ?? FALLBACK_COVER,
+      bodyMarkdown: found.bodyMarkdown ?? "",
+      content: found.bodyMarkdown ? found.bodyMarkdown.split("\n\n") : [],
+    };
+  }
   try {
-    const item = await getContentBySlug(slug);
+    const item = await getContentBySlug(getDefaultDb(), slug);
     if (item) {
       return {
         id: item.id,
@@ -320,8 +348,18 @@ export interface PublicEvent {
 }
 
 export async function getPublicEvents(): Promise<PublicEvent[]> {
+  if (!isDbAvailable()) return seedEvents
+    .filter((e) => e.status === "published")
+    .map((e) => ({
+      id: e.id, slug: e.slug, title: e.title,
+      startsAt: e.startsAt, endsAt: e.endsAt,
+      isOnline: e.isOnline, onlineUrl: e.onlineUrl,
+      locationName: e.locationName, city: e.city,
+      venue: e.venue, eventType: e.eventType, capacity: e.capacity,
+      attachmentUrl: "", attachmentName: "",
+    }));
   try {
-    const items = await getPublishedEvents();
+    const items = await getPublishedEvents(getDefaultDb());
     if (items.length > 0) {
       return items.map((e) => ({
         id: e.id,
@@ -389,8 +427,13 @@ export interface MGPageContent {
 }
 
 export async function getMGPageContent(slug: string): Promise<MGPageContent | null> {
+  if (!isDbAvailable()) {
+    const section = MG_SECTIONS.find((s) => s.slug === slug);
+    if (!section) return null;
+    return { slug: section.slug, title: section.title, body: section.description };
+  }
   try {
-    const item = await getContentBySlug(slug);
+    const item = await getContentBySlug(getDefaultDb(), slug);
     if (item && item.type === "page") {
       return {
         slug: item.slug,
@@ -414,8 +457,9 @@ export async function getMGPageContent(slug: string): Promise<MGPageContent | nu
 // ── Donation IBAN entries (from ibanEntries collection) ───────────────────────
 
 export async function getDonationIbanEntries(): Promise<PublicIbanEntry[]> {
+  if (!isDbAvailable()) return [{ id: "seed", bankName: seedSettings.bankName ?? "", accountHolder: seedSettings.accountName ?? "", iban: seedSettings.iban ?? "", currency: "TRY", sortOrder: 0 }];
   try {
-    const entries = await getPublicIbanEntries();
+    const entries = await getPublicIbanEntries(getDefaultDb());
     if (entries.length > 0) return entries;
   } catch (err) {
     console.error("[publicContent] getDonationIbanEntries Firestore error:", err);
@@ -436,8 +480,9 @@ export async function getDonationIbanEntries(): Promise<PublicIbanEntry[]> {
 // ── Public supporters ─────────────────────────────────────────────────────────
 
 export async function getSupportersForPublic(): Promise<PublicSupporter[]> {
+  if (!isDbAvailable()) return [];
   try {
-    const supporters = await getPublicSupporters();
+    const supporters = await getPublicSupporters(getDefaultDb());
     if (supporters.length > 0) return supporters;
   } catch (err) {
     console.error("[publicContent] getSupportersForPublic Firestore error:", err);
@@ -476,8 +521,9 @@ const DEFAULT_IMPACT_ITEMS: PublicImpactItem[] = [
 ];
 
 export async function getDonationImpactItems(): Promise<PublicImpactItem[]> {
+  if (!isDbAvailable()) return DEFAULT_IMPACT_ITEMS;
   try {
-    const item = await getContentBySlug("bagis");
+    const item = await getContentBySlug(getDefaultDb(), "bagis");
     const list = (item?.pageData as Record<string, unknown> | undefined)?.impactItems;
     if (Array.isArray(list)) {
       return list
@@ -506,10 +552,31 @@ export async function getDonationCampaignById(
 // ── Donation page ─────────────────────────────────────────────────────────────
 
 export async function getDonationPageData(): Promise<DonationPageData> {
+  if (!isDbAvailable()) {
+    const campaigns = seedCampaigns.map((c) => ({
+      id: c.id, title: c.title, subtitle: c.subtitle,
+      description: c.description, imageUrl: c.imageUrl,
+      currentAmount: c.raisedAmount, targetAmount: c.goalAmount,
+    }));
+    const ibanEntries = await getDonationIbanEntries();
+    const primary = ibanEntries[0];
+    return {
+      title: mergeEditablePageData("bagis").title,
+      subtitle: mergeEditablePageData("bagis").subtitle,
+      bankName: primary?.bankName ?? seedSettings.bankName ?? "",
+      accountName: primary?.accountHolder ?? seedSettings.accountName ?? "",
+      iban: primary?.iban ?? seedSettings.iban ?? "",
+      swiftCode: seedSettings.swiftCode ?? "",
+      monthlyMessage: seedSettings.monthlyMessage,
+      campaigns,
+      showCampaigns: true,
+    };
+  }
+
   let campaigns: DonationCampaign[] = [];
 
   try {
-    const firestoreCampaigns = await getActiveCampaigns();
+    const firestoreCampaigns = await getActiveCampaigns(getDefaultDb());
     if (firestoreCampaigns.length > 0) {
       campaigns = firestoreCampaigns.map((c) => ({
         id: c.id,
@@ -539,8 +606,8 @@ export async function getDonationPageData(): Promise<DonationPageData> {
 
   // monthlyMessage from site settings with seed fallback
   let monthlyMessage = seedSettings.monthlyMessage;
-  try {
-    const settings = await getSiteSettings();
+  if (isDbAvailable()) try {
+    const settings = await getSiteSettings(getDefaultDb());
     if (settings) {
       monthlyMessage =
         (settings as unknown as Record<string, string>).monthlyMessage ?? monthlyMessage;
@@ -553,8 +620,8 @@ export async function getDonationPageData(): Promise<DonationPageData> {
   const ibanEntries = await getDonationIbanEntries();
   const primary = ibanEntries[0];
   let pageContent = mergeEditablePageData("bagis");
-  try {
-    const item = await getContentBySlug("bagis");
+  if (isDbAvailable()) try {
+    const item = await getContentBySlug(getDefaultDb(), "bagis");
     pageContent = mergeEditablePageData("bagis", item?.pageData as Record<string, unknown> | null | undefined);
   } catch {
     // use defaults
@@ -582,8 +649,8 @@ export async function getMediaPageData(): Promise<MediaPageData> {
   let updateItems: MediaListItem[] = [];
   let pageContent = mergeEditablePageData("medya");
 
-  try {
-    const assets = await getPublicMediaAssets();
+  if (isDbAvailable()) try {
+    const assets = await getPublicMediaAssets(getDefaultDb());
     // Hide drafts on the public side
     const publishedAssets = assets.filter(
       (a) => ((a as unknown as Record<string, unknown>).status ?? "published") === "published"
@@ -623,8 +690,8 @@ export async function getMediaPageData(): Promise<MediaPageData> {
       }));
   }
 
-  try {
-    const item = await getContentBySlug("medya");
+  if (isDbAvailable()) try {
+    const item = await getContentBySlug(getDefaultDb(), "medya");
     pageContent = mergeEditablePageData("medya", item?.pageData as Record<string, unknown> | null | undefined);
   } catch {
     // use defaults
@@ -698,8 +765,8 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
   let featuredFormat = "PDF";
   let pageContent = mergeEditablePageData("raporlar");
 
-  try {
-    const items = await getPublishedContentByType("policy");
+  if (isDbAvailable()) try {
+    const items = await getPublishedContentByType(getDefaultDb(), "policy");
     if (items.length > 0) {
       const featuredItem = items.find((i) => i.featured) ?? items[0];
       featuredTitle = featuredItem.title;
@@ -744,8 +811,8 @@ export async function getReportsPageData(): Promise<ReportsPageData> {
     }));
   }
 
-  try {
-    const item = await getContentBySlug("raporlar");
+  if (isDbAvailable()) try {
+    const item = await getContentBySlug(getDefaultDb(), "raporlar");
     pageContent = mergeEditablePageData("raporlar", item?.pageData as Record<string, unknown> | null | undefined);
   } catch {
     // use defaults

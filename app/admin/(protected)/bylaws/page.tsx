@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { upsertPageContent } from "@/lib/firebase/adminServices";
-import { getContentBySlug } from "@/lib/firebase/services";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 import { FileUploadWithUrl } from "@/components/admin/shared/FileUploadWithUrl";
 
 const SLUG = "tuzuk";
 
 export default function BylawsPage() {
+  const { upsertPageContent, getContentBySlug } = useTenantServices();
   const [title, setTitle] = useState("Dernek Tüzüğü");
   const [fileUrl, setFileUrl] = useState("");
   const [description, setDescription] = useState("");

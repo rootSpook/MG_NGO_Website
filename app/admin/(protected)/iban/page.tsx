@@ -2,13 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, X, Check, Copy } from "lucide-react";
-import {
-  IbanEntry,
-  getIbanEntries,
-  createIbanEntry,
-  updateIbanEntry,
-  deleteIbanEntry,
-} from "@/lib/firebase/adminServices";
+import type { IbanEntry } from "@/lib/firebase/adminServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
 const emptyEntry: Omit<IbanEntry, "id"> = {
   bankName: "",
@@ -96,6 +91,7 @@ function IbanForm({
 }
 
 export default function IbanPage() {
+  const { getIbanEntries, createIbanEntry, updateIbanEntry, deleteIbanEntry } = useTenantServices();
   const [entries, setEntries] = useState<IbanEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);

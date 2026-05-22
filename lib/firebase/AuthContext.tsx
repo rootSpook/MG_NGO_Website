@@ -14,7 +14,7 @@ import {
   type User,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./config";
+import { useTenantFirebase } from "./TenantFirebaseContext";
 
 type Role = "admin" | "editor" | null;
 
@@ -29,8 +29,13 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<Role>(null);
+  // auth and db come from the tenant-aware Firebase context, not a build-time
+  // singleton. This means the correct Firebase project is always used regardless
+  // of which NGO's domain the user is visiting.
+  const { auth, db } = useTenantFirebase();
+
+  const [user, setUser]       = useState<User | null>(null);
+  const [role, setRole]       = useState<Role>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,11 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+    // Re-subscribe whenever the Firebase app instance changes (tenant switch).
+  }, [auth, db]);
 
   const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged listener handles setting user + role after sign-in
+    // onAuthStateChanged handles setting user + role after sign-in.
   };
 
   const logout = async () => {

@@ -6,15 +6,25 @@ __v0_jsx-dev-runtime.ts
 # Common ignores
 node_modules/
 .next/
-.env
-.env*.local
 .DS_Store
-serviceAccountKey.json
 notes.md
 CLAUDE.md
-.firebaserc
 .claude/
 .firebase/
 .vscode/
 docs/FIREBASE_SYNC_PLAN.md
 docs/PROGRESS.md
+
+# Environment variables — never commit real credentials
+.env
+.env.local
+.env.production.local
+.env*.local
+
+# Firebase Admin SDK service account key — use env vars instead (see .env.example)
+serviceAccountKey.json
+*-service-account*.json
+
+
+coverage/
+firestore-debug.log
