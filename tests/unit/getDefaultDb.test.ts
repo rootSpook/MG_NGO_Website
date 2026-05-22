@@ -16,6 +16,24 @@ beforeEach(async () => {
   getOrInitMock.mockReset();
 });
 
+// ── isDbAvailable ─────────────────────────────────────────────────────────────
+
+describe("isDbAvailable", () => {
+  it("returns true when NEXT_PUBLIC_FIREBASE_PROJECT_ID is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "my-project");
+    const { isDbAvailable } = await import("@/lib/firebase/getDefaultDb");
+    expect(isDbAvailable()).toBe(true);
+    vi.unstubAllEnvs();
+  });
+
+  it("returns false when NEXT_PUBLIC_FIREBASE_PROJECT_ID is absent", async () => {
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID", "");
+    const { isDbAvailable } = await import("@/lib/firebase/getDefaultDb");
+    expect(isDbAvailable()).toBe(false);
+    vi.unstubAllEnvs();
+  });
+});
+
 // ── getDefaultDb ──────────────────────────────────────────────────────────────
 
 describe("getDefaultDb", () => {

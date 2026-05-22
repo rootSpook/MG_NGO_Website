@@ -15,7 +15,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
-  env = await newEnv();
+  env = await newEnv("publish-flow");
 });
 afterAll(async () => {
   await env.cleanup();

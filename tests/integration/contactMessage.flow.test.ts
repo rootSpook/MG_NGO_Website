@@ -13,7 +13,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
-  env = await newEnv();
+  env = await newEnv("contact");
 });
 afterAll(async () => {
   await env.cleanup();
