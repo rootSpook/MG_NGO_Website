@@ -1,12 +1,13 @@
 "use client";
 
-import { X, Mountain, AlignLeft, CalendarDays, FileText, Users, HelpCircle, Megaphone, BarChart2 } from "lucide-react";
+import { X, Mountain, AlignLeft, CalendarDays, FileText, Users, HelpCircle, Megaphone, BarChart2, ImageIcon } from "lucide-react";
 import type { BlockType } from "@/types/pageBuilder";
 import { BLOCK_TYPE_LABELS } from "@/types/pageBuilder";
 
 const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   "hero": "Büyük arka plan görseli, başlık ve eylem butonu",
   "rich-text": "Markdown formatında zengin metin içeriği",
+  "image": "Tek görsel; genişlik ve hizalama seçeneğiyle",
   "event-grid": "Etkinlik kartları ızgarası",
   "report-list": "PDF ve araştırma belgesi listesi",
   "team-grid": "Ekip üyeleri kartları",
@@ -18,6 +19,7 @@ const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
 const BLOCK_ICONS: Record<BlockType, React.ComponentType<{ className?: string }>> = {
   "hero": Mountain,
   "rich-text": AlignLeft,
+  "image": ImageIcon,
   "event-grid": CalendarDays,
   "report-list": FileText,
   "team-grid": Users,
@@ -27,8 +29,8 @@ const BLOCK_ICONS: Record<BlockType, React.ComponentType<{ className?: string }>
 };
 
 const BLOCK_ORDER: BlockType[] = [
-  "hero", "rich-text", "cta-banner", "event-grid",
-  "report-list", "team-grid", "faq-accordion", "stats-bar",
+  "hero", "rich-text", "image", "cta-banner",
+  "event-grid", "report-list", "team-grid", "faq-accordion", "stats-bar",
 ];
 
 interface BlockTypeSelectorProps {

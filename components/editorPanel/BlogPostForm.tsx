@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { ChevronDown, Eye, Code2 } from "lucide-react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { ChevronDown, Eye, Code2, ImageIcon, Upload, Loader2, X } from "lucide-react";
 import { BlogPost, BlogAttachment } from "@/types/editorPanel";
 import { marked } from "marked";
 import { ImageUploadField } from "@/components/admin/shared/ImageUploadField";
 import { FileAttachmentManager, type AttachmentEntry } from "@/components/admin/shared/FileAttachmentManager";
+import { uploadImage } from "@/lib/firebase/storageUtils";
 
 type BlogFormMode = "create" | "edit";
 
@@ -83,6 +84,14 @@ export default function BlogPostForm({
   const [editorTab, setEditorTab] = useState<"write" | "preview">("write");
   const [previewHtml, setPreviewHtml] = useState("");
 
+  // Image-at-cursor insertion state
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [pickerUrl, setPickerUrl] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+
   // Re-render preview whenever markdown changes
   useEffect(() => {
     if (editorTab === "preview") {
@@ -125,6 +134,43 @@ export default function BlogPostForm({
       });
     }
     onClear?.();
+  }
+
+  function insertImageAtCursor(url: string) {
+    const ta = textareaRef.current;
+    const markdown = `![](${url})`;
+    if (!ta) {
+      handleChange("bodyMarkdown", formData.bodyMarkdown + "\n" + markdown);
+      return;
+    }
+    const start = ta.selectionStart ?? formData.bodyMarkdown.length;
+    const end = ta.selectionEnd ?? start;
+    const before = formData.bodyMarkdown.slice(0, start);
+    const after = formData.bodyMarkdown.slice(end);
+    const newValue = before + markdown + after;
+    handleChange("bodyMarkdown", newValue);
+    // Restore cursor after React re-render
+    requestAnimationFrame(() => {
+      ta.selectionStart = ta.selectionEnd = start + markdown.length;
+      ta.focus();
+    });
+    setShowImagePicker(false);
+    setPickerUrl("");
+  }
+
+  async function handleImageFileChange(files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    setImageUploadError(null);
+    setImageUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setPickerUrl(url);
+    } catch {
+      setImageUploadError("Yükleme başarısız. Tekrar deneyin.");
+    } finally {
+      setImageUploading(false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -288,42 +334,129 @@ export default function BlogPostForm({
           <label className="text-[14px] font-medium text-[#222]">
             Blog İçeriği (Tam Metin)
           </label>
-          <div className="flex gap-1 rounded-lg bg-[#e3e3e3] p-1">
-            <button
-              type="button"
-              onClick={() => setEditorTab("write")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                editorTab === "write"
-                  ? "bg-white text-[#2f80ed] shadow-sm"
-                  : "text-[#666] hover:text-[#333]"
-              }`}
-            >
-              <Code2 className="h-3.5 w-3.5" />
-              Yaz
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPreviewHtml(renderMarkdown(formData.bodyMarkdown));
-                setEditorTab("preview");
-              }}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                editorTab === "preview"
-                  ? "bg-white text-[#2f80ed] shadow-sm"
-                  : "text-[#666] hover:text-[#333]"
-              }`}
-            >
-              <Eye className="h-3.5 w-3.5" />
-              Önizleme
-            </button>
+          <div className="flex items-center gap-2">
+            {/* Insert Image button — only shown in write mode */}
+            {editorTab === "write" && (
+              <button
+                type="button"
+                onClick={() => { setShowImagePicker((v) => !v); setPickerUrl(""); setImageUploadError(null); }}
+                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  showImagePicker
+                    ? "border-[#2f80ed] bg-[#2f80ed] text-white"
+                    : "border-[#ccc] bg-white text-[#444] hover:border-[#2f80ed] hover:text-[#2f80ed]"
+                }`}
+              >
+                <ImageIcon className="h-3.5 w-3.5" />
+                Görsel Ekle
+              </button>
+            )}
+            <div className="flex gap-1 rounded-lg bg-[#e3e3e3] p-1">
+              <button
+                type="button"
+                onClick={() => setEditorTab("write")}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  editorTab === "write"
+                    ? "bg-white text-[#2f80ed] shadow-sm"
+                    : "text-[#666] hover:text-[#333]"
+                }`}
+              >
+                <Code2 className="h-3.5 w-3.5" />
+                Yaz
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPreviewHtml(renderMarkdown(formData.bodyMarkdown));
+                  setEditorTab("preview");
+                  setShowImagePicker(false);
+                }}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  editorTab === "preview"
+                    ? "bg-white text-[#2f80ed] shadow-sm"
+                    : "text-[#666] hover:text-[#333]"
+                }`}
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Önizleme
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Inline image picker panel */}
+        {showImagePicker && editorTab === "write" && (
+          <div className="mb-3 rounded-[10px] border border-[#2f80ed]/30 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[13px] font-medium text-[#222]">Görsel ekle — URL girin veya cihazdan yükleyin</span>
+              <button
+                type="button"
+                onClick={() => { setShowImagePicker(false); setPickerUrl(""); setImageUploadError(null); }}
+                className="rounded p-1 text-[#999] hover:text-[#333]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={pickerUrl}
+                onChange={(e) => setPickerUrl(e.target.value)}
+                placeholder="https://örnek.com/gorsel.jpg"
+                className="flex-1 rounded-[8px] border border-[#ddd] bg-[#f7f7f7] px-3 py-2 text-[13px] outline-none focus:border-[#2f80ed]"
+              />
+              <button
+                type="button"
+                disabled={imageUploading}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 rounded-[8px] border border-[#ccc] bg-[#f0f0f0] px-3 py-2 text-[13px] text-[#444] hover:bg-[#e8e8e8] disabled:opacity-60"
+              >
+                {imageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {imageUploading ? "Yükleniyor…" : "Yükle"}
+              </button>
+              <button
+                type="button"
+                disabled={!pickerUrl.trim()}
+                onClick={() => insertImageAtCursor(pickerUrl.trim())}
+                className="rounded-[8px] bg-[#2f80ed] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2568c8] disabled:opacity-40"
+              >
+                Ekle
+              </button>
+            </div>
+
+            {imageUploadError && (
+              <p className="mt-2 text-[12px] text-red-500">{imageUploadError}</p>
+            )}
+
+            {pickerUrl && (
+              <div className="mt-3">
+                <p className="mb-1 text-[11px] text-[#888]">Önizleme:</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pickerUrl}
+                  alt="önizleme"
+                  className="max-h-40 max-w-full rounded border border-[#eee] object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { handleImageFileChange(e.target.files); e.target.value = ""; }}
+            />
+          </div>
+        )}
+
         {editorTab === "write" ? (
           <textarea
+            ref={textareaRef}
             value={formData.bodyMarkdown}
             onChange={(e) => handleChange("bodyMarkdown", e.target.value)}
-            placeholder={`# Blog Başlığı\n\nİlk paragrafınızı buraya yazın.\n\n## Alt Başlık\n\nMarkdown formatı desteklenmektedir:\n- **kalın**, *italik*, \`kod\`\n- Listeler ve başlıklar\n- [Bağlantılar](https://ornek.com)`}
+            placeholder={`# Blog Başlığı\n\nİlk paragrafınızı buraya yazın.\n\n## Alt Başlık\n\nMarkdown formatı desteklenmektedir:\n- **kalın**, *italik*, \`kod\`\n- Listeler ve başlıklar\n- [Bağlantılar](https://ornek.com)\n- Görsel eklemek için yukarıdaki "Görsel Ekle" düğmesini kullanın`}
             rows={20}
             className="w-full rounded-[10px] border border-transparent bg-[#e3e3e3] px-4 py-3 font-mono text-[13px] leading-relaxed outline-none focus:border-[#2f80ed] resize-y"
           />
@@ -337,7 +470,7 @@ export default function BlogPostForm({
         )}
 
         <p className="mt-2 text-[12px] text-[#888]">
-          Markdown formatı desteklenir: **kalın**, *italik*, # başlık, - liste, `kod`, [bağlantı](url)
+          Markdown formatı desteklenir: **kalın**, *italik*, # başlık, - liste, `kod`, [bağlantı](url), ![](görsel-url)
         </p>
       </div>
 

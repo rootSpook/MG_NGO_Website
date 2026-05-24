@@ -5,6 +5,7 @@
 export type BlockType =
   | "hero"
   | "rich-text"
+  | "image"
   | "event-grid"
   | "report-list"
   | "team-grid"
@@ -15,6 +16,7 @@ export type BlockType =
 export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   "hero": "Hero Bölümü",
   "rich-text": "Metin İçeriği",
+  "image": "Görsel",
   "event-grid": "Etkinlik Kartları",
   "report-list": "Rapor Listesi",
   "team-grid": "Ekip Üyeleri",
@@ -71,6 +73,14 @@ export interface HeroBlockData {
 
 export interface RichTextBlockData {
   markdown: string;
+}
+
+export interface ImageBlockData {
+  imageUrl: string;
+  altText: string;
+  caption?: string;
+  width: "full" | "container" | "narrow";
+  alignment: "left" | "center" | "right";
 }
 
 export interface EventGridBlockData {

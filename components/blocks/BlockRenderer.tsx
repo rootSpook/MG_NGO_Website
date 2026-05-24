@@ -7,6 +7,7 @@ import { ReportListBlock } from "./ReportListBlock";
 import { TeamGridBlock } from "./TeamGridBlock";
 import { FaqAccordionBlock } from "./FaqAccordionBlock";
 import { StatsBarBlock } from "./StatsBarBlock";
+import { ImageBlock } from "./ImageBlock";
 
 function renderBlock(section: PageSection) {
   switch (section.type) {
@@ -26,6 +27,8 @@ function renderBlock(section: PageSection) {
       return <FaqAccordionBlock key={section.id} data={section.data} />;
     case "stats-bar":
       return <StatsBarBlock key={section.id} data={section.data} />;
+    case "image":
+      return <ImageBlock key={section.id} data={section.data} />;
     default:
       return null;
   }

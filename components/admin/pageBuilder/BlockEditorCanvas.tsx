@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   ChevronUp, ChevronDown, ChevronRight, ChevronDown as Expand,
   Trash2, Plus, GripVertical,
-  Mountain, AlignLeft, CalendarDays, FileText, Users, HelpCircle, Megaphone, BarChart2,
+  Mountain, AlignLeft, CalendarDays, FileText, Users, HelpCircle, Megaphone, BarChart2, ImageIcon,
 } from "lucide-react";
 import type { PageSection, BlockType } from "@/types/pageBuilder";
 import { BLOCK_TYPE_LABELS } from "@/types/pageBuilder";
@@ -17,6 +17,7 @@ import { ReportListBlockEditor } from "./ReportListBlockEditor";
 import { TeamGridBlockEditor } from "./TeamGridBlockEditor";
 import { FaqBlockEditor } from "./FaqBlockEditor";
 import { StatsBarBlockEditor } from "./StatsBarBlockEditor";
+import { ImageBlockEditor } from "./ImageBlockEditor";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ function defaultDataForType(type: BlockType): Record<string, unknown> {
       return { title: "", subtitle: "", imageUrl: "", ctaLabel: "", ctaHref: "", overlayDark: false };
     case "rich-text":
       return { markdown: "" };
+    case "image":
+      return { imageUrl: "", altText: "", caption: "", width: "container", alignment: "center" };
     case "cta-banner":
       return { heading: "", body: "", buttonLabel: "", buttonHref: "", variant: "teal" };
     case "event-grid":
@@ -48,6 +51,7 @@ function defaultDataForType(type: BlockType): Record<string, unknown> {
 const TYPE_ICONS: Record<BlockType, React.ComponentType<{ className?: string }>> = {
   "hero": Mountain,
   "rich-text": AlignLeft,
+  "image": ImageIcon,
   "event-grid": CalendarDays,
   "report-list": FileText,
   "team-grid": Users,
@@ -59,6 +63,7 @@ const TYPE_ICONS: Record<BlockType, React.ComponentType<{ className?: string }>>
 const TYPE_COLORS: Record<BlockType, string> = {
   "hero": "bg-violet-100 text-violet-700",
   "rich-text": "bg-blue-100 text-blue-700",
+  "image": "bg-rose-100 text-rose-700",
   "event-grid": "bg-amber-100 text-amber-700",
   "report-list": "bg-orange-100 text-orange-700",
   "team-grid": "bg-pink-100 text-pink-700",
@@ -74,6 +79,8 @@ function previewText(section: PageSection): string {
       return String(d.title || "—");
     case "rich-text":
       return String(d.markdown || "—").replace(/[#*_`]/g, "").slice(0, 60) + (String(d.markdown || "").length > 60 ? "…" : "");
+    case "image":
+      return d.imageUrl ? (d.caption ? String(d.caption) : "Görsel yüklendi") : "Görsel seçilmedi";
     case "cta-banner":
       return String(d.heading || "—");
     case "event-grid":
@@ -109,6 +116,8 @@ function BlockSpecificEditor({
       return <HeroBlockEditor data={section.data} onChange={onChange} />;
     case "rich-text":
       return <RichTextBlockEditor data={section.data} onChange={onChange} />;
+    case "image":
+      return <ImageBlockEditor data={section.data} onChange={onChange} />;
     case "cta-banner":
       return <CtaBannerBlockEditor data={section.data} onChange={onChange} />;
     case "event-grid":
