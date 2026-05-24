@@ -3,9 +3,10 @@ import { unstable_cache } from 'next/cache'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
-import { getSiteSettings } from '@/lib/firebase/services'
-import { getNavConfig } from '@/lib/firebase/navServices'
+import { getSiteSettingsServer, getNavConfigServer } from '@/lib/firebase/serverServices'
+import { DEFAULT_NAV_ITEMS } from '@/lib/firebase/navServices'
 import { NavProvider } from '@/components/layout/NavProvider'
+import { LogoProvider } from '@/components/layout/LogoProvider'
 import { ThemeListener } from '@/components/theme/ThemeListener'
 import './globals.css'
 
@@ -13,7 +14,7 @@ import './globals.css'
 // per-request freshness. The admin theme page calls revalidatePath('/') after
 // saving to bust this cache immediately when settings are updated.
 const getCachedSiteSettings = unstable_cache(
-  getSiteSettings,
+  getSiteSettingsServer,
   ['site-settings'],
   { revalidate: 300 }
 )
@@ -22,7 +23,7 @@ const getCachedSiteSettings = unstable_cache(
 // revalidateNavAction() after every save, which calls revalidatePath("/","layout")
 // to bust this cache immediately so changes propagate on the next request.
 const getCachedNavConfig = unstable_cache(
-  getNavConfig,
+  getNavConfigServer,
   ['nav-config'],
   { revalidate: 60 }
 )
@@ -57,10 +58,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const [settings, navItems] = await Promise.all([
+  const [settingsResult, navResult] = await Promise.allSettled([
     getCachedSiteSettings(),
     getCachedNavConfig(),
   ]);
+  const settings = settingsResult.status === "fulfilled" ? settingsResult.value : null;
+  const navItems = navResult.status === "fulfilled" ? navResult.value : DEFAULT_NAV_ITEMS;
 
   return (
     <html lang="tr" suppressHydrationWarning>
@@ -86,7 +89,9 @@ export default async function RootLayout({
         <ThemeListener />
         <Providers>
           <NavProvider initialItems={navItems}>
-            {children}
+            <LogoProvider initialLogoUrl={settings?.logoUrl ?? null}>
+              {children}
+            </LogoProvider>
           </NavProvider>
         </Providers>
         <Analytics />

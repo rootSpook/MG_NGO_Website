@@ -44,6 +44,7 @@ export interface SiteSettings {
   contactPhone: string | null;
   addressText: string | null;
   logoAssetRef: DocumentReference | null;
+  logoUrl: string | null;
   primaryColor: string | null;
   secondaryColor: string | null;
   theme?: {

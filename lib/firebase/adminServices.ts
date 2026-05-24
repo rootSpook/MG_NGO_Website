@@ -503,6 +503,7 @@ export interface AdminSiteSettings {
   socialLinkedin: string;
   socialYoutube: string;
   defaultSeoDescription: string;
+  logoUrl: string | null;
 }
 
 export async function getAdminSiteSettings(): Promise<Partial<AdminSiteSettings>> {
@@ -522,6 +523,7 @@ export async function getAdminSiteSettings(): Promise<Partial<AdminSiteSettings>
     socialLinkedin: data.socialLinkedin ?? "",
     socialYoutube: data.socialYoutube ?? "",
     defaultSeoDescription: data.defaultSeoDescription ?? data.metaDescription ?? "",
+    logoUrl: data.logoUrl ?? null,
   };
 }
 

@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import { useState } from "react"
 import { useNav } from "@/components/layout/NavProvider"
+import { useLogo } from "@/components/layout/LogoProvider"
 import type { NavItem } from "@/lib/firebase/navServices"
 
 /**
@@ -20,6 +22,7 @@ import type { NavItem } from "@/lib/firebase/navServices"
  */
 export function Header() {
   const navItems = useNav()
+  const logoUrl = useLogo()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isPublic = (item: NavItem) =>
@@ -34,57 +37,44 @@ export function Header() {
       <div className="bg-white py-4 px-6">
         <div className="max-w-6xl mx-auto">
           <Link href="/" className="flex items-center gap-2">
-            <svg
-              width="120"
-              height="60"
-              viewBox="0 0 120 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-14 w-auto"
-            >
-              {/* Circuit lines */}
-              <path
-                d="M5 10 H25 V5 H30 M5 15 H20 V20 H25 M5 20 H15"
-                stroke="#1d4ed8"
-                strokeWidth="2"
-                fill="none"
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt="Site Logosu"
+                width={120}
+                height={56}
+                className="h-14 w-auto object-contain"
+                priority
               />
-              <circle cx="30" cy="5" r="2" fill="#1d4ed8" />
-              <circle cx="25" cy="20" r="2" fill="#1d4ed8" />
-              <circle cx="15" cy="20" r="2" fill="#1d4ed8" />
-
-              {/* MG Letters */}
-              <text
-                x="35"
-                y="35"
-                fontSize="32"
-                fontWeight="bold"
-                fill="#1d4ed8"
+            ) : (
+              <svg
+                width="120"
+                height="60"
+                viewBox="0 0 120 60"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-14 w-auto"
               >
-                MG
-              </text>
-
-              {/* Organization name */}
-              <text
-                x="5"
-                y="45"
-                fontFamily="Arial, sans-serif"
-                fontSize="8"
-                fontWeight="bold"
-                fill="#1d4ed8"
-              >
-                MYASTHENİA GRAVİS
-              </text>
-              <text
-                x="5"
-                y="55"
-                fontFamily="Arial, sans-serif"
-                fontSize="8"
-                fill="#E11D48"
-              >
-                YAŞAM DERNEĞİ
-              </text>
-            </svg>
+                <path
+                  d="M5 10 H25 V5 H30 M5 15 H20 V20 H25 M5 20 H15"
+                  stroke="#1d4ed8"
+                  strokeWidth="2"
+                  fill="none"
+                />
+                <circle cx="30" cy="5" r="2" fill="#1d4ed8" />
+                <circle cx="25" cy="20" r="2" fill="#1d4ed8" />
+                <circle cx="15" cy="20" r="2" fill="#1d4ed8" />
+                <text x="35" y="35" fontSize="32" fontWeight="bold" fill="#1d4ed8">
+                  MG
+                </text>
+                <text x="5" y="45" fontFamily="Arial, sans-serif" fontSize="8" fontWeight="bold" fill="#1d4ed8">
+                  MYASTHENİA GRAVİS
+                </text>
+                <text x="5" y="55" fontFamily="Arial, sans-serif" fontSize="8" fill="#E11D48">
+                  YAŞAM DERNEĞİ
+                </text>
+              </svg>
+            )}
           </Link>
         </div>
       </div>

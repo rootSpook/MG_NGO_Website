@@ -22,6 +22,7 @@ import {
   UserCircle2,
   CalendarDays,
   ChartNoAxesColumn,
+  ImageIcon,
 } from "lucide-react";
 
 const EXTRA_PAGE_LABELS: Record<string, string> = {
@@ -41,6 +42,7 @@ const navItems = [
   { label: "Raporlar", href: "/admin/reports", icon: BarChart2 },
   { label: "IBAN Bilgileri", href: "/admin/iban", icon: CreditCard },
   { label: "Tema & Renkler", href: "/admin/theme", icon: Palette },
+  { label: "Site Logosu", href: "/admin/branding", icon: ImageIcon },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
