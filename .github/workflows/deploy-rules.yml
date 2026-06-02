@@ -5,6 +5,7 @@ name: Deploy Firebase Rules
 # quality job passing first (branch protection must require "CI / Lint · Test · Build").
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop]
     paths:
