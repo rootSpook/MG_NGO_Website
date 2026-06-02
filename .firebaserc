@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": "ngo-mg-website-47a1a",
-    "prod": "ngo-mg-website-prod"
+    "prod": "ngo-mg-website-47a1a"
   },
   "targets": {},
   "etags": {}
