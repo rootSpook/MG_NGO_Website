@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pencil, Plus, RotateCcw, Search } from "lucide-react";
 import BlogPostForm from "@/components/editorPanel/BlogPostForm";
 import type { BlogPost } from "@/types/editorPanel";
-import {
-  createEditorBlog,
-  getEditorBlogs,
-  updateEditorBlog,
-} from "@/lib/firebase/editorServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 
 type SortMode = "newest" | "oldest";
@@ -22,6 +18,7 @@ function formatDateTR(value: string) {
 }
 
 export function InlineBlogManager() {
+  const { getEditorBlogs, createEditorBlog, updateEditorBlog } = useTenantServices();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");

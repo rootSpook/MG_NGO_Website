@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
+import { useTenantFirebase } from "@/lib/firebase/TenantFirebaseContext";
 import { useAuth } from "@/lib/firebase/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
+  const { auth } = useTenantFirebase();
   const { user, loading, login } = useAuth();
   const router = useRouter();
 

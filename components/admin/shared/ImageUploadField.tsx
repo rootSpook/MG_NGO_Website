@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ImagePlus, Trash2, RefreshCw, Loader2 } from "lucide-react";
-import { uploadImage } from "@/lib/firebase/storageUtils";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
 interface ImageUploadFieldProps {
   value: string;
@@ -26,6 +26,7 @@ export function ImageUploadField({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { uploadImage } = useTenantServices();
 
   async function handleFile(files: FileList | null) {
     const file = files?.[0];

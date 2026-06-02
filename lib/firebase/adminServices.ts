@@ -10,9 +10,16 @@ import {
   where,
   serverTimestamp,
   type DocumentData,
+  type Firestore,
 } from "firebase/firestore";
-import { db, auth } from "./config";
+import type { Auth } from "firebase/auth";
 import { COLLECTIONS, DOCUMENT_IDS } from "./constants";
+
+/** Services bag passed into every admin function — matches TenantFirebaseServices shape. */
+export interface AdminServices {
+  db: Firestore;
+  auth: Auth;
+}
 
 export interface AdminDashboardStats {
   totalBlogs: number;
@@ -42,7 +49,7 @@ async function safeDocs(q: Query<DocumentData>) {
   }
 }
 
-export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
+export async function getAdminDashboardStats({ db }: AdminServices): Promise<AdminDashboardStats> {
   const [blogsSnap, totalEvents, totalAnnouncements, pendingMessages, pendingVolunteers] =
     await Promise.all([
       safeDocs(
@@ -104,7 +111,7 @@ export interface BoardMember {
   sortOrder: number;
 }
 
-export async function getBoardMembers(): Promise<BoardMember[]> {
+export async function getBoardMembers({ db }: AdminServices): Promise<BoardMember[]> {
   const snap = await getDocs(collection(db, COLLECTIONS.BOARD_MEMBERS));
   return snap.docs
     .map((d) => {
@@ -122,6 +129,7 @@ export async function getBoardMembers(): Promise<BoardMember[]> {
 }
 
 export async function createBoardMember(
+  { db, auth }: AdminServices,
   member: Omit<BoardMember, "id">
 ): Promise<string> {
   const uid = auth.currentUser?.uid ?? null;
@@ -136,6 +144,7 @@ export async function createBoardMember(
 }
 
 export async function updateBoardMember(
+  { db, auth }: AdminServices,
   id: string,
   data: Partial<Omit<BoardMember, "id">>
 ): Promise<void> {
@@ -146,7 +155,7 @@ export async function updateBoardMember(
   });
 }
 
-export async function deleteBoardMember(id: string): Promise<void> {
+export async function deleteBoardMember({ db }: AdminServices, id: string): Promise<void> {
   const { deleteDoc } = await import("firebase/firestore");
   await deleteDoc(doc(db, COLLECTIONS.BOARD_MEMBERS, id));
 }
@@ -161,7 +170,7 @@ export interface Supporter {
   sortOrder: number;
 }
 
-export async function getSupporters(): Promise<Supporter[]> {
+export async function getSupporters({ db }: AdminServices): Promise<Supporter[]> {
   const snap = await getDocs(collection(db, COLLECTIONS.SUPPORTERS));
   return snap.docs
     .map((d) => {
@@ -178,6 +187,7 @@ export async function getSupporters(): Promise<Supporter[]> {
 }
 
 export async function createSupporter(
+  { db, auth }: AdminServices,
   supporter: Omit<Supporter, "id">
 ): Promise<string> {
   const uid = auth.currentUser?.uid ?? null;
@@ -192,6 +202,7 @@ export async function createSupporter(
 }
 
 export async function updateSupporter(
+  { db, auth }: AdminServices,
   id: string,
   data: Partial<Omit<Supporter, "id">>
 ): Promise<void> {
@@ -202,7 +213,7 @@ export async function updateSupporter(
   });
 }
 
-export async function deleteSupporter(id: string): Promise<void> {
+export async function deleteSupporter({ db }: AdminServices, id: string): Promise<void> {
   const { deleteDoc } = await import("firebase/firestore");
   await deleteDoc(doc(db, COLLECTIONS.SUPPORTERS, id));
 }
@@ -218,7 +229,7 @@ export interface IbanEntry {
   sortOrder: number;
 }
 
-export async function getIbanEntries(): Promise<IbanEntry[]> {
+export async function getIbanEntries({ db }: AdminServices): Promise<IbanEntry[]> {
   const snap = await getDocs(collection(db, COLLECTIONS.IBAN_ENTRIES));
   return snap.docs
     .map((d) => {
@@ -235,7 +246,7 @@ export async function getIbanEntries(): Promise<IbanEntry[]> {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export async function createIbanEntry(entry: Omit<IbanEntry, "id">): Promise<string> {
+export async function createIbanEntry({ db, auth }: AdminServices, entry: Omit<IbanEntry, "id">): Promise<string> {
   const uid = auth.currentUser?.uid ?? null;
   const ref = await addDoc(collection(db, COLLECTIONS.IBAN_ENTRIES), {
     ...entry,
@@ -248,6 +259,7 @@ export async function createIbanEntry(entry: Omit<IbanEntry, "id">): Promise<str
 }
 
 export async function updateIbanEntry(
+  { db, auth }: AdminServices,
   id: string,
   data: Partial<Omit<IbanEntry, "id">>
 ): Promise<void> {
@@ -258,7 +270,7 @@ export async function updateIbanEntry(
   });
 }
 
-export async function deleteIbanEntry(id: string): Promise<void> {
+export async function deleteIbanEntry({ db }: AdminServices, id: string): Promise<void> {
   const { deleteDoc } = await import("firebase/firestore");
   await deleteDoc(doc(db, COLLECTIONS.IBAN_ENTRIES, id));
 }
@@ -275,7 +287,7 @@ export interface AdminReport {
   featured: boolean;
 }
 
-export async function getAdminReports(): Promise<AdminReport[]> {
+export async function getAdminReports({ db }: AdminServices): Promise<AdminReport[]> {
   const snap = await getDocs(
     query(
       collection(db, COLLECTIONS.CONTENT_ITEMS),
@@ -297,7 +309,7 @@ export async function getAdminReports(): Promise<AdminReport[]> {
   });
 }
 
-export async function createAdminReport(report: Omit<AdminReport, "id">): Promise<string> {
+export async function createAdminReport({ db, auth }: AdminServices, report: Omit<AdminReport, "id">): Promise<string> {
   const uid = auth.currentUser?.uid ?? null;
   const ref = await addDoc(collection(db, COLLECTIONS.CONTENT_ITEMS), {
     type: "policy",
@@ -337,6 +349,7 @@ export async function createAdminReport(report: Omit<AdminReport, "id">): Promis
 }
 
 export async function updateAdminReport(
+  { db, auth }: AdminServices,
   id: string,
   data: Partial<Omit<AdminReport, "id">>
 ): Promise<void> {
@@ -353,7 +366,7 @@ export async function updateAdminReport(
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), update);
 }
 
-export async function deleteAdminReport(id: string): Promise<void> {
+export async function deleteAdminReport({ db }: AdminServices, id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -371,7 +384,7 @@ export interface AdminPage {
   updatedAt: string;
 }
 
-export async function getAdminPageBySlug(slug: string): Promise<AdminPage | null> {
+export async function getAdminPageBySlug({ db }: AdminServices, slug: string): Promise<AdminPage | null> {
   const snap = await getDocs(
     query(
       collection(db, COLLECTIONS.CONTENT_ITEMS),
@@ -395,6 +408,7 @@ export async function getAdminPageBySlug(slug: string): Promise<AdminPage | null
 }
 
 export async function getAdminPageDataBySlug(
+  { db }: AdminServices,
   slug: string
 ): Promise<Record<string, unknown> | null> {
   const snap = await getDocs(
@@ -409,7 +423,7 @@ export async function getAdminPageDataBySlug(
   return (snap.docs[0].data().pageData as Record<string, unknown> | null) ?? null;
 }
 
-export async function getAdminPages(): Promise<AdminPage[]> {
+export async function getAdminPages({ db }: AdminServices): Promise<AdminPage[]> {
   const snap = await getDocs(
     query(
       collection(db, COLLECTIONS.CONTENT_ITEMS),
@@ -432,6 +446,7 @@ export async function getAdminPages(): Promise<AdminPage[]> {
 }
 
 export async function upsertAdminPage(
+  { db, auth }: AdminServices,
   slug: string,
   title: string,
   bodyMarkdown: string,
@@ -506,7 +521,7 @@ export interface AdminSiteSettings {
   logoUrl: string | null;
 }
 
-export async function getAdminSiteSettings(): Promise<Partial<AdminSiteSettings>> {
+export async function getAdminSiteSettings({ db }: AdminServices): Promise<Partial<AdminSiteSettings>> {
   const snap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.SITE_SETTINGS));
   if (!snap.exists()) return {};
   const data = snap.data();
@@ -528,6 +543,7 @@ export async function getAdminSiteSettings(): Promise<Partial<AdminSiteSettings>
 }
 
 export async function updateAdminSiteSettings(
+  { db, auth }: AdminServices,
   data: Partial<AdminSiteSettings>
 ): Promise<void> {
   const uid = auth.currentUser?.uid ?? null;
@@ -552,7 +568,7 @@ export interface AdminContactMessage {
   createdAt: string;
 }
 
-export async function getContactMessages(): Promise<AdminContactMessage[]> {
+export async function getContactMessages({ db }: AdminServices): Promise<AdminContactMessage[]> {
   const snap = await getDocs(
     query(
       collection(db, COLLECTIONS.CONTACT_MESSAGES),
@@ -580,6 +596,7 @@ export async function getContactMessages(): Promise<AdminContactMessage[]> {
 }
 
 export async function updateContactMessageStatus(
+  { db, auth }: AdminServices,
   id: string,
   status: AdminContactMessage["status"],
   internalNotes?: string
@@ -602,7 +619,7 @@ import type { PageBlockData } from "@/types/pageBuilder";
  * Fetch the block-based page data for a given slug.
  * Returns null when the document doesn't exist yet or has no sections.
  */
-export async function getPageBlocks(slug: string): Promise<PageBlockData | null> {
+export async function getPageBlocks({ db }: AdminServices, slug: string): Promise<PageBlockData | null> {
   const snap = await getDocs(
     query(
       collection(db, COLLECTIONS.CONTENT_ITEMS),
@@ -621,6 +638,7 @@ export async function getPageBlocks(slug: string): Promise<PageBlockData | null>
  * exist yet, otherwise updates pageData + status + publishedAt.
  */
 export async function savePageBlocks(
+  { db, auth }: AdminServices,
   slug: string,
   title: string,
   blockData: PageBlockData,
@@ -686,6 +704,7 @@ export async function savePageBlocks(
 // Creates a new doc if none exists yet.
 
 export async function upsertPageContent(
+  { db, auth }: AdminServices,
   slug: string,
   pageData: Record<string, unknown>
 ): Promise<void> {
@@ -745,14 +764,14 @@ export async function upsertPageContent(
 
 // ── Staff photo management ────────────────────────────────────────────────────
 
-export async function updateStaffPhotoURL(uid: string, photoURL: string): Promise<void> {
+export async function updateStaffPhotoURL({ db }: AdminServices, uid: string, photoURL: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.STAFF, uid), {
     photoURL,
     updatedAt: serverTimestamp(),
   });
 }
 
-export async function getStaffMember(uid: string): Promise<{ photoURL?: string; displayName?: string; email?: string } | null> {
+export async function getStaffMember({ db }: AdminServices, uid: string): Promise<{ photoURL?: string; displayName?: string; email?: string } | null> {
   try {
     const snap = await getDoc(doc(db, COLLECTIONS.STAFF, uid));
     if (!snap.exists()) return null;

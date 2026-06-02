@@ -7,7 +7,6 @@ import {
   updateDoc,
   query,
   where,
-  orderBy,
 } from "firebase/firestore";
 import { assertSucceeds } from "@firebase/rules-unit-testing";
 import { newEnv, EDITOR_UID, ADMIN_UID } from "./helpers/emulator";
@@ -16,7 +15,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
-  env = await newEnv();
+  env = await newEnv("publish-flow");
 });
 afterAll(async () => {
   await env.cleanup();
@@ -37,10 +36,8 @@ async function queryPublished(db: FirestoreDb) {
   return getDocs(
     query(
       collection(db, "contentItems"),
-      where("type", "==", "post"),
       where("status", "==", "published"),
-      where("deletedAt", "==", null),
-      orderBy("publishedAt", "desc")
+      where("deletedAt", "==", null)
     )
   );
 }

@@ -6,11 +6,9 @@ import {
   ArrowLeft, Check, AlertCircle, FileText, Eye, EyeOff,
   Layers, WandSparkles, ExternalLink,
 } from "lucide-react";
-import { getNavConfig, patchNavItem, type NavItem } from "@/lib/firebase/navServices";
-import {
-  getPageBlocks, savePageBlocks,
-  getAdminPageBySlug, getAdminPageDataBySlug, upsertPageContent, type AdminPage,
-} from "@/lib/firebase/adminServices";
+import { type NavItem } from "@/lib/firebase/navServices";
+import { type AdminPage } from "@/lib/firebase/adminServices";
+import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 import { revalidatePageAction, revalidatePublicPathAction } from "@/app/admin/actions";
 import { BlockEditorCanvas } from "@/components/admin/pageBuilder/BlockEditorCanvas";
 import { InlineBlogManager } from "@/components/admin/InlineBlogManager";
@@ -77,6 +75,7 @@ const SPECIAL_MANAGE_LINKS: Record<string, { label: string; href: string }> = {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function MenuItemContentPage() {
+  const { getNavConfig, patchNavItem, getPageBlocks, savePageBlocks, getAdminPageBySlug, getAdminPageDataBySlug, upsertPageContent } = useTenantServices();
   const router = useRouter();
   const params = useParams();
   const menuKey = params.key as string;
