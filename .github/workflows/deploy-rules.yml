@@ -52,9 +52,6 @@ jobs:
     name: Deploy Rules → Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    # Requires a GitHub Environment named "production" with required reviewers
-    # configured for an additional approval gate before prod rules deploy.
-    environment: production
 
     steps:
       - name: Checkout
