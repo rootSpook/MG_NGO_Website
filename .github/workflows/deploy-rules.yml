@@ -73,5 +73,5 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
 
-      - name: Deploy Firestore & Storage rules to production
-        run: npx firebase-tools deploy --only firestore:rules,firestore:indexes,storage --project ngo-mg-website-47a1a --non-interactive
+      - name: Deploy Firestore rules to production
+        run: npx firebase-tools deploy --only firestore:rules,firestore:indexes --project ngo-mg-website-47a1a --non-interactive
