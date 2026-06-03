@@ -61,6 +61,12 @@ export function useTenantServices() {
     submitContactMessage:      (data: Parameters<typeof publicSvc.submitContactMessage>[1]) =>
                                   publicSvc.submitContactMessage(db, data),
 
+    // ── Logo settings ──────────────────────────────────────────────────────
+    getLogoSettings: async () => {
+      const s = await publicSvc.getSiteSettings(db);
+      return s?.logoSettings ?? null;
+    },
+
     // ── Nav functions ──────────────────────────────────────────────────────
     getNavConfig:   () => navSvc.getNavConfig(db),
     saveNavConfig:  (items: Parameters<typeof navSvc.saveNavConfig>[1]) =>

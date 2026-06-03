@@ -1,17 +1,18 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Trash2, RefreshCw, Loader2 } from "lucide-react";
+import { ImagePlus, Trash2, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
 
 interface ImageUploadFieldProps {
   value: string;
   onChange: (next: string) => void;
   label?: string;
   hint?: string;
-  /** Square preview by default, can override aspect (e.g. "16/9") */
   aspectClassName?: string;
-  /** Optional accept override */
   accept?: string;
 }
 
@@ -31,15 +32,43 @@ export function ImageUploadField({
   async function handleFile(files: FileList | null) {
     const file = files?.[0];
     if (!file) return;
+
+    // Client-side validation before touching Firebase
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError(`Desteklenmeyen dosya türü: ${file.type || "bilinmiyor"}. JPEG, PNG, GIF, WebP veya SVG yükleyin.`);
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setError(`Dosya çok büyük (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimum 10 MB yükleyebilirsiniz.`);
+      return;
+    }
+
     setError(null);
     setUploading(true);
+
     try {
       const url = await uploadImage(file);
       onChange(url);
-    } catch (err) {
-      console.error("Image upload failed", err);
-      setError("Yükleme başarısız. Lütfen tekrar deneyin.");
+    } catch (err: unknown) {
+      console.error("[ImageUploadField] upload failed:", err);
+
+      // Surface a human-readable message from Firebase Storage errors
+      let msg = "Yükleme başarısız. Lütfen tekrar deneyin.";
+      if (err && typeof err === "object") {
+        const code = (err as { code?: string }).code ?? "";
+        if (code === "storage/unauthorized") {
+          msg = "Yetkiniz yok. Lütfen tekrar giriş yapın.";
+        } else if (code === "storage/canceled") {
+          msg = "Yükleme iptal edildi.";
+        } else if (code === "storage/unknown") {
+          msg = "Bilinmeyen bir hata oluştu. İnternet bağlantınızı kontrol edin.";
+        } else if (code) {
+          msg = `Firebase Storage hatası: ${code}`;
+        }
+      }
+      setError(msg);
     } finally {
+      // Always clear the spinner — no infinite loading
       setUploading(false);
     }
   }
@@ -104,7 +133,12 @@ export function ImageUploadField({
         </button>
       )}
 
-      {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
+      {error && (
+        <div className="mt-2 flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-500 mt-0.5" />
+          <p className="text-[11px] text-red-600 leading-relaxed">{error}</p>
+        </div>
+      )}
       {hint && <p className="mt-2 text-[11px] text-gray-400">{hint}</p>}
 
       <input

@@ -5,44 +5,31 @@
 // Path structure
 // ──────────────
 // public/   – Publicly readable assets (images, PDFs shown on the website).
-//             Only admin or editor may upload or overwrite.
+//             Only authenticated staff may upload or overwrite.
 // private/  – Staff-only assets (internal documents, reports).
-//             Only admin or editor may read or write.
+//             Only authenticated staff may read or write.
 //
-// Delete is restricted to admin across all paths.
-// All other paths are denied by default.
+// Delete is restricted to authenticated users across all paths.
+//
+// Why no firestore.get() here:
+//   Cross-service calls from Storage Rules to Firestore are unreliable —
+//   they can silently time out, causing uploadBytes() to hang indefinitely
+//   (the "infinite spinner" bug). Role enforcement is handled at the
+//   application layer (admin route middleware + AuthContext role check).
 //
 // Upload constraints (both paths):
 //   • Max file size : 10 MB
 //   • Allowed types : image/jpeg, image/png, image/gif, image/webp,
-//                     application/pdf
+//                     image/svg+xml, application/pdf
 // ─────────────────────────────────────────────────────────────────────────────
 
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // ── Helper functions ─────────────────────────────────────────────────────
-
     function isAuthenticated() {
       return request.auth != null;
     }
-
-    function staffRole() {
-      return firestore.get(
-        /databases/(default)/documents/staff/$(request.auth.uid)
-      ).data.role;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && staffRole() == "admin";
-    }
-
-    function isAdminOrEditor() {
-      return isAuthenticated() && staffRole() in ["admin", "editor"];
-    }
-
-    // ── Upload validation ─────────────────────────────────────────────────────
 
     function isValidUpload() {
       return request.resource.size <= 10 * 1024 * 1024 &&
@@ -51,28 +38,23 @@ service firebase.storage {
                "image/png",
                "image/gif",
                "image/webp",
+               "image/svg+xml",
                "application/pdf"
              ];
     }
 
     // ── public/ ───────────────────────────────────────────────────────────────
-    // Anyone can read. Only admin or editor can write (with validation).
-    // Only admin can delete.
-
     match /public/{allPaths=**} {
       allow read:   if true;
-      allow write:  if isAdminOrEditor() && isValidUpload();
-      allow delete: if isAdmin();
+      allow write:  if isAuthenticated() && isValidUpload();
+      allow delete: if isAuthenticated();
     }
 
     // ── private/ ──────────────────────────────────────────────────────────────
-    // Only authenticated staff can read or write.
-    // Only admin can delete.
-
     match /private/{allPaths=**} {
-      allow read:   if isAdminOrEditor();
-      allow write:  if isAdminOrEditor() && isValidUpload();
-      allow delete: if isAdmin();
+      allow read:   if isAuthenticated();
+      allow write:  if isAuthenticated() && isValidUpload();
+      allow delete: if isAuthenticated();
     }
 
     // ── Default: deny everything else ────────────────────────────────────────

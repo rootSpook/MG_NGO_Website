@@ -5,9 +5,10 @@ import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
 import { getTenantByDomain } from '@/lib/tenant/masterDb'
 import { TenantFirebaseProvider } from '@/lib/firebase/TenantFirebaseContext'
-import { getTenantNavConfig, getTenantSiteSettings } from '@/lib/firebase/tenantServerDb'
+import { getTenantNavConfig, getTenantSiteSettings, getTenantLogoSettings } from '@/lib/firebase/tenantServerDb'
 import { DEFAULT_NAV_ITEMS } from '@/lib/firebase/navServices'
 import { NavProvider } from '@/components/layout/NavProvider'
+import { LogoProvider } from '@/components/layout/LogoProvider'
 import { ThemeListener } from '@/components/theme/ThemeListener'
 import './globals.css'
 
@@ -38,6 +39,14 @@ function buildCachedNavConfig(tenantId: string, projectId: string, apiKey: strin
     () => getTenantNavConfig({ projectId, apiKey }),
     [`tenant-nav:${tenantId}`],
     { revalidate: 60, tags: [`tenant-nav:${tenantId}`] },
+  );
+}
+
+function buildCachedLogoSettings(tenantId: string, projectId: string, apiKey: string) {
+  return unstable_cache(
+    () => getTenantLogoSettings({ projectId, apiKey }),
+    [`tenant-logo:${tenantId}`],
+    { revalidate: 300, tags: [`tenant-settings:${tenantId}`] },
   );
 }
 
@@ -87,9 +96,10 @@ export default async function RootLayout({
 
   const { projectId, apiKey } = tenant.firebaseConfig;
 
-  const [settings, navItemsOrNull] = await Promise.all([
+  const [settings, navItemsOrNull, logoSettings] = await Promise.all([
     buildCachedSiteSettings(tenant.tenantId, projectId, apiKey)(),
     buildCachedNavConfig(tenant.tenantId, projectId, apiKey)(),
+    buildCachedLogoSettings(tenant.tenantId, projectId, apiKey)(),
   ]);
 
   const navItems = navItemsOrNull ?? DEFAULT_NAV_ITEMS;
@@ -139,7 +149,9 @@ export default async function RootLayout({
         <TenantFirebaseProvider config={tenant.firebaseConfig}>
           <Providers>
             <NavProvider initialItems={navItems}>
-              {children}
+              <LogoProvider initialSettings={logoSettings}>
+                {children}
+              </LogoProvider>
             </NavProvider>
           </Providers>
         </TenantFirebaseProvider>

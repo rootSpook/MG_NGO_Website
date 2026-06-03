@@ -15,7 +15,7 @@ import "server-only";
 
 import { COLLECTIONS, DOCUMENT_IDS } from "./constants";
 import type { NavItem } from "./navServices";
-import type { SiteSettings } from "./types";
+import type { LogoSettings, SiteSettings } from "./types";
 
 interface FirestoreValue {
   stringValue?: string;
@@ -95,6 +95,19 @@ export async function getTenantSiteSettings(
     return data as SiteSettings | null;
   } catch (err) {
     console.error("[tenantServerDb] getSiteSettings error:", err);
+    return null;
+  }
+}
+
+export async function getTenantLogoSettings(
+  cfg: TenantServerConfig,
+): Promise<LogoSettings | null> {
+  try {
+    const data = await getDocument(cfg.projectId, cfg.apiKey, COLLECTIONS.SETTINGS, DOCUMENT_IDS.SITE_SETTINGS);
+    if (!data?.logoSettings) return null;
+    return data.logoSettings as LogoSettings;
+  } catch (err) {
+    console.error("[tenantServerDb] getLogoSettings error:", err);
     return null;
   }
 }
