@@ -1,27 +1,28 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ThemeColors } from "./page";
+import type { ThemeColors, AdminLogoSettings } from "./page";
 
 interface LivePreviewProps {
   theme: ThemeColors;
+  logoSettings: AdminLogoSettings;
 }
 
-export default function LivePreview({ theme }: LivePreviewProps) {
+export default function LivePreview({ theme, logoSettings }: LivePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const handleIframeLoad = () => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        { type: "UPDATE_THEME", theme },
-        "*"
-      );
-    }
-  };
+  function postUpdate() {
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: "UPDATE_THEME", theme, logoSettings },
+      "*"
+    );
+  }
+
+  const handleIframeLoad = () => postUpdate();
 
   useEffect(() => {
-    handleIframeLoad();
-  }, [theme]);
+    postUpdate();
+  }, [theme, logoSettings]);
 
   return (
     <div className="w-full h-full min-h-[600px] border shadow-md rounded-lg overflow-hidden bg-background">

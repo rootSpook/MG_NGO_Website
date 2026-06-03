@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { UserCircle2, Camera, CheckCircle2 } from "lucide-react";
+import { UserCircle2, Camera, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/firebase/AuthContext";
 import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
 
@@ -11,6 +11,7 @@ export default function AdminMyDetailsPage() {
   const [staffPhoto, setStaffPhoto] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -25,14 +26,20 @@ export default function AdminMyDetailsPage() {
     const file = e.target.files?.[0];
     if (!file || !user?.uid) return;
     setUploading(true);
+    setUploadError(null);
     try {
       const url = await uploadImage(file);
       await updateStaffPhotoURL(user.uid, url);
       setStaffPhoto(url);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Photo upload failed:", err);
+      const code = (err as { code?: string })?.code ?? "";
+      let msg = "Fotoğraf yüklenemedi. Lütfen tekrar deneyin.";
+      if (code === "storage/unauthorized") msg = "Yetkiniz yok. Lütfen tekrar giriş yapın.";
+      else if ((err as Error)?.message?.includes("timed out")) msg = "Bağlantı zaman aşımına uğradı.";
+      setUploadError(msg);
     } finally {
       setUploading(false);
     }
@@ -90,6 +97,11 @@ export default function AdminMyDetailsPage() {
               {saved && (
                 <p className="mt-1.5 flex items-center gap-1 text-xs text-green-600">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Fotoğraf kaydedildi
+                </p>
+              )}
+              {uploadError && (
+                <p className="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+                  <AlertCircle className="h-3.5 w-3.5" /> {uploadError}
                 </p>
               )}
             </div>

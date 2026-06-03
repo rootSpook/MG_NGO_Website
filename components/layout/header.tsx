@@ -6,18 +6,8 @@ import { Menu, X } from "lucide-react"
 import { useState } from "react"
 import { useNav } from "@/components/layout/NavProvider"
 import type { NavItem } from "@/lib/firebase/navServices"
+import { LogoImage } from "@/components/layout/LogoImage"
 
-/**
- * Renders the public site header with dynamic navigation links.
- *
- * Navigation data is provided by NavProvider (in the root layout), which
- * server-fetches the live Firestore config on every request and caches it for
- * 60 s.  The provider also re-validates client-side after hydration, so
- * in-session admin changes propagate without a full reload.
- *
- * This component no longer manages its own nav state or Firestore fetches —
- * eliminating the DEFAULT_NAV_ITEMS flash that occurred on every mount.
- */
 export function Header() {
   const navItems = useNav()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -34,57 +24,7 @@ export function Header() {
       <div className="bg-white py-4 px-6">
         <div className="max-w-6xl mx-auto">
           <Link href="/" className="flex items-center gap-2">
-            <svg
-              width="120"
-              height="60"
-              viewBox="0 0 120 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-14 w-auto"
-            >
-              {/* Circuit lines */}
-              <path
-                d="M5 10 H25 V5 H30 M5 15 H20 V20 H25 M5 20 H15"
-                stroke="#1d4ed8"
-                strokeWidth="2"
-                fill="none"
-              />
-              <circle cx="30" cy="5" r="2" fill="#1d4ed8" />
-              <circle cx="25" cy="20" r="2" fill="#1d4ed8" />
-              <circle cx="15" cy="20" r="2" fill="#1d4ed8" />
-
-              {/* MG Letters */}
-              <text
-                x="35"
-                y="35"
-                fontSize="32"
-                fontWeight="bold"
-                fill="#1d4ed8"
-              >
-                MG
-              </text>
-
-              {/* Organization name */}
-              <text
-                x="5"
-                y="45"
-                fontFamily="Arial, sans-serif"
-                fontSize="8"
-                fontWeight="bold"
-                fill="#1d4ed8"
-              >
-                MYASTHENİA GRAVİS
-              </text>
-              <text
-                x="5"
-                y="55"
-                fontFamily="Arial, sans-serif"
-                fontSize="8"
-                fill="#E11D48"
-              >
-                YAŞAM DERNEĞİ
-              </text>
-            </svg>
+            <LogoImage slot="header" />
           </Link>
         </div>
       </div>

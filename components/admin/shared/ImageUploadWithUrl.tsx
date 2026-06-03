@@ -1,8 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, Loader2, Trash2 } from "lucide-react";
+import { Upload, Loader2, Trash2, AlertCircle } from "lucide-react";
 import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+
+const MAX_BYTES = 10 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
 
 interface ImageUploadWithUrlProps {
   label: string;
@@ -12,10 +15,6 @@ interface ImageUploadWithUrlProps {
   previewClassName?: string;
 }
 
-/**
- * URL girişi + cihazdan dosya yükleme desteği olan görsel alanı.
- * İkisi aynı state'i paylaşır: dosya yüklenince URL alanı otomatik dolar.
- */
 export function ImageUploadWithUrl({
   label,
   value,
@@ -34,14 +33,29 @@ export function ImageUploadWithUrl({
   async function handleFile(files: FileList | null) {
     const file = files?.[0];
     if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError(`Desteklenmeyen dosya türü: ${file.type || "bilinmiyor"}. JPEG, PNG, GIF, WebP veya SVG yükleyin.`);
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setError(`Dosya çok büyük (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimum 10 MB.`);
+      return;
+    }
+
     setError(null);
     setUploading(true);
     try {
       const url = await uploadImage(file);
       onChange(url);
-    } catch (err) {
-      console.error("Görsel yükleme hatası:", err);
-      setError("Yükleme başarısız. Lütfen tekrar deneyin.");
+    } catch (err: unknown) {
+      console.error("[ImageUploadWithUrl] upload failed:", err);
+      let msg = "Yükleme başarısız. Lütfen tekrar deneyin.";
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "storage/unauthorized") msg = "Yetkiniz yok. Lütfen tekrar giriş yapın.";
+      else if (code === "storage/canceled")  msg = "Yükleme iptal edildi.";
+      else if ((err as Error)?.message?.includes("timed out")) msg = "Bağlantı zaman aşımına uğradı. İnternet bağlantınızı kontrol edin.";
+      setError(msg);
     } finally {
       setUploading(false);
     }
@@ -51,12 +65,11 @@ export function ImageUploadWithUrl({
     <div>
       <label className="mb-1 block text-xs font-medium text-gray-600">{label}</label>
 
-      {/* URL input + upload button side by side */}
       <div className="flex gap-2">
         <input
           className={cls}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => { onChange(e.target.value); setError(null); }}
           placeholder={placeholder}
         />
         <button
@@ -78,10 +91,12 @@ export function ImageUploadWithUrl({
       </div>
 
       {error && (
-        <p className="mt-1 text-xs text-red-500">{error}</p>
+        <div className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-500 mt-0.5" />
+          <p className="text-[11px] text-red-600 leading-relaxed">{error}</p>
+        </div>
       )}
 
-      {/* Preview */}
       {value && (
         <div className="mt-2 flex items-center gap-2">
           <img

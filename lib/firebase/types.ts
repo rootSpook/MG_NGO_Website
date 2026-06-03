@@ -33,6 +33,26 @@ export type DonationStatus =
 export type EventStatus = "draft" | "published" | "canceled" | "archived";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Logo position / branding
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface LogoPosition {
+  x: number;
+  y: number;
+}
+
+export interface LogoSettings {
+  /** Firebase Storage download URL for the uploaded logo image */
+  logo_url: string;
+  /** Pixel offset of the header logo within its container (desktop) */
+  header_logo_position: LogoPosition;
+  /** Pixel offset of the footer logo within its container (desktop) */
+  footer_logo_position: LogoPosition;
+  /** Alt text for accessibility */
+  logo_alt: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // settings/site
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -46,6 +66,8 @@ export interface SiteSettings {
   logoAssetRef: DocumentReference | null;
   primaryColor: string | null;
   secondaryColor: string | null;
+  /** Dynamic logo settings managed from the admin theme panel */
+  logoSettings?: LogoSettings | null;
   theme?: {
     primary?: string;
     primaryForeground?: string;
