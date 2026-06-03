@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { UserCircle2, Camera, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/lib/firebase/AuthContext";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { uploadImage } from "@/lib/firebase/storageUtils";
+import { updateStaffPhotoURL, getStaffMember } from "@/lib/firebase/adminServices";
 
 export default function AdminMyDetailsPage() {
-  const { uploadImage, updateStaffPhotoURL, getStaffMember } = useTenantServices();
   const { user } = useAuth();
   const [staffPhoto, setStaffPhoto] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);

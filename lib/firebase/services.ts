@@ -8,8 +8,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  type Firestore,
 } from "firebase/firestore";
+import { db } from "./config";
 import { COLLECTIONS, CONTENT_STATUS, EVENT_STATUS, CONTACT_STATUS, CAMPAIGN_STATUS } from "./constants";
 import type {
   SiteSettings,
@@ -31,7 +31,7 @@ function fromDoc<T>(snap: { id: string; data: () => Record<string, unknown> }): 
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 
-export async function getSiteSettings(db: Firestore): Promise<SiteSettings | null> {
+export async function getSiteSettings(): Promise<SiteSettings | null> {
   const snap = await getDoc(doc(db, COLLECTIONS.SETTINGS, "site"));
   if (!snap.exists()) return null;
   return snap.data() as SiteSettings;
@@ -40,7 +40,6 @@ export async function getSiteSettings(db: Firestore): Promise<SiteSettings | nul
 // ── Content items ─────────────────────────────────────────────────────────────
 
 export async function getPublishedContentByType(
-  db: Firestore,
   type: ContentItem["type"]
 ): Promise<(ContentItem & { id: string })[]> {
   const q = query(
@@ -55,7 +54,6 @@ export async function getPublishedContentByType(
 }
 
 export async function getContentBySlug(
-  db: Firestore,
   slug: string
 ): Promise<(ContentItem & { id: string }) | null> {
   const q = query(
@@ -71,7 +69,7 @@ export async function getContentBySlug(
 
 // ── Events ────────────────────────────────────────────────────────────────────
 
-export async function getPublishedEvents(db: Firestore): Promise<(Event & { id: string })[]> {
+export async function getPublishedEvents(): Promise<(Event & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.EVENTS),
     where("status", "==", EVENT_STATUS.PUBLISHED),
@@ -83,7 +81,7 @@ export async function getPublishedEvents(db: Firestore): Promise<(Event & { id: 
 
 // ── Categories & Tags ─────────────────────────────────────────────────────────
 
-export async function getCategories(db: Firestore): Promise<(Category & { id: string })[]> {
+export async function getCategories(): Promise<(Category & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.CATEGORIES),
     where("deletedAt", "==", null)
@@ -92,7 +90,7 @@ export async function getCategories(db: Firestore): Promise<(Category & { id: st
   return snap.docs.map((d) => fromDoc<Category>(d));
 }
 
-export async function getTags(db: Firestore): Promise<(Tag & { id: string })[]> {
+export async function getTags(): Promise<(Tag & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.TAGS),
     where("deletedAt", "==", null)
@@ -103,7 +101,7 @@ export async function getTags(db: Firestore): Promise<(Tag & { id: string })[]> 
 
 // ── Media assets ──────────────────────────────────────────────────────────────
 
-export async function getPublicMediaAssets(db: Firestore): Promise<(MediaAsset & { id: string })[]> {
+export async function getPublicMediaAssets(): Promise<(MediaAsset & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.MEDIA_ASSETS),
     where("visibility", "==", "public"),
@@ -116,7 +114,7 @@ export async function getPublicMediaAssets(db: Firestore): Promise<(MediaAsset &
 
 // ── Campaigns ─────────────────────────────────────────────────────────────────
 
-export async function getActiveCampaigns(db: Firestore): Promise<(Campaign & { id: string })[]> {
+export async function getActiveCampaigns(): Promise<(Campaign & { id: string })[]> {
   const q = query(
     collection(db, COLLECTIONS.CAMPAIGNS),
     where("status", "==", CAMPAIGN_STATUS.ACTIVE),
@@ -137,7 +135,7 @@ export interface PublicIbanEntry {
   sortOrder: number;
 }
 
-export async function getPublicIbanEntries(db: Firestore): Promise<PublicIbanEntry[]> {
+export async function getPublicIbanEntries(): Promise<PublicIbanEntry[]> {
   const snap = await getDocs(collection(db, COLLECTIONS.IBAN_ENTRIES));
   return snap.docs
     .map((d) => {
@@ -164,7 +162,7 @@ export interface PublicSupporter {
   sortOrder: number;
 }
 
-export async function getPublicSupporters(db: Firestore): Promise<PublicSupporter[]> {
+export async function getPublicSupporters(): Promise<PublicSupporter[]> {
   const snap = await getDocs(collection(db, COLLECTIONS.SUPPORTERS));
   return snap.docs
     .map((d) => {
@@ -201,7 +199,6 @@ export interface VolunteerApplicationInput {
 }
 
 export async function submitVolunteerApplication(
-  db: Firestore,
   data: VolunteerApplicationInput
 ): Promise<string> {
   const ref = await addDoc(
@@ -222,7 +219,6 @@ export async function submitVolunteerApplication(
 // ── Contact messages ──────────────────────────────────────────────────────────
 
 export async function submitContactMessage(
-  db: Firestore,
   data: ContactMessageInput
 ): Promise<string> {
   const payload: Omit<ContactMessage, "id"> = {

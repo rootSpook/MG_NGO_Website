@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, Plus, RotateCcw, Search, Trash2, X } from "lucide-react";
 import type { MediaItem, MediaStatus } from "@/types/editorPanel";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import {
+  createEditorMedia,
+  deleteEditorMedia,
+  getEditorMedia,
+  updateEditorMedia,
+} from "@/lib/firebase/editorServices";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 import { ImageUploadField } from "@/components/admin/shared/ImageUploadField";
 import { DraftPublishToggle } from "@/components/admin/shared/DraftPublishToggle";
@@ -153,7 +158,6 @@ function MediaForm({ initial, onSave, onCancel, saving }: MediaFormProps) {
 }
 
 export function InlineMediaManager() {
-  const { getEditorMedia, createEditorMedia, updateEditorMedia, deleteEditorMedia } = useTenantServices();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);

@@ -1,21 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Firestore Security Rules — Multi-Tenant NGO Platform
+// Firestore Security Rules
+// Project: ngo-mg-website-47a1a
 //
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  ARCHITECTURE CHOICE                                                    ║
-// ║                                                                         ║
-// ║  Option A (Recommended): One Firebase project per tenant.               ║
-// ║    → Use this file as-is for each tenant's own project.                 ║
-// ║    → Data isolation is enforced at the infrastructure level.            ║
-// ║    → An Auth token from NGO-A is cryptographically invalid in NGO-B.    ║
-// ║                                                                         ║
-// ║  Option B: Shared project, tenant-namespaced collections.               ║
-// ║    → Replace the flat collection rules below with the namespaced        ║
-// ║      /tenants/{tenantId}/... pattern shown at the bottom of this file.  ║
-// ║    → Requires a `tenantId` custom claim set at login via Admin SDK.     ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-//
-// Role-based access model (Option A — per-tenant project)
+// Role-based access model
 // ────────────────────────
 // Public   – unauthenticated visitors; read-only access to published content
 //            and the right to submit contact forms / event registrations.
@@ -41,14 +28,16 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function staffDoc() {
+      return get(/databases/$(database)/documents/staff/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
-      return request.auth != null
-        && get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.role == "admin";
+      return isAuthenticated() && staffDoc().role == "admin";
     }
 
     function isEditor() {
-      return request.auth != null
-        && get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.role == "editor";
+      return isAuthenticated() && staffDoc().role == "editor";
     }
 
     function isAdminOrEditor() {
@@ -78,8 +67,9 @@ service cloud.firestore {
     // Admin:  full CRUD.
 
     match /contentItems/{contentItemId} {
-      allow read: if resource.data.status == "published" && resource.data.deletedAt == null;
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if
+        (resource.data.status == "published" && resource.data.deletedAt == null) ||
+        isAdminOrEditor();
 
       allow create: if isAdmin() ||
         (isEditor() &&
@@ -129,8 +119,9 @@ service cloud.firestore {
     // Only admin may delete.
 
     match /mediaAssets/{assetId} {
-      allow read: if resource.data.visibility == "public" && resource.data.deletedAt == null;
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if
+        (resource.data.visibility == "public" && resource.data.deletedAt == null) ||
+        isAdminOrEditor();
 
       allow create,
             update: if isAdminOrEditor();
@@ -145,6 +136,8 @@ service cloud.firestore {
 
     match /contactMessages/{messageId} {
       allow create: if
+        // Public submission — allow all fields the client sends, but lock down
+        // workflow/audit fields so the submitter cannot manipulate them.
         request.resource.data.keys().hasOnly([
           "senderName", "senderEmail", "senderPhone",
           "subject", "messageBody",
@@ -156,12 +149,13 @@ service cloud.firestore {
         request.resource.data.handledAt == null &&
         request.resource.data.deletedAt == null;
 
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if isAdminOrEditor();
 
-      allow update: if request.auth != null && (isAdmin() ||
+      allow update: if isAdmin() ||
+        // Editor may only touch workflow fields
         (isEditor() &&
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(["status", "handledAt", "handledBy", "internalNotes"])));
+            .hasOnly(["status", "handledAt", "handledBy", "internalNotes"]));
 
       allow delete: if isAdmin();
     }
@@ -172,8 +166,7 @@ service cloud.firestore {
     // Only admin may archive / delete.
 
     match /campaigns/{campaignId} {
-      allow read: if resource.data.status == "active";
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if resource.data.status == "active" || isAdminOrEditor();
 
       allow create,
             update: if isAdminOrEditor();
@@ -195,8 +188,7 @@ service cloud.firestore {
     // Admin and editor: create and update.
 
     match /events/{eventId} {
-      allow read: if resource.data.status == "published";
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if resource.data.status == "published" || isAdminOrEditor();
 
       allow create,
             update: if isAdminOrEditor();
@@ -236,8 +228,7 @@ service cloud.firestore {
     // Admin and editor: full CRUD.
 
     match /announcements/{announcementId} {
-      allow read: if resource.data.status == "published";
-      allow read: if request.auth != null && isAdminOrEditor();
+      allow read: if resource.data.status == "published" || isAdminOrEditor();
       allow create, update: if isAdminOrEditor();
       allow delete: if isAdminOrEditor();
     }
@@ -299,88 +290,3 @@ service cloud.firestore {
     }
   }
 }
-
-// =============================================================================
-// OPTION B — Shared project, tenant-namespaced collections
-// =============================================================================
-// Uncomment and deploy this block INSTEAD of the rules above if you choose to
-// host all NGOs in a single Firebase project. Each NGO's data lives under
-// /tenants/{tenantId}/... — cross-tenant reads/writes are impossible by rule.
-//
-// Prerequisites:
-//   1. Set a `tenantId` custom claim on each user via Admin SDK at sign-in:
-//        await getAuth().setCustomUserClaims(uid, { tenantId: "ngo-a" });
-//   2. Migrate all collection paths to /tenants/{tenantId}/<collection>/<doc>.
-//   3. Update service files to use the namespaced collection paths.
-//
-// =============================================================================
-//
-// rules_version = '2';
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//
-//     function tenantId() {
-//       return request.auth.token.tenantId;
-//     }
-//
-//     function staffDoc(tid) {
-//       return get(/databases/$(database)/documents/tenants/$(tid)/staff/$(request.auth.uid)).data;
-//     }
-//
-//     function isAdmin(tid) {
-//       return request.auth != null && tenantId() == tid && staffDoc(tid).role == "admin";
-//     }
-//
-//     function isEditor(tid) {
-//       return request.auth != null && tenantId() == tid && staffDoc(tid).role == "editor";
-//     }
-//
-//     function isAdminOrEditor(tid) {
-//       return isAdmin(tid) || isEditor(tid);
-//     }
-//
-//     // ── Tenant root — no direct document reads ──────────────────────────
-//     match /tenants/{tenantId} {
-//
-//       match /settings/{doc} {
-//         allow read: if true;
-//         allow write: if isAdmin(tenantId);
-//       }
-//
-//       match /staff/{uid} {
-//         allow read: if isAdmin(tenantId)
-//           || (request.auth != null && tenantId() == tenantId && request.auth.uid == uid);
-//         allow write: if isAdmin(tenantId);
-//       }
-//
-//       match /contentItems/{id} {
-//         allow read: if
-//           (resource.data.status == "published" && resource.data.deletedAt == null)
-//           || isAdminOrEditor(tenantId);
-//
-//         allow create: if isAdmin(tenantId)
-//           || (isEditor(tenantId) && request.resource.data.createdBy == request.auth.uid);
-//
-//         allow update: if isAdmin(tenantId)
-//           || (isEditor(tenantId) && request.resource.data.updatedBy == request.auth.uid);
-//
-//         allow delete: if isAdmin(tenantId);
-//
-//         match /revisions/{revisionId} {
-//           allow read, create: if isAdminOrEditor(tenantId);
-//           allow update, delete: if false;
-//         }
-//       }
-//
-//       // Repeat the same pattern for all other collections:
-//       // categories, tags, mediaAssets, contactMessages, campaigns,
-//       // donations, events, auditLogs, announcements, ibanEntries,
-//       // boardMembers, supporters, volunteerApplications, notifications
-//     }
-//
-//     // Deny everything outside /tenants/{tenantId}/...
-//     match /{document=**} {
-//       allow read, write: if false;
-//     }
-//   }
-// }

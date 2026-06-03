@@ -10,15 +10,9 @@ import {
   serverTimestamp,
   Timestamp,
   type DocumentData,
-  type Firestore,
 } from "firebase/firestore";
-import type { Auth } from "firebase/auth";
+import { db, auth } from "./config";
 import { COLLECTIONS } from "./constants";
-
-export interface EditorServices {
-  db: Firestore;
-  auth: Auth;
-}
 import type {
   BlogPost,
   EventItem,
@@ -64,7 +58,7 @@ export function slugify(text: string): string {
     .slice(0, 80);
 }
 
-function uid(auth: Auth): string | null {
+function uid(): string | null {
   return auth.currentUser?.uid ?? null;
 }
 
@@ -79,7 +73,7 @@ export function attachmentsFromContentItem(data: Record<string, unknown>): impor
 
 // ── Blog Posts (contentItems with type="post") ────────────────────────────────
 
-export async function getEditorBlogs({ db }: EditorServices): Promise<BlogPost[]> {
+export async function getEditorBlogs(): Promise<BlogPost[]> {
   const q = query(
     collection(db, COLLECTIONS.CONTENT_ITEMS),
     where("type", "==", "post"),
@@ -107,8 +101,8 @@ export async function getEditorBlogs({ db }: EditorServices): Promise<BlogPost[]
   });
 }
 
-export async function createEditorBlog({ db, auth }: EditorServices, blog: Omit<BlogPost, "id">): Promise<string> {
-  const userId = uid(auth);
+export async function createEditorBlog(blog: Omit<BlogPost, "id">): Promise<string> {
+  const userId = uid();
   const ref = await addDoc(collection(db, COLLECTIONS.CONTENT_ITEMS), {
     type: "post",
     title: blog.title,
@@ -147,10 +141,10 @@ export async function createEditorBlog({ db, auth }: EditorServices, blog: Omit<
   return ref.id;
 }
 
-export async function updateEditorBlog({ db, auth }: EditorServices, id: string, data: Partial<BlogPost>): Promise<void> {
+export async function updateEditorBlog(id: string, data: Partial<BlogPost>): Promise<void> {
   const update: DocumentData = {
     updatedAt: serverTimestamp(),
-    updatedBy: uid(auth),
+    updatedBy: uid(),
   };
   if (data.title !== undefined) {
     update.title = data.title;
@@ -178,7 +172,7 @@ export async function updateEditorBlog({ db, auth }: EditorServices, id: string,
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), update);
 }
 
-export async function deleteEditorBlog({ db }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorBlog(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.CONTENT_ITEMS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -207,7 +201,7 @@ function eventStatusToFirestore(s: EventItem["status"]): string {
   return map[s] ?? "draft";
 }
 
-export async function getEditorEvents({ db }: EditorServices): Promise<EventItem[]> {
+export async function getEditorEvents(): Promise<EventItem[]> {
   const q = query(
     collection(db, COLLECTIONS.EVENTS),
     where("deletedAt", "==", null),
@@ -235,8 +229,8 @@ export async function getEditorEvents({ db }: EditorServices): Promise<EventItem
     });
 }
 
-export async function createEditorEvent({ db, auth }: EditorServices, event: Omit<EventItem, "id">): Promise<string> {
-  const userId = uid(auth);
+export async function createEditorEvent(event: Omit<EventItem, "id">): Promise<string> {
+  const userId = uid();
   const ref = await addDoc(collection(db, COLLECTIONS.EVENTS), {
     title: event.title,
     slug: slugify(event.title),
@@ -263,10 +257,10 @@ export async function createEditorEvent({ db, auth }: EditorServices, event: Omi
   return ref.id;
 }
 
-export async function updateEditorEvent({ db, auth }: EditorServices, id: string, data: Partial<EventItem>): Promise<void> {
+export async function updateEditorEvent(id: string, data: Partial<EventItem>): Promise<void> {
   const update: DocumentData = {
     updatedAt: serverTimestamp(),
-    updatedBy: uid(auth),
+    updatedBy: uid(),
   };
   if (data.title !== undefined) {
     update.title = data.title;
@@ -289,7 +283,7 @@ export async function updateEditorEvent({ db, auth }: EditorServices, id: string
   await updateDoc(doc(db, COLLECTIONS.EVENTS, id), update);
 }
 
-export async function deleteEditorEvent({ db }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorEvent(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.EVENTS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -298,7 +292,7 @@ export async function deleteEditorEvent({ db }: EditorServices, id: string): Pro
 
 // ── Media Assets ───────────────────────────────────────────────��──────────────
 
-export async function getEditorMedia({ db }: EditorServices): Promise<MediaItem[]> {
+export async function getEditorMedia(): Promise<MediaItem[]> {
   const q = query(
     collection(db, COLLECTIONS.MEDIA_ASSETS),
     where("deletedAt", "==", null),
@@ -322,8 +316,8 @@ export async function getEditorMedia({ db }: EditorServices): Promise<MediaItem[
   });
 }
 
-export async function createEditorMedia({ db, auth }: EditorServices, item: Omit<MediaItem, "id">): Promise<string> {
-  const userId = uid(auth);
+export async function createEditorMedia(item: Omit<MediaItem, "id">): Promise<string> {
+  const userId = uid();
   const mimeType = item.mimeType ?? "application/octet-stream";
   const kind = mimeType.startsWith("image/")
     ? "image"
@@ -357,7 +351,6 @@ export async function createEditorMedia({ db, auth }: EditorServices, item: Omit
 }
 
 export async function updateEditorMedia(
-  { db }: EditorServices,
   id: string,
   data: Partial<MediaItem>
 ): Promise<void> {
@@ -376,7 +369,7 @@ export async function updateEditorMedia(
   await updateDoc(doc(db, COLLECTIONS.MEDIA_ASSETS, id), update);
 }
 
-export async function deleteEditorMedia({ db }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorMedia(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.MEDIA_ASSETS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -385,7 +378,7 @@ export async function deleteEditorMedia({ db }: EditorServices, id: string): Pro
 
 // ── Announcements ─────────────────────────────────────────────────────────────
 
-export async function getEditorAnnouncements({ db }: EditorServices): Promise<AnnouncementItem[]> {
+export async function getEditorAnnouncements(): Promise<AnnouncementItem[]> {
   const q = query(
     collection(db, COLLECTIONS.ANNOUNCEMENTS),
     where("deletedAt", "==", null),
@@ -408,7 +401,6 @@ export async function getEditorAnnouncements({ db }: EditorServices): Promise<An
 }
 
 export async function createEditorAnnouncement(
-  { db }: EditorServices,
   item: Omit<AnnouncementItem, "id">
 ): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTIONS.ANNOUNCEMENTS), {
@@ -427,7 +419,6 @@ export async function createEditorAnnouncement(
 }
 
 export async function updateEditorAnnouncement(
-  { db }: EditorServices,
   id: string,
   data: Partial<AnnouncementItem>
 ): Promise<void> {
@@ -445,7 +436,7 @@ export async function updateEditorAnnouncement(
   await updateDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id), update);
 }
 
-export async function deleteEditorAnnouncement({ db }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorAnnouncement(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -454,7 +445,7 @@ export async function deleteEditorAnnouncement({ db }: EditorServices, id: strin
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 
-export async function getEditorNotifications({ db, auth }: EditorServices): Promise<NotificationItem[]> {
+export async function getEditorNotifications(): Promise<NotificationItem[]> {
   const user = auth.currentUser;
   if (!user) return [];
 
@@ -475,13 +466,13 @@ export async function getEditorNotifications({ db, auth }: EditorServices): Prom
   });
 }
 
-export async function markNotificationRead({ db }: EditorServices, id: string): Promise<void> {
+export async function markNotificationRead(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.NOTIFICATIONS, id), { isRead: true });
 }
 
 // ── Campaigns ─────────────────────────────────────────────────────────────────
 
-export async function getEditorCampaigns({ db }: EditorServices): Promise<CampaignItem[]> {
+export async function getEditorCampaigns(): Promise<CampaignItem[]> {
   const q = query(
     collection(db, COLLECTIONS.CAMPAIGNS),
     where("deletedAt", "==", null),
@@ -508,10 +499,9 @@ export async function getEditorCampaigns({ db }: EditorServices): Promise<Campai
 }
 
 export async function createEditorCampaign(
-  { db, auth }: EditorServices,
   campaign: Omit<CampaignItem, "id">
 ): Promise<string> {
-  const userId = uid(auth);
+  const userId = uid();
   const ref = await addDoc(collection(db, COLLECTIONS.CAMPAIGNS), {
     title: campaign.title,
     slug: slugify(campaign.title),
@@ -539,11 +529,10 @@ export async function createEditorCampaign(
 }
 
 export async function updateEditorCampaign(
-  { db, auth }: EditorServices,
   id: string,
   data: Partial<CampaignItem>
 ): Promise<void> {
-  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid(auth) };
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
   if (data.title !== undefined) {
     update.title = data.title;
     update.slug = slugify(data.title);
@@ -566,7 +555,7 @@ export async function updateEditorCampaign(
   await updateDoc(doc(db, COLLECTIONS.CAMPAIGNS, id), update);
 }
 
-export async function deleteEditorCampaign({ db }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorCampaign(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.CAMPAIGNS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -575,7 +564,7 @@ export async function deleteEditorCampaign({ db }: EditorServices, id: string): 
 
 // ── Categories ────────────────────────────────────────────────────────────────
 
-export async function getEditorCategories({ db }: EditorServices, type?: string): Promise<CategoryItem[]> {
+export async function getEditorCategories(type?: string): Promise<CategoryItem[]> {
   const q = type
     ? query(
         collection(db, COLLECTIONS.CATEGORIES),
@@ -602,10 +591,9 @@ export async function getEditorCategories({ db }: EditorServices, type?: string)
 }
 
 export async function createEditorCategory(
-  { db, auth }: EditorServices,
   category: Omit<CategoryItem, "id">
 ): Promise<string> {
-  const userId = uid(auth);
+  const userId = uid();
   const ref = await addDoc(collection(db, COLLECTIONS.CATEGORIES), {
     name: category.name,
     slug: category.slug || slugify(category.name),
@@ -621,11 +609,10 @@ export async function createEditorCategory(
 }
 
 export async function updateEditorCategory(
-  { db, auth }: EditorServices,
   id: string,
   data: Partial<Omit<CategoryItem, "id">>
 ): Promise<void> {
-  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid(auth) };
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
   if (data.name !== undefined) update.name = data.name;
   if (data.slug !== undefined) update.slug = data.slug;
   if (data.type !== undefined) update.type = data.type;
@@ -633,17 +620,17 @@ export async function updateEditorCategory(
   await updateDoc(doc(db, COLLECTIONS.CATEGORIES, id), update);
 }
 
-export async function deleteEditorCategory({ db, auth }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorCategory(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.CATEGORIES, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-    updatedBy: uid(auth),
+    updatedBy: uid(),
   });
 }
 
 // ── Tags ──────────────────────────────────────────────────────────────────────
 
-export async function getEditorTags({ db }: EditorServices, type?: string): Promise<TagItem[]> {
+export async function getEditorTags(type?: string): Promise<TagItem[]> {
   const q = type
     ? query(
         collection(db, COLLECTIONS.TAGS),
@@ -663,8 +650,8 @@ export async function getEditorTags({ db }: EditorServices, type?: string): Prom
   });
 }
 
-export async function createEditorTag({ db, auth }: EditorServices, tag: Omit<TagItem, "id">): Promise<string> {
-  const userId = uid(auth);
+export async function createEditorTag(tag: Omit<TagItem, "id">): Promise<string> {
+  const userId = uid();
   const ref = await addDoc(collection(db, COLLECTIONS.TAGS), {
     name: tag.name,
     slug: tag.slug || slugify(tag.name),
@@ -679,22 +666,21 @@ export async function createEditorTag({ db, auth }: EditorServices, tag: Omit<Ta
 }
 
 export async function updateEditorTag(
-  { db, auth }: EditorServices,
   id: string,
   data: Partial<Omit<TagItem, "id">>
 ): Promise<void> {
-  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid(auth) };
+  const update: DocumentData = { updatedAt: serverTimestamp(), updatedBy: uid() };
   if (data.name !== undefined) update.name = data.name;
   if (data.slug !== undefined) update.slug = data.slug;
   if (data.type !== undefined) update.type = data.type;
   await updateDoc(doc(db, COLLECTIONS.TAGS, id), update);
 }
 
-export async function deleteEditorTag({ db, auth }: EditorServices, id: string): Promise<void> {
+export async function deleteEditorTag(id: string): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.TAGS, id), {
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-    updatedBy: uid(auth),
+    updatedBy: uid(),
   });
 }
 

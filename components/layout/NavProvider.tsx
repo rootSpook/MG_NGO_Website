@@ -7,8 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { DEFAULT_NAV_ITEMS, type NavItem } from "@/lib/firebase/navServices";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { getNavConfig, DEFAULT_NAV_ITEMS, type NavItem } from "@/lib/firebase/navServices";
 
 // ── Context ───────────────────────────────────────────────────────────────────
 
@@ -34,7 +33,6 @@ export function NavProvider({
   initialItems: NavItem[];
 }) {
   const [navItems, setNavItems] = useState<NavItem[]>(initialItems);
-  const { getNavConfig } = useTenantServices();
 
   useEffect(() => {
     // Re-validate client-side after hydration to pick up any changes that
@@ -42,7 +40,7 @@ export function NavProvider({
     getNavConfig()
       .then(setNavItems)
       .catch(() => {/* keep server-fetched initialItems on error */});
-  }, [getNavConfig]);
+  }, []);
 
   return <NavContext.Provider value={navItems}>{children}</NavContext.Provider>;
 }

@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Pencil, Plus, RotateCcw, Search } from "lucide-react";
 import EventForm from "@/components/editorPanel/EventForm";
 import type { EventItem } from "@/types/editorPanel";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import {
+  createEditorEvent,
+  getEditorEvents,
+  updateEditorEvent,
+} from "@/lib/firebase/editorServices";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 
 type SortMode = "newest" | "oldest";
@@ -25,7 +29,6 @@ function publicStatusLabel(status: EventItem["status"]) {
 }
 
 export function InlineEventManager() {
-  const { getEditorEvents, createEditorEvent, updateEditorEvent } = useTenantServices();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");

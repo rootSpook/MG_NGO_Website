@@ -8,6 +8,7 @@ import {
   updateDoc,
   query,
   where,
+  orderBy,
 } from "firebase/firestore";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import { newEnv, EDITOR_UID, ADMIN_UID } from "./helpers/emulator";
@@ -16,7 +17,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 let env: RulesTestEnvironment;
 
 beforeAll(async () => {
-  env = await newEnv("blog");
+  env = await newEnv();
 });
 afterAll(async () => {
   await env.cleanup();
@@ -121,8 +122,10 @@ describe("blog CRUD flow", () => {
     const unauth = env.unauthenticatedContext().firestore();
     const q = query(
       collection(unauth, "contentItems"),
+      where("type", "==", "post"),
       where("status", "==", "published"),
-      where("deletedAt", "==", null)
+      where("deletedAt", "==", null),
+      orderBy("publishedAt", "desc")
     );
     const snap = await assertSucceeds(getDocs(q));
     expect(snap.docs).toHaveLength(1);
@@ -155,8 +158,10 @@ describe("blog CRUD flow", () => {
     const unauth = env.unauthenticatedContext().firestore();
     const q = query(
       collection(unauth, "contentItems"),
+      where("type", "==", "post"),
       where("status", "==", "published"),
-      where("deletedAt", "==", null)
+      where("deletedAt", "==", null),
+      orderBy("publishedAt", "desc")
     );
     const snap = await getDocs(q);
     expect(snap.docs).toHaveLength(0);

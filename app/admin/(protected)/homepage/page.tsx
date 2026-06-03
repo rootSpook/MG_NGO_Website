@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getHomePageData } from "@/lib/publicPagesContent";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { upsertPageContent } from "@/lib/firebase/adminServices";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 import type { HomePageData, HomeQuickLink } from "@/lib/publicPagesContent";
 import { ArrowRight, Eye, ExternalLink, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
@@ -67,7 +67,6 @@ function SectionCard({
 }
 
 export default function HomepageContentPage() {
-  const { upsertPageContent } = useTenantServices();
   const [data, setData] = useState<HomePageData | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");

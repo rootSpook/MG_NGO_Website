@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Upload, Loader2, Trash2 } from "lucide-react";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { uploadImage } from "@/lib/firebase/storageUtils";
 
 interface ImageUploadWithUrlProps {
   label: string;
@@ -26,7 +26,6 @@ export function ImageUploadWithUrl({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { uploadImage } = useTenantServices();
 
   const cls =
     "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";

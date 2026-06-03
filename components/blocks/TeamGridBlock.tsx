@@ -1,7 +1,6 @@
 import { User } from "lucide-react";
 import type { TeamGridBlockData } from "@/types/pageBuilder";
 import { getBoardMembers } from "@/lib/firebase/adminServices";
-import { getDefaultDb } from "@/lib/firebase/getDefaultDb";
 
 interface TeamGridBlockProps {
   data: Record<string, unknown>;
@@ -32,7 +31,7 @@ export async function TeamGridBlock({ data }: TeamGridBlockProps) {
     // Pull from the boardMembers Firestore collection. Falls back to an
     // empty list if the read fails so the page still renders.
     try {
-      const board = await getBoardMembers({ db: getDefaultDb(), auth: null as never });
+      const board = await getBoardMembers();
       members = board.map((member) => ({
         id: member.id,
         name: member.name,

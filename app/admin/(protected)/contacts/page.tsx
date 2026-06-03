@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Mail, Phone } from "lucide-react";
-import type { AdminContactMessage } from "@/lib/firebase/adminServices";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import {
+  AdminContactMessage,
+  getContactMessages,
+  updateContactMessageStatus,
+} from "@/lib/firebase/adminServices";
 
 const STATUS_LABELS: Record<AdminContactMessage["status"], string> = {
   new: "Yeni",
@@ -31,7 +34,6 @@ function formatDate(iso: string) {
 }
 
 export default function ContactMessagesPage() {
-  const { getContactMessages, updateContactMessageStatus } = useTenantServices();
   const [messages, setMessages] = useState<AdminContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);

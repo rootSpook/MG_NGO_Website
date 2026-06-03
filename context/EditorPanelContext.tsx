@@ -17,7 +17,25 @@ import {
   MediaItem,
   AnnouncementItem,
 } from "@/types/editorPanel";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import {
+  getEditorBlogs,
+  createEditorBlog,
+  updateEditorBlog,
+  deleteEditorBlog,
+  getEditorEvents,
+  createEditorEvent,
+  updateEditorEvent,
+  deleteEditorEvent,
+  getEditorMedia,
+  createEditorMedia,
+  deleteEditorMedia,
+  getEditorAnnouncements,
+  createEditorAnnouncement,
+  updateEditorAnnouncement,
+  deleteEditorAnnouncement,
+  getEditorNotifications,
+  markNotificationRead,
+} from "@/lib/firebase/editorServices";
 
 interface EditorPanelContextType {
   blogs: BlogPost[];
@@ -60,14 +78,6 @@ interface EditorPanelContextType {
 const EditorPanelContext = createContext<EditorPanelContextType | null>(null);
 
 export function EditorPanelProvider({ children }: { children: ReactNode }) {
-  const {
-    getEditorBlogs, createEditorBlog, updateEditorBlog, deleteEditorBlog,
-    getEditorEvents, createEditorEvent, updateEditorEvent, deleteEditorEvent,
-    getEditorMedia, createEditorMedia, deleteEditorMedia,
-    getEditorAnnouncements, createEditorAnnouncement, updateEditorAnnouncement, deleteEditorAnnouncement,
-    getEditorNotifications, markNotificationRead,
-  } = useTenantServices();
-
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -99,7 +109,7 @@ export function EditorPanelProvider({ children }: { children: ReactNode }) {
       }
     }
     loadAll();
-  }, [getEditorBlogs, getEditorEvents, getEditorMedia, getEditorAnnouncements, getEditorNotifications]);
+  }, []);
 
   // ── Events ────────────────────────────────────────────────────────────────
 
@@ -252,7 +262,6 @@ export function EditorPanelProvider({ children }: { children: ReactNode }) {
       getAnnouncementById,
       markNotificationAsRead,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [blogs, events, notifications, media, announcements, loading]
   );
 

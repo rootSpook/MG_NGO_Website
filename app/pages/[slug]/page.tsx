@@ -3,7 +3,6 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 import { getPublishedContentByType, getContentBySlug } from "@/lib/firebase/services";
-import { getDefaultDb } from "@/lib/firebase/getDefaultDb";
 import type { PageBlockData } from "@/types/pageBuilder";
 
 interface CmsPageProps {
@@ -16,7 +15,7 @@ interface CmsPageProps {
  */
 export async function generateStaticParams() {
   try {
-    const pages = await getPublishedContentByType(getDefaultDb(), "page");
+    const pages = await getPublishedContentByType("page");
     return pages
       .filter((p) => {
         const pd = p.pageData as Record<string, unknown> | null;
@@ -30,7 +29,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: CmsPageProps) {
   const { slug } = await params;
-  const page = await getContentBySlug(getDefaultDb(), slug);
+  const page = await getContentBySlug(slug);
   if (!page) return { title: "Sayfa Bulunamadı" };
   return {
     title: `${page.title} | MG Yaşam Derneği`,
@@ -41,7 +40,7 @@ export async function generateMetadata({ params }: CmsPageProps) {
 export default async function CmsPage({ params }: CmsPageProps) {
   const { slug } = await params;
 
-  const page = await getContentBySlug(getDefaultDb(), slug);
+  const page = await getContentBySlug(slug);
 
   if (!page) notFound();
 

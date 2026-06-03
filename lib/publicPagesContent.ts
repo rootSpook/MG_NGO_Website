@@ -4,7 +4,6 @@
  */
 
 import { getSiteSettings, getContentBySlug } from "@/lib/firebase/services";
-import { getDefaultDb, isDbAvailable } from "@/lib/firebase/getDefaultDb";
 import { seedPages, seedSettings } from "@/lib/firebase/seedData";
 import { mergeEditablePageData } from "@/lib/pageContentConfig";
 
@@ -103,9 +102,8 @@ function normalizeQuickLinks(input: unknown): HomeQuickLink[] {
 }
 
 export async function getHomePageData(): Promise<HomePageData> {
-  if (!isDbAvailable()) return homePageTemplate;
   try {
-    const item = await getContentBySlug(getDefaultDb(), "anasayfa");
+    const item = await getContentBySlug("anasayfa");
     if (item?.pageData) {
       const pageData = item.pageData as Record<string, unknown>;
       return {
@@ -128,9 +126,8 @@ export async function getHomePageData(): Promise<HomePageData> {
 }
 
 export async function getAboutPageData(): Promise<AboutPageData> {
-  if (!isDbAvailable()) return aboutPageTemplate;
   try {
-    const item = await getContentBySlug(getDefaultDb(), "hakkimizda");
+    const item = await getContentBySlug("hakkimizda");
     if (item?.pageData) {
       const pageData = item.pageData as unknown as Partial<AboutPageData>;
       return {
@@ -150,11 +147,10 @@ export async function getAboutPageData(): Promise<AboutPageData> {
 }
 
 export async function getContactPageData(): Promise<ContactPageData> {
-  if (!isDbAvailable()) return contactPageTemplate;
   try {
     const [item, settings] = await Promise.all([
-      getContentBySlug(getDefaultDb(), "iletisim"),
-      getSiteSettings(getDefaultDb()),
+      getContentBySlug("iletisim"),
+      getSiteSettings(),
     ]);
     const pageData = item?.pageData as unknown as Partial<ContactPageData> | undefined;
     return {
@@ -172,9 +168,8 @@ export async function getContactPageData(): Promise<ContactPageData> {
 }
 
 export async function getEditablePageContent(key: string): Promise<Record<string, string>> {
-  if (!isDbAvailable()) return mergeEditablePageData(key);
   try {
-    const item = await getContentBySlug(getDefaultDb(), key);
+    const item = await getContentBySlug(key);
     return mergeEditablePageData(key, item?.pageData as Record<string, unknown> | null | undefined);
   } catch (err) {
     console.error("[publicPagesContent] getEditablePageContent error:", err);

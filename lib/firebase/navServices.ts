@@ -1,4 +1,5 @@
-import { doc, getDoc, setDoc, type Firestore } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "./config";
 import { COLLECTIONS, DOCUMENT_IDS } from "./constants";
 import type { TemplateType } from "@/types/pageBuilder";
 
@@ -37,7 +38,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   { key: "bagis", href: "/donate", label: "Bağış Yap", isVisible: true, sortOrder: 8, isDonateButton: true, pageSlug: null, pageType: "special" },
 ];
 
-export async function getNavConfig(db: Firestore): Promise<NavItem[]> {
+export async function getNavConfig(): Promise<NavItem[]> {
   try {
     const snap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.NAVIGATION));
     if (snap.exists()) {
@@ -52,7 +53,7 @@ export async function getNavConfig(db: Firestore): Promise<NavItem[]> {
   return DEFAULT_NAV_ITEMS;
 }
 
-export async function saveNavConfig(db: Firestore, items: NavItem[]): Promise<void> {
+export async function saveNavConfig(items: NavItem[]): Promise<void> {
   await setDoc(
     doc(db, COLLECTIONS.SETTINGS, DOCUMENT_IDS.NAVIGATION),
     { items },
@@ -61,31 +62,30 @@ export async function saveNavConfig(db: Firestore, items: NavItem[]): Promise<vo
 }
 
 /** Append a new nav item to the current config and persist. */
-export async function createNavItem(db: Firestore, newItem: NavItem): Promise<void> {
-  const current = await getNavConfig(db);
+export async function createNavItem(newItem: NavItem): Promise<void> {
+  const current = await getNavConfig();
   const maxOrder = current.reduce((m, i) => Math.max(m, i.sortOrder), 0);
   const withOrder: NavItem = { ...newItem, sortOrder: maxOrder + 1 };
-  await saveNavConfig(db, [...current, withOrder]);
+  await saveNavConfig([...current, withOrder]);
 }
 
 /** Remove a nav item by key and persist the updated list. */
-export async function deleteNavItem(db: Firestore, key: string): Promise<void> {
-  const current = await getNavConfig(db);
+export async function deleteNavItem(key: string): Promise<void> {
+  const current = await getNavConfig();
   const filtered = current
     .filter((i) => i.key !== key)
     .map((item, idx) => ({ ...item, sortOrder: idx + 1 }));
-  await saveNavConfig(db, filtered);
+  await saveNavConfig(filtered);
 }
 
 /** Update a single field on a nav item (e.g. pageStatus) and persist. */
 export async function patchNavItem(
-  db: Firestore,
   key: string,
   patch: Partial<NavItem>
 ): Promise<void> {
-  const current = await getNavConfig(db);
+  const current = await getNavConfig();
   const next = current.map((item) =>
     item.key === key ? { ...item, ...patch } : item
   );
-  await saveNavConfig(db, next);
+  await saveNavConfig(next);
 }

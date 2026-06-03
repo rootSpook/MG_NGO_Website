@@ -16,8 +16,7 @@ import {
   Navigation,
   AlertTriangle,
 } from "lucide-react";
-import type { AdminDashboardStats } from "@/lib/firebase/adminServices";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { getAdminDashboardStats, AdminDashboardStats } from "@/lib/firebase/adminServices";
 import { useAuth } from "@/lib/firebase/AuthContext";
 
 const statCards = (s: AdminDashboardStats) => [
@@ -71,7 +70,6 @@ const quickLinks = [
 ];
 
 export default function AdminDashboardPage() {
-  const { getAdminDashboardStats } = useTenantServices();
   const { user } = useAuth();
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);

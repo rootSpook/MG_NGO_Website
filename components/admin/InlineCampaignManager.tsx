@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import type { CampaignItem } from "@/types/editorPanel";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import {
+  createEditorCampaign,
+  deleteEditorCampaign,
+  getEditorCampaigns,
+  updateEditorCampaign,
+} from "@/lib/firebase/editorServices";
 import { revalidatePublicPathAction } from "@/app/admin/actions";
 
 const emptyCampaign: Omit<CampaignItem, "id"> = {
@@ -76,7 +81,6 @@ function CampaignForm({
 }
 
 export function InlineCampaignManager() {
-  const { getEditorCampaigns, createEditorCampaign, updateEditorCampaign, deleteEditorCampaign } = useTenantServices();
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);

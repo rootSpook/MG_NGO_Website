@@ -8,10 +8,10 @@ import {
   Newspaper, CalendarDays, ClipboardList, BookOpen, Layers,
 } from "lucide-react";
 import {
-  DEFAULT_NAV_ITEMS,
+  DEFAULT_NAV_ITEMS, getNavConfig, saveNavConfig, createNavItem, deleteNavItem,
   type NavItem,
 } from "@/lib/firebase/navServices";
-import { useTenantServices } from "@/lib/firebase/hooks/useTenantServices";
+import { savePageBlocks } from "@/lib/firebase/adminServices";
 import { revalidateNavAction } from "@/app/admin/actions";
 import {
   seedSectionsForTemplate, TEMPLATE_LABELS,
@@ -47,7 +47,6 @@ const TEMPLATES: Array<{
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function MenuManagementPage() {
-  const { getNavConfig, saveNavConfig, createNavItem, deleteNavItem, savePageBlocks } = useTenantServices();
   const router = useRouter();
   const [items, setItems] = useState<NavItem[]>(DEFAULT_NAV_ITEMS);
   const [loading, setLoading] = useState(true);
